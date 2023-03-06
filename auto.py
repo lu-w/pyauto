@@ -54,7 +54,7 @@ def get_ontology(ontology: Ontology, world: owlready2.World) -> owlready2.Ontolo
         return world.get_ontology("http://anonymous#").get_namespace(iri)
 
 
-def load(folder="auto/ontology", world=None):
+def load(folder="auto", world=None):
     """
     Loads A.U.T.O. from a given folder location.
     :param folder: The folder to look for, should contain the `automotive_urban_traffic_ontology.owl`.
@@ -74,7 +74,7 @@ def load(folder="auto/ontology", world=None):
         raise FileNotFoundError(folder)
 
 
-def load_cp(folder="auto/ontology", world=None):
+def load_cp(folder="auto", world=None):
     """
     Loads A.U.T.O. along with the criticality phenomena ontologies (vocabulary, formalization) from a given folder
     location.
@@ -96,4 +96,3 @@ def load_cp(folder="auto/ontology", world=None):
         world.get_ontology(folder + "/criticality_phenomena_formalization.owl").load()
     else:
         raise FileNotFoundError(folder)
-

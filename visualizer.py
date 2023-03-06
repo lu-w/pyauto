@@ -18,11 +18,9 @@ import owlready2
 from shapely import geometry
 import numpy as np
 from tqdm import tqdm
-import time as pytime
 
-import auto.auto
-
-from criticality_recognition import phenomena_extraction
+import auto
+import utils
 
 # TODO
 # - visualize scenario level CPs
@@ -582,7 +580,7 @@ def _describe_entity(entity):
     :param entity: An object of an owlready2 class.
     :return: The HTML-representation of entity.
     """
-    cls = phenomena_extraction.get_most_specific_classes([entity])
+    cls = utils.get_most_specific_classes([entity])
     label = "<table class=\"m-2\"><thead><tr><th>Individual</th><th>" + str(entity)
     label += " (" + ", ".join(cls[0][1]) + ")</th></tr></thead><tbody><tr><td>is_a</td><td>"
     label += ", ".join([str(x) for x in entity.is_a])
@@ -621,14 +619,14 @@ def _describe_cp(cp):
         label += str(time)
     label += "</td></tr><tr><td>Subject(s)</td><td>"
     if len(cp.subjects) > 0:
-        subj_and_classes = phenomena_extraction.get_most_specific_classes(cp.subjects)
+        subj_and_classes = utils.get_most_specific_classes(cp.subjects)
         label += "<br />".join([str(x[0]) + " (" + ", ".join(x[1]) + ")" for x in subj_and_classes])
     label += "</td></tr><tr><td>Predicate</td><td>"
     label += str(cp.predicate)
     label += "</td></tr><tr><td>Object(s)</td><td>"
     if len(cp.objects) > 0:
         for obj_predicate in cp.objects.keys():
-            obj_and_classes = phenomena_extraction.get_most_specific_classes(cp.objects[obj_predicate])
+            obj_and_classes = utils.get_most_specific_classes(cp.objects[obj_predicate])
             label += obj_predicate + ":<br/>" + "<br />".join([str(x[0]) + " (" + ", ".join(x[1]) + ")" for x in
                                                                obj_and_classes])
             if len(cp.objects.keys()) > 1:

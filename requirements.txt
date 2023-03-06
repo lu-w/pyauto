@@ -1,0 +1,7 @@
+owlready
+matplotlib
+mpld3
+shapely
+numpy
+screeninfo
+tqdm
