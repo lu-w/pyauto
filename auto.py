@@ -38,13 +38,13 @@ class Ontology(Enum):
     L6_DE = "http://purl.org/auto/l6_de#"
 
 
-def get_ontology(ontology: Ontology, world: owlready2.World) -> owlready2.Ontology:
+def get_ontology(ontology: Ontology, world: owlready2.World = owlready2.default_world) -> owlready2.Ontology:
     """
     Can be used to fetch a specific sub-ontology of A.U.T.O. from a given world. Also handles the case of saving and
     re-loading ontologies into owlready2, where (due to import aggregation into a single ontology), ontologies were
     merged but namespaces remain.
     :param ontology: The ontology to fetch.
-    :param world: The world to search for the ontology.
+    :param world: The world to search for the ontology (the default world if not set)
     :return: The ontology object corresponding to the given ontology.
     """
     iri = ontology.value
@@ -54,7 +54,7 @@ def get_ontology(ontology: Ontology, world: owlready2.World) -> owlready2.Ontolo
         return world.get_ontology("http://anonymous#").get_namespace(iri)
 
 
-def load(folder="auto", world=None):
+def load(folder="auto", world = None):
     """
     Loads A.U.T.O. from a given folder location.
     :param folder: The folder to look for, should contain the `automotive_urban_traffic_ontology.owl`.
@@ -74,7 +74,7 @@ def load(folder="auto", world=None):
         raise FileNotFoundError(folder)
 
 
-def load_cp(folder="auto", world=None):
+def load_cp(folder="auto", world = None):
     """
     Loads A.U.T.O. along with the criticality phenomena ontologies (vocabulary, formalization) from a given folder
     location.

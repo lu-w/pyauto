@@ -16,25 +16,32 @@ It basically provides an easier access to
 This small example loads A.U.T.O., creates a vehicle in the ABox, saves, and visualizes it.
 
 ```python
-# imports pyauto
-from pyauto import auto, auto_visualizer
-# creates an ABox
-world = owlready2.World()
-# loads A.U.T.O. into this world
-auto.load(world)
-# accesses the relevant sub-ontologies easily
-l4_de = auto.get_ontology(auto.Ontology.L4_De, world)
-ge = auto.get_ontology(auto.Ontology.GeoSPARQL, world)
-# creates a vehicle
+# imports relevant modules
+import owlready2
 from shapely import geometry
+from pyauto import auto, visualizer
+
+# loads A.U.T.O. into the default world
+auto.load()
+# accesses the relevant sub-ontologies easily
+tm = auto.get_ontology(auto.Ontology.Traffic_Model)
+ti = auto.get_ontology(auto.Ontology.Time)
+l4_de = auto.get_ontology(auto.Ontology.L4_DE)
+ge = auto.get_ontology(auto.Ontology.GeoSPARQL)
+# creates a scene with one vehicle
+scene = tm.Scene()
+t0 = ti.TimePosition()
+t0.numericPosition = [0]
+scene.inTimePosition = [t0]
 ego = l4_de.Passenger_Car()
 ego_geometry = ge.Geometry()
 ego_geometry.asWKT = [geometry.Polygon([(4, 23), (9, 23), (9, 21), (4, 21), (4, 23)]).wkt]
 ego.hasGeometry = [ego_geometry]
+scene.has_traffic_entity = [ego]
 # saves the ABox
-world.save("/tmp/world.owl")
+owlready2.default_world.save("/tmp/world.owl")
 # visualizes the ABox
-auto_visualizer.visualize_scenario(world)
+visualizer.visualize_scenario([owlready2.default_world])
 ```
 
 For a larger example on how to use this module, look at the [example of the criticality recognition program](https://github.com/lu-w/criticality-recognition/blob/main/inputs/example_fuc_2_3.py).
@@ -42,7 +49,6 @@ For a larger example on how to use this module, look at the [example of the crit
 # TODO
 
 - make an installable python module out of this (empty __init__?)
-- rename auto_visualizer to visualizer
 
 # Plans for module
 - implement functions that abstract creation of commonly used objects (e.g. geometry etc.)

@@ -141,10 +141,11 @@ def visualize_scenario(scenario, cps=None):
 
     # Fetch scene list
     if type(scenario) == list:
-        scenes = [scene_world.search(type=auto.auto.get_ontology(auto.auto.Ontology.Traffic_Model, scene_world).Scene)
+        scenes = [scene_world.search(type=auto.get_ontology(auto.Ontology.Traffic_Model, scene_world).Scene)
                   [0] for scene_world in scenario]
+        scenario = owlready2.default_world
     elif type(scenario) == owlready2.namespace.World or type(scenario) == owlready2.World:
-        tm = auto.auto.get_ontology(auto.auto.Ontology.Traffic_Model, scenario)
+        tm = auto.get_ontology(auto.Ontology.Traffic_Model, scenario)
         scenario_inst = scenario.search(type=tm.Scenario)[0]
         scenes = list(filter(lambda x: tm.Scene in x.is_a, scenario_inst.has_traffic_model))
     else:
@@ -303,8 +304,7 @@ def visualize_scenario(scenario, cps=None):
                         centroids_x.append(x)
                         centroids_y.append(y)
                         plt.plot(*points, alpha=.6)
-                        if auto.auto.get_ontology(auto.auto.Ontology.Physics, scenario).Dynamical_Object in \
-                                entity.INDIRECT_is_a:
+                        if auto.get_ontology(auto.Ontology.Physics, scenario).Dynamical_Object in entity.INDIRECT_is_a:
                             plt.fill(*points, alpha=.3)
                             if entity.has_yaw is not None:
                                 x_dir = (0.9 * math.cos(math.radians(entity.has_yaw)))
