@@ -48,7 +48,7 @@ For a larger example on how to use this module, look at the [example of the crit
 
 # TODO
 
-- make an installable python module out of this (empty __init__?)
+- make an installable python module out of this
 
 # Plans for module
 - implement functions that abstract creation of commonly used objects (e.g. geometry etc.)
