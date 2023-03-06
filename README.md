@@ -9,7 +9,8 @@ It basically provides an easier access to
 
 ## Install
 
-(TODO)
+First, initialize the submodule: `git submodule update --init --recursive`.
+Install this module via `pip install -e .`.
 
 ## Example
 
@@ -45,10 +46,6 @@ visualizer.visualize_scenario([owlready2.default_world])
 ```
 
 For a larger example on how to use this module, look at the [example of the criticality recognition program](https://github.com/lu-w/criticality-recognition/blob/main/inputs/example_fuc_2_3.py).
-
-# TODO
-
-- make an installable python module out of this
 
 # Plans for module
 - implement functions that abstract creation of commonly used objects (e.g. geometry etc.)
