@@ -1,6 +1,6 @@
 # pyauto
 
-A python module for accessing the [Automotive Urban Traffic Ontology](https://github.com/lu-w/auto/) using owlready2.
+A python package for accessing the [Automotive Urban Traffic Ontology](https://github.com/lu-w/auto/) using owlready2.
 It basically provides an easier access to
 - loading A.U.T.O. into owlready2
 - A.U.T.O.'s set of IRIs
@@ -10,7 +10,7 @@ It basically provides an easier access to
 ## Install
 
 First, initialize the submodule: `git submodule update --init --recursive`.
-Install this module via `pip install -e .`.
+Install this package via `pip install -e .`.
 
 ## Example
 
@@ -45,12 +45,11 @@ owlready2.default_world.save("/tmp/world.owl")
 visualizer.visualize_scenario([owlready2.default_world])
 ```
 
-For a larger example on how to use this module, look at the [example of the criticality recognition program](https://github.com/lu-w/criticality-recognition/blob/main/inputs/example_fuc_2_3.py).
+For a larger example on how to use this package, look at the [example of the criticality recognition](https://github.com/lu-w/criticality-recognition/blob/main/inputs/example_fuc_2_3.py).
 
-# Plans for module
+# TODO
 - implement functions that abstract creation of commonly used objects (e.g. geometry etc.)
-  - best as constructors
+  - best as constructors enhancing the owlready2 classes
   - provide some convenience functions for accessing geometries, calculating distances etc.
-- relocate omega2auto in separate git and import pyauto
+- update the omega2auto module to use the new functionality
   - use new constructors for this
-- 
