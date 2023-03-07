@@ -19,8 +19,7 @@ from shapely import geometry
 import numpy as np
 from tqdm import tqdm
 
-import auto
-import utils
+from pyauto import auto, utils
 
 # TODO
 # - visualize scenario level CPs
