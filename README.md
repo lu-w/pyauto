@@ -9,8 +9,8 @@ It basically provides an easier access to
 
 ## Install
 
-First, initialize the submodule: `git submodule update --init --recursive`.
-Install this package via `pip install -e .`.
+First, initialize submodules: `git submodule update --init --recursive`.
+Install this package via `pip install .`.
 
 ## Example
 
