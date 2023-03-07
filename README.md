@@ -21,6 +21,7 @@ This small example loads A.U.T.O., creates a vehicle in the ABox, saves, and vis
 import owlready2
 from shapely import geometry
 from pyauto import auto, visualizer
+from pyauto.extras import physics
 
 # loads A.U.T.O. into the default world
 auto.load()

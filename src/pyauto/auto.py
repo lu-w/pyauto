@@ -9,6 +9,8 @@ Loads A.U.T.O. globally into owlready2. Also provides an easier enum interface t
 
 logger = logging.Logger(__name__)
 
+# Whether A.U.T.O. has already been loaded
+_loaded = False
 
 class Ontology(Enum):
     """
@@ -54,24 +56,30 @@ def get_ontology(ontology: Ontology, world: owlready2.World = owlready2.default_
         return world.get_ontology("http://anonymous#").get_namespace(iri)
 
 
-def load(folder="auto", world = None):
+def load(folder = None, world = None):
     """
     Loads A.U.T.O. from a given folder location.
-    :param folder: The folder to look for, should contain the `automotive_urban_traffic_ontology.owl`.
+    :param folder: The folder to look for, should contain the `automotive_urban_traffic_ontology.owl`. Can be None, in
+        this case, it takes the ontology located in this repository.
     :param world: The world to load A.U.T.O. into. If None, loads into the default world.
     :raise FileNotFoundError: if given an invalid folder location.
     """
-    if os.path.isdir(folder):
-        # Setting correct path for owlready2
-        for i, j, k in os.walk(folder + "/"):
-            owlready2.onto_path.append(i)
-        owlready2.onto_path.remove(folder + "/")
-        # Loading ontology into world (or default world)
-        if not world:
-            world = owlready2.default_world
-        world.get_ontology(folder + "/automotive_urban_traffic_ontology.owl").load()
-    else:
-        raise FileNotFoundError(folder)
+    global _loaded
+    if not _loaded:
+        if folder is None:
+            folder = os.path.dirname(os.path.realpath(__file__)) + "/../../auto"
+        if os.path.isdir(folder):
+            # Setting correct path for owlready2
+            for i, j, k in os.walk(folder + "/"):
+                owlready2.onto_path.append(i)
+            owlready2.onto_path.remove(folder + "/")
+            # Loading ontology into world (or default world)
+            if not world:
+                world = owlready2.default_world
+            world.get_ontology(folder + "/automotive_urban_traffic_ontology.owl").load()
+            _loaded = True
+        else:
+            raise FileNotFoundError(folder)
 
 
 def load_cp(folder="auto", world = None):
