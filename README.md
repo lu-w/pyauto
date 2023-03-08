@@ -19,27 +19,15 @@ This small example loads A.U.T.O., creates a vehicle in the ABox, saves, and vis
 ```python
 # imports relevant modules
 import owlready2
-from shapely import geometry
 from pyauto import auto, visualizer
-from pyauto.extras import physics
 
 # loads A.U.T.O. into the default world
 auto.load()
 # accesses the relevant sub-ontologies easily
-tm = auto.get_ontology(auto.Ontology.Traffic_Model)
-ti = auto.get_ontology(auto.Ontology.Time)
 l4_de = auto.get_ontology(auto.Ontology.L4_DE)
-ge = auto.get_ontology(auto.Ontology.GeoSPARQL)
-# creates a scene with one vehicle
-scene = tm.Scene()
-t0 = ti.TimePosition()
-t0.numericPosition = [0]
-scene.inTimePosition = [t0]
+# creates one vehicle
 ego = l4_de.Passenger_Car()
-ego_geometry = ge.Geometry()
-ego_geometry.asWKT = [geometry.Polygon([(4, 23), (9, 23), (9, 21), (4, 21), (4, 23)]).wkt]
-ego.hasGeometry = [ego_geometry]
-scene.has_traffic_entity = [ego]
+ego.set_geometry(5, 10, 5.1, 2.2)
 # saves the ABox
 owlready2.default_world.save("/tmp/world.owl")
 # visualizes the ABox
@@ -50,7 +38,31 @@ For a larger example on how to use this package, look at the [example of the cri
 
 # TODO
 - implement functions that abstract creation of commonly used objects (e.g. geometry etc.)
-  - best as constructors enhancing the owlready2 classes
   - provide some convenience functions for accessing geometries, calculating distances etc.
-- update the omega2auto module to use the new functionality
-  - use new constructors for this
+
+## List of convenience functions needed
+
+- setting geometries
+  - 2d rectangles (done) (set width automatically TODO)
+  - points (done)
+  - 3d rectangles (set height automatically)
+  - add_geometry_from_polygon
+  - create line from point list (not a polygon) (with and without height)
+    - with and without width (buffer by geometry)
+  - getting geometries as shapely objects?
+- setting velocity (and add speed vector directly from this)
+- same for acceleration
+- Environment class
+  - add_precipitation(mmh: float) that automatically stores the amount and assigns the correct classification
+  - same for wind
+  - same for cloudiness
+  - same for daytime
+  - same for air (temp, rel humd, visibility, pressure)
+- add_marker() for selected objects e.g. Pedestrian_Ford, Bicycle_Ford, etc. (see lateral_marking.py)
+- applies_to relation when adding marker's geometry automatically by checking which previously created lanes and their roads it intersects
+- creating a road network
+  - determining successor lanes based on connecting geometries?
+  - create an n-lane road given its overall width and length and a querschnitt -> list of classes and their proportion of the overall road
+    - e.g. `fill_road({l1_core.Roadwalk: 0.1, l1_core.Lane: 0.4, l1_core.Lane: 0.4, l1_core.Roadwalk: 0.1})`
+- Bicyclist (create a bicycle automatically that is driven by it)
+- copy from a previously created world

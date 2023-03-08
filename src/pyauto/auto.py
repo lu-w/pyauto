@@ -12,20 +12,22 @@ logger = logging.Logger(__name__)
 # Whether A.U.T.O. has already been loaded
 _loaded = False
 
+
 class Ontology(Enum):
     """
-    Contains an enumeration of all sub-ontologies of A.U.T.O. pointing to their IRIs.
+    Contains an enumeration of all sub-ontologies of A.U.T.O. pointing to their IRIs (as str)
     """
     Criticality_Phenomena = "http://purl.org/auto/criticality_phenomena#"
     Criticality_Phenomena_Formalization = "http://purl.org/auto/criticality_phenomena_formalization#"
-    Traffic_Model = "http://purl.org/auto/traffic_model#"
     Physics = "http://purl.org/auto/physics#"
     Perception = "http://purl.org/auto/perception#"
-    Time = "http://www.w3.org/2006/time#"
-    Act = "http://purl.org/auto/act#"
+    Communication = "http://purl.org/auto/communication#"
     GeoSPARQL = "http://www.opengis.net/ont/geosparql#"
+    TE_Core = "http://purl.org/auto/traffic_entity_core#"
     Descriptive_TE_Core = "http://purl.org/auto/descriptive_traffic_entity_core#"
     Descriptive_TE_DE = "http://purl.org/auto/descriptive_traffic_entity_de#"
+    Interpretative_TE_Core = "http://purl.org/auto/interpretative_traffic_entity_core#"
+    Interpretative_TE_DE = "http://purl.org/auto/interpretative_traffic_entity_de#"
     L1_Core = "http://purl.org/auto/l1_core#"
     L1_DE = "http://purl.org/auto/l1_de#"
     L2_Core = "http://purl.org/auto/l2_core#"
@@ -56,9 +58,9 @@ def get_ontology(ontology: Ontology, world: owlready2.World = owlready2.default_
         return world.get_ontology("http://anonymous#").get_namespace(iri)
 
 
-def load(folder = None, world = None):
+def load(folder: str = None, world: owlready2.World = None) -> None:
     """
-    Loads A.U.T.O. from a given folder location.
+    Loads A.U.T.O. from a given folder location. Avoids double loading (i.e. calling twice has no effect).
     :param folder: The folder to look for, should contain the `automotive_urban_traffic_ontology.owl`. Can be None, in
         this case, it takes the ontology located in this repository.
     :param world: The world to load A.U.T.O. into. If None, loads into the default world.
@@ -82,7 +84,7 @@ def load(folder = None, world = None):
             raise FileNotFoundError(folder)
 
 
-def load_cp(folder="auto", world = None):
+def load_cp(folder: str = None, world: owlready2.World = None) -> None:
     """
     Loads A.U.T.O. along with the criticality phenomena ontologies (vocabulary, formalization) from a given folder
     location.
@@ -91,16 +93,21 @@ def load_cp(folder="auto", world = None):
     :param world: The world to load A.U.T.O. & CPs into. If None, loads into the default world.
     :raise FileNotFoundError: if given an invalid folder location.
     """
-    if os.path.isdir(folder):
-        # Setting correct path for owlready2
-        for i, j, k in os.walk(folder + "/"):
-            owlready2.onto_path.append(i)
-        owlready2.onto_path.remove(folder + "/")
-        # Loading ontology into world (or default world)
-        if not world:
-            world = owlready2.default_world
-        world.get_ontology(folder + "/automotive_urban_traffic_ontology.owl").load()
-        world.get_ontology(folder + "/criticality_phenomena.owl").load()
-        world.get_ontology(folder + "/criticality_phenomena_formalization.owl").load()
+    global _loaded
+    if not _loaded:
+        if folder is None:
+            folder = os.path.dirname(os.path.realpath(__file__)) + "/../../auto"
+        if os.path.isdir(folder):
+            # Setting correct path for owlready2
+            for i, j, k in os.walk(folder + "/"):
+                owlready2.onto_path.append(i)
+            owlready2.onto_path.remove(folder + "/")
+            # Loading ontology into world (or default world)
+            if not world:
+                world = owlready2.default_world
+            world.get_ontology(folder + "/automotive_urban_traffic_ontology.owl").load()
+            world.get_ontology(folder + "/criticality_phenomena.owl").load()
+            world.get_ontology(folder + "/criticality_phenomena_formalization.owl").load()
+            _loaded = True
     else:
         raise FileNotFoundError(folder)
