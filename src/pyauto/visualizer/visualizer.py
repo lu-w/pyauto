@@ -17,9 +17,8 @@ import webbrowser
 import owlready2
 from shapely import geometry
 import numpy as np
-from tqdm import tqdm
 
-from pyauto import auto, utils
+from pyauto import utils
 
 # TODO
 # - visualize scenario level CPs
@@ -50,7 +49,7 @@ logger = logging.getLogger(__name__)
 
 
 # Helper function for sorting CPs & individuals
-def natural_sort_key(s, _nsre=re.compile("([0-9]+)")):
+def _natural_sort_key(s, _nsre=re.compile("([0-9]+)")):
     return [int(text) if text.isdigit() else text.lower() for text in _nsre.split(str(s))]
 
 
@@ -125,12 +124,12 @@ scenario_css = """
         </style>"""
 
 
-def visualize_scenario(scenario, cps=None):
+def visualize_scenario(scenes: list, scenario_name: str = None, cps=None):
     """
     Creates an HTML visualization of the given scenario. Starts a simple web server at localhost:8000 (blocking).
-    :param scenario: Either a list of worlds, each world representing a single scene or a single world representing a
-    whole scenario
+    :param scenes: A list of worlds, each world representing a single scene - temporally sorted
     :param cps: A list of criticality phenomena which optionally to visualize as well.
+    :param scenario_name: An optional name for the scenario to display.
     :return: The path to the directory in which to find the created HTML visualization.
     """
     pl_html = []
@@ -138,23 +137,12 @@ def visualize_scenario(scenario, cps=None):
     if cps is None:
         cps = []
 
-    # Fetch scene list
-    if type(scenario) == list:
-        scenes = [scene_world.search(type=auto.get_ontology(auto.Ontology.Traffic_Model, scene_world).Scene)
-                  [0] for scene_world in scenario]
-        scenario = owlready2.default_world
-    elif type(scenario) == owlready2.namespace.World or type(scenario) == owlready2.World:
-        tm = auto.get_ontology(auto.Ontology.Traffic_Model, scenario)
-        scenario_inst = scenario.search(type=tm.Scenario)[0]
-        scenes = list(filter(lambda x: tm.Scene in x.is_a, scenario_inst.has_traffic_model))
-    else:
-        raise ValueError
-    scenes = sorted(scenes, key=lambda x: x.inTimePosition[0].numericPosition[0])
+    scenario = owlready2.default_world
 
     # Assemble scenario title
     title = "Scenario"
-    if scenario_inst and hasattr(scenario_inst, "identifier") and len(scenario_inst.identifier) > 0:
-        title += " " + str(scenario_inst.identifier[0])
+    if scenario_name:
+        title += " " + scenario_name
     scenario_info = "(" + str(len(scenes)) + " Scenes)"
     # Main HTML code for index.html
     html_body = """<!DOCTYPE html>
@@ -275,9 +263,7 @@ def visualize_scenario(scenario, cps=None):
         centroids_y = []
         plotted_labels = []
         entity_points = dict()
-        traffic_entities = tqdm(scene.has_traffic_entity)
-        for entity in traffic_entities:
-            traffic_entities.set_description(str(entity))
+        for entity in scene.individuals():
             if len(entity.hasGeometry) > 0:
                 for geo in entity.hasGeometry:
                     shape = wkt.loads(geo.asWKT[0])
@@ -303,7 +289,7 @@ def visualize_scenario(scenario, cps=None):
                         centroids_x.append(x)
                         centroids_y.append(y)
                         plt.plot(*points, alpha=.6)
-                        if auto.get_ontology(auto.Ontology.Physics, scenario).Dynamical_Object in entity.INDIRECT_is_a:
+                        if len([x for x in entity.INDIRECT_is_a if "Dynamical_Object" in str(x)]) > 0:
                             plt.fill(*points, alpha=.3)
                             if entity.has_yaw is not None:
                                 x_dir = (0.9 * math.cos(math.radians(entity.has_yaw)))
@@ -424,7 +410,7 @@ def visualize_scenario(scenario, cps=None):
                             <input type="checkbox" class="cp-all-button" id="cp-all-button-%s" autocomplete="off" onclick="toggle_cps_all_iframes();" checked>
                             <span>Show all criticality phenomena (%s)</span>
                         </label>""" % ("100%", str(i), str(cp_count_total))
-        for l, pred in enumerate(sorted(relations_per_cp_class.keys(), key=natural_sort_key)):
+        for l, pred in enumerate(sorted(relations_per_cp_class.keys(), key=_natural_sort_key)):
             cp_count = len([x for x in cps if x.predicate == pred and ((isinstance(x.traffic_model, list) and
                             scene in x.traffic_model) or x.traffic_model == scenario_inst)])
             html += """
@@ -510,15 +496,7 @@ def visualize_scenario(scenario, cps=None):
         <div class="card m-2">
             <div class="card-title d-flex flex-row justify-content-center m-1">
                 <h5>"""
-        if len(scene.inTimePosition) > 0 and len(scene.inTimePosition[0].numericPosition) > 0:
-            time = "%.2f s" % scene.inTimePosition[0].numericPosition[0]
-            if scenario_inst and len(scenario_inst.hasEnd) > 0 and len(scenario_inst.hasEnd[0].inTimePosition) > 0 and \
-                    len(scenario_inst.hasEnd[0].inTimePosition[0].numericPosition) > 0:
-                time += " / %.2f s" % scenario_inst.hasEnd[0].inTimePosition[0].numericPosition[0]
-            else:
-                time += " / " + str(len(scenes))
-        else:
-            time = str(i) + " / " + str(len(scenes))
+        time = str(i) + " / " + str(len(scenes))
         iframe_html += "Scene " + time + "<br />"
         iframe_html += """
                 </h5>
@@ -750,7 +728,7 @@ class ToolTipAndClickInfo(mpld3.plugins.PointHTMLTooltip):
         self.targets_per_cp = []
         self.cps = []
         if targets_per_cp:
-            self.cps = sorted(targets_per_cp.keys(), key=natural_sort_key)
+            self.cps = sorted(targets_per_cp.keys(), key=_natural_sort_key)
             for cp in self.cps:
                 x_ = []
                 for y in targets_per_cp[cp]:

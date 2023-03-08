@@ -1,16 +1,16 @@
 import owlready2
 import os
+import importlib
 import logging
 from enum import Enum
+
+import pyauto.extras.physics
 
 """
 Loads A.U.T.O. globally into owlready2. Also provides an easier enum interface to access the sub-ontologies of A.U.T.O.
 """
 
 logger = logging.Logger(__name__)
-
-# Whether A.U.T.O. has already been loaded
-_loaded = False
 
 
 class Ontology(Enum):
@@ -58,56 +58,69 @@ def get_ontology(ontology: Ontology, world: owlready2.World = owlready2.default_
         return world.get_ontology("http://anonymous#").get_namespace(iri)
 
 
-def load(folder: str = None, world: owlready2.World = None) -> None:
+def load(folder: str = None, world: owlready2.World = None, add_extras: bool = True) -> None:
     """
-    Loads A.U.T.O. from a given folder location. Avoids double loading (i.e. calling twice has no effect).
+    Loads A.U.T.O. from a given folder location.
     :param folder: The folder to look for, should contain the `automotive_urban_traffic_ontology.owl`. Can be None, in
         this case, it takes the ontology located in this repository.
     :param world: The world to load A.U.T.O. into. If None, loads into the default world.
+    :param add_extras: Whether to import the extra functionality that is added the classes from owlready2.
     :raise FileNotFoundError: if given an invalid folder location.
     """
-    global _loaded
-    if not _loaded:
-        if folder is None:
-            folder = os.path.dirname(os.path.realpath(__file__)) + "/../../auto"
-        if os.path.isdir(folder):
-            # Setting correct path for owlready2
-            for i, j, k in os.walk(folder + "/"):
-                owlready2.onto_path.append(i)
-            owlready2.onto_path.remove(folder + "/")
-            # Loading ontology into world (or default world)
-            if not world:
-                world = owlready2.default_world
-            world.get_ontology(folder + "/automotive_urban_traffic_ontology.owl").load()
-            _loaded = True
-        else:
-            raise FileNotFoundError(folder)
+    if folder is None:
+        folder = os.path.dirname(os.path.realpath(__file__)) + "/../../auto"
+    if os.path.isdir(folder):
+        # Setting correct path for owlready2
+        for i, j, k in os.walk(folder + "/"):
+            owlready2.onto_path.append(i)
+        owlready2.onto_path.remove(folder + "/")
+        # Loading ontology into world (or default world)
+        if world is None:
+            world = owlready2.default_world
+        world.get_ontology(folder + "/automotive_urban_traffic_ontology.owl").load()
+        if add_extras:
+            _add_extras(world)
+    else:
+        raise FileNotFoundError(folder)
 
 
-def load_cp(folder: str = None, world: owlready2.World = None) -> None:
+def load_cp(folder: str = None, world: owlready2.World = None, add_extras: bool = True) -> None:
     """
     Loads A.U.T.O. along with the criticality phenomena ontologies (vocabulary, formalization) from a given folder
     location.
     :param folder: The folder to look for, should contain the `automotive_urban_traffic_ontology.owl`,
     criticality_phenomena.owl`, `criticality_phenomena_formalization.owl`
     :param world: The world to load A.U.T.O. & CPs into. If None, loads into the default world.
+    :param add_extras: Whether to import the extra functionality that is added the classes from owlready2.
     :raise FileNotFoundError: if given an invalid folder location.
     """
-    global _loaded
-    if not _loaded:
-        if folder is None:
-            folder = os.path.dirname(os.path.realpath(__file__)) + "/../../auto"
-        if os.path.isdir(folder):
-            # Setting correct path for owlready2
-            for i, j, k in os.walk(folder + "/"):
-                owlready2.onto_path.append(i)
-            owlready2.onto_path.remove(folder + "/")
-            # Loading ontology into world (or default world)
-            if not world:
-                world = owlready2.default_world
-            world.get_ontology(folder + "/automotive_urban_traffic_ontology.owl").load()
-            world.get_ontology(folder + "/criticality_phenomena.owl").load()
-            world.get_ontology(folder + "/criticality_phenomena_formalization.owl").load()
-            _loaded = True
+    if folder is None:
+        folder = os.path.dirname(os.path.realpath(__file__)) + "/../../auto"
+    if os.path.isdir(folder):
+        # Setting correct path for owlready2
+        for i, j, k in os.walk(folder + "/"):
+            owlready2.onto_path.append(i)
+        owlready2.onto_path.remove(folder + "/")
+        # Loading ontology into world (or default world)
+        if world is None:
+            world = owlready2.default_world
+        world.get_ontology(folder + "/automotive_urban_traffic_ontology.owl").load()
+        world.get_ontology(folder + "/criticality_phenomena.owl").load()
+        world.get_ontology(folder + "/criticality_phenomena_formalization.owl").load()
+        if add_extras:
+            _add_extras(world)
     else:
         raise FileNotFoundError(folder)
+
+
+def _add_extras(world: owlready2.World = owlready2.default_world):
+    """
+    Loads all extra module functionality (i.e. those members specified in `extras`) into the classes provided by
+    owlready2.
+    :param world: The world to load the functionality into. Note that all other worlds won't have this functionality!
+    """
+    for file in os.listdir(os.path.dirname(os.path.realpath(__file__)) + "/extras"):
+        if file.endswith(".py") and file != "__init__.py":
+            mod = importlib.import_module("pyauto.extras." + file.replace(".py", ""))
+            if hasattr(mod, "apply"):
+                mod.apply(world)

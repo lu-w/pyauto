@@ -1,6 +1,7 @@
 # imports relevant modules
 import owlready2
-from pyauto import auto, visualizer
+from pyauto import auto
+from pyauto.visualizer import visualizer
 
 # loads A.U.T.O. into the default world
 auto.load()
