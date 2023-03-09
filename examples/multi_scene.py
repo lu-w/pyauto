@@ -1,9 +1,10 @@
-import owlready2
 import logging
+
+import owlready2
 from pyauto import auto, augmentator
 from pyauto.visualizer import visualizer
 
-logging.basicConfig(format="%(asctime)s %(levelname)s  %(message)s", datefmt="%H:%M:%S")
+logging.basicConfig(level=logging.DEBUG)
 
 # loads A.U.T.O. for scene 1
 scene_1 = owlready2.World()
