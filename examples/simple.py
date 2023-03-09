@@ -1,4 +1,3 @@
-import owlready2
 from pyauto import auto
 from pyauto.visualizer import visualizer
 
