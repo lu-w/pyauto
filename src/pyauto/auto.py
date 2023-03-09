@@ -108,7 +108,9 @@ def save_abox(self, file: str = None, format: str = "rdfxml", **kargs):
     """
     Works analogously to the save() method of owlready2.World, but saves the ABox auf A.U.T.O. only.
     Note that right now, only the "rdfxml" format is supported. If some other format is given, the plain save() method
-    is executed.
+    is executed. This method also removes all existing color individuals of A.U.T.O.'s physics ontology since we do not
+    want to have those individuals doubly present.
+    It adds an import to the internet location of A.U.T.O. such that the ABox is well-defined by the imports.
     Note: This method overwrites existing files.
     :param file: A string to a file location to save the ABox to.
     :param format: The format to save in (one of: rdfxml, ntriples, nquads). Recommended: rdfxml.
@@ -126,7 +128,9 @@ def save_abox(self, file: str = None, format: str = "rdfxml", **kargs):
         root = tree.getroot()
         for child in reversed(root):
             _, _, tag = child.tag.rpartition("}")
-            if tag in _TO_DELETE or (tag in "Color" and child.attrib["{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about"].split("#")[-1] in _COLORS_DELETE):
+            if tag in _TO_DELETE or (tag in "Color" and
+                                     child.attrib["{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about"].split("#")[ -1]
+                                     in _COLORS_DELETE):
                 root.remove(child)
 
         # Adds owl prefix
