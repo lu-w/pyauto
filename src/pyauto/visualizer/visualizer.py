@@ -496,7 +496,7 @@ def visualize_scenario(scenes: list, scenario_name: str = None, cps=None):
         <div class="card m-2">
             <div class="card-title d-flex flex-row justify-content-center m-1">
                 <h5>"""
-        time = str(i) + " / " + str(len(scenes))
+        time = str(i + 1) + " / " + str(len(scenes))
         iframe_html += "Scene " + time + "<br />"
         iframe_html += """
                 </h5>

@@ -18,8 +18,8 @@ ego_1.set_geometry(5, 10, 5.1, 2.2)
 ego_2 = l4_de_2.Passenger_Car()
 ego_2.set_geometry(6, 10, 5.1, 2.2)
 # saves the ABoxes
-scene_1.save("/tmp/scene_1.owl")
-scene_2.save("/tmp/scene_2.owl")
+scene_1.save_abox("/tmp/scene_1.owl")
+scene_2.save_abox("/tmp/scene_2.owl")
 
 # visualizes the ABox
 visualizer.visualize_scenario([scene_1, scene_2])

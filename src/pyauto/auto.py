@@ -2,9 +2,10 @@ import owlready2
 import os
 import importlib
 import logging
+from xml.etree import ElementTree
 from enum import Enum
 
-import pyauto.extras.physics
+from pyauto.utils import monkeypatch
 
 """
 Loads A.U.T.O. globally into owlready2. Also provides an easier enum interface to access the sub-ontologies of A.U.T.O.
@@ -58,13 +59,14 @@ def get_ontology(ontology: Ontology, world: owlready2.World = owlready2.default_
         return world.get_ontology("http://anonymous#").get_namespace(iri)
 
 
-def load(folder: str = None, world: owlready2.World = None, add_extras: bool = True) -> None:
+def load(folder: str = None, world: owlready2.World = None, add_extras: bool = True, load_cp: bool = False) -> None:
     """
     Loads A.U.T.O. from a given folder location.
     :param folder: The folder to look for, should contain the `automotive_urban_traffic_ontology.owl`. Can be None, in
         this case, it takes the ontology located in this repository.
     :param world: The world to load A.U.T.O. into. If None, loads into the default world.
     :param add_extras: Whether to import the extra functionality that is added the classes from owlready2.
+    :param load_cp: Whether to load the criticality_phenomena.owl (and formalization) as well.
     :raise FileNotFoundError: if given an invalid folder location.
     """
     if folder is None:
@@ -78,35 +80,9 @@ def load(folder: str = None, world: owlready2.World = None, add_extras: bool = T
         if world is None:
             world = owlready2.default_world
         world.get_ontology(folder + "/automotive_urban_traffic_ontology.owl").load()
-        if add_extras:
-            _add_extras(world)
-    else:
-        raise FileNotFoundError(folder)
-
-
-def load_cp(folder: str = None, world: owlready2.World = None, add_extras: bool = True) -> None:
-    """
-    Loads A.U.T.O. along with the criticality phenomena ontologies (vocabulary, formalization) from a given folder
-    location.
-    :param folder: The folder to look for, should contain the `automotive_urban_traffic_ontology.owl`,
-    criticality_phenomena.owl`, `criticality_phenomena_formalization.owl`
-    :param world: The world to load A.U.T.O. & CPs into. If None, loads into the default world.
-    :param add_extras: Whether to import the extra functionality that is added the classes from owlready2.
-    :raise FileNotFoundError: if given an invalid folder location.
-    """
-    if folder is None:
-        folder = os.path.dirname(os.path.realpath(__file__)) + "/../../auto"
-    if os.path.isdir(folder):
-        # Setting correct path for owlready2
-        for i, j, k in os.walk(folder + "/"):
-            owlready2.onto_path.append(i)
-        owlready2.onto_path.remove(folder + "/")
-        # Loading ontology into world (or default world)
-        if world is None:
-            world = owlready2.default_world
-        world.get_ontology(folder + "/automotive_urban_traffic_ontology.owl").load()
-        world.get_ontology(folder + "/criticality_phenomena.owl").load()
-        world.get_ontology(folder + "/criticality_phenomena_formalization.owl").load()
+        if load_cp:
+            world.get_ontology(folder + "/criticality_phenomena.owl").load()
+            world.get_ontology(folder + "/criticality_phenomena_formalization.owl").load()
         if add_extras:
             _add_extras(world)
     else:
@@ -119,8 +95,44 @@ def _add_extras(world: owlready2.World = owlready2.default_world):
     owlready2.
     :param world: The world to load the functionality into. Note that all other worlds won't have this functionality!
     """
+    # TODO change that no apply() method is needed but the code "world = ..." is injected at runtime and then the module is imported
     for file in os.listdir(os.path.dirname(os.path.realpath(__file__)) + "/extras"):
         if file.endswith(".py") and file != "__init__.py":
             mod = importlib.import_module("pyauto.extras." + file.replace(".py", ""))
             if hasattr(mod, "apply"):
                 mod.apply(world)
+
+
+@monkeypatch(owlready2.World)
+def save_abox(self, file: str = None, format: str = "rdfxml", **kargs):
+    self.save(file, format, **kargs)
+    if file is not None and format == "rdfxml":
+        # Read in file again
+        tree = ElementTree.parse(file)
+
+        # Remove all unwanted elements
+        _TO_DELETE = {"Class", "Datatype", "AllDisjointClasses", "Description", "DatatypeProperty", "ObjectProperty",
+                      "Ontology", "AnnotationProperty"}
+        _COLORS_DELETE = {"Blue", "Green", "Red", "White", "Yellow"}
+
+        root = tree.getroot()
+        for child in reversed(root):
+            _, _, tag = child.tag.rpartition("}")
+            if tag in _TO_DELETE or (tag in "Color" and child.attrib["{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about"].split("#")[-1] in _COLORS_DELETE):
+                root.remove(child)
+
+        # Adds owl prefix
+        root.set("xmlns:owl", "http://www.w3.org/2002/07/owl#")
+
+        # Set ontology name and add AUTO as import (since all other ontologies and imports were removed)
+        onto = ElementTree.Element("owl:Ontology")
+        filename = os.path.basename(file)
+        if "." in filename:
+            filename = filename.split(".")[:-1]
+            filename = ".".join(filename)
+        onto.set("rdf:about", "http://purl.org/auto/" + filename)
+        ElementTree.SubElement(onto, "owl:imports", {"rdf:resource": "http://purl.org/auto/"})
+        root.insert(0, onto)
+
+        # Save file again
+        tree.write(file)

@@ -10,6 +10,14 @@ logger = logging.getLogger(__name__)
 _CACHED_CP_CLASSES = dict()
 
 
+def monkeypatch(cls):
+    def decorator(func):
+        setattr(cls, func.__name__, func)
+        return func
+
+    return decorator
+
+
 def _get_individual_id(individual) -> str:
     """
     Returns a unique identifier as a string for the given individual.
