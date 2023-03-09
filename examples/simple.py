@@ -1,4 +1,3 @@
-# imports relevant modules
 import owlready2
 from pyauto import auto
 from pyauto.visualizer import visualizer
@@ -11,6 +10,6 @@ l4_de = auto.get_ontology(auto.Ontology.L4_DE)
 ego = l4_de.Passenger_Car()
 ego.set_geometry(5, 10, 5.1, 2.2)
 # saves the ABox
-owlready2.default_world.save("/tmp/world.owl")
+owlready2.default_world.save_abox("/tmp/scene.owl")
 # visualizes the ABox
 visualizer.visualize_scenario([owlready2.default_world])

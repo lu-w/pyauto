@@ -5,3 +5,4 @@ shapely
 numpy
 screeninfo
 tqdm
+./owlready2_augmentator

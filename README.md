@@ -42,6 +42,8 @@ For a larger example on how to use this package, look at the [example of the cri
 
 ## List of convenience functions needed
 
+- take over everything from augmentation functions
+  - create a method augment(worlds) in pyauto
 - setting geometries
   - 2d rectangles (done) (set width automatically TODO)
   - points (done)

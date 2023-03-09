@@ -1,3 +1,6 @@
 [submodule "auto"]
 	path = auto
 	url = https://github.com/lu-w/auto.git
+[submodule "owlready2_augmentator"]
+	path = owlready2_augmentator
+	url = https://github.com/lu-w/owlready2-augmentator.git

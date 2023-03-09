@@ -13,6 +13,7 @@ setup(
         "shapely",
         "numpy",
         "screeninfo",
-        "tqdm"
+        "tqdm",
+        "owlready2_augmentator"
     ]
 )
