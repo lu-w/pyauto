@@ -13,6 +13,11 @@ Loads A.U.T.O. globally into owlready2. Also provides an easier enum interface t
 
 logger = logging.Logger(__name__)
 
+# The world that A.U.T.O. was loaded into the last time load() was called. Standard is owlready2.default_world.
+_world = owlready2.default_world
+# Imported modules of extras (in order to be able to reload them in case of more than one world)
+_extras = []
+
 
 class Ontology(Enum):
     """
@@ -69,6 +74,12 @@ def load(folder: str = None, world: owlready2.World = None, add_extras: bool = T
     :param load_cp: Whether to load the criticality_phenomena.owl (and formalization) as well.
     :raise FileNotFoundError: if given an invalid folder location.
     """
+    global _world
+    # Loading ontology into world (or default world)
+    if world is None:
+        _world = owlready2.default_world
+    else:
+        _world = world
     if folder is None:
         folder = os.path.dirname(os.path.realpath(__file__)) + "/../../auto"
     if os.path.isdir(folder):
@@ -76,31 +87,32 @@ def load(folder: str = None, world: owlready2.World = None, add_extras: bool = T
         for i, j, k in os.walk(folder + "/"):
             owlready2.onto_path.append(i)
         owlready2.onto_path.remove(folder + "/")
-        # Loading ontology into world (or default world)
-        if world is None:
-            world = owlready2.default_world
-        world.get_ontology(folder + "/automotive_urban_traffic_ontology.owl").load()
+        _world.get_ontology(folder + "/automotive_urban_traffic_ontology.owl").load()
         if load_cp:
-            world.get_ontology(folder + "/criticality_phenomena.owl").load()
-            world.get_ontology(folder + "/criticality_phenomena_formalization.owl").load()
-        if add_extras:
-            _add_extras(world)
+            _world.get_ontology(folder + "/criticality_phenomena.owl").load()
+            _world.get_ontology(folder + "/criticality_phenomena_formalization.owl").load()
+        # Importing extras only required for non-default worlds as otherwise this is handled via owlready2 already.
+        if add_extras and _world is not owlready2.default_world:
+            _add_extras()
     else:
         raise FileNotFoundError(folder)
 
 
-def _add_extras(world: owlready2.World = owlready2.default_world):
+def _add_extras():
     """
     Loads all extra module functionality (i.e. those members specified in `extras`) into the classes provided by
-    owlready2.
-    :param world: The world to load the functionality into. Note that all other worlds won't have this functionality!
+    owlready2. The global _world is the world to load the functionality into. Note that all other worlds won't have this
+    functionality!
     """
-    # TODO change that no apply() method is needed but the code "world = ..." is injected at runtime and then the module is imported
-    for file in os.listdir(os.path.dirname(os.path.realpath(__file__)) + "/extras"):
-        if file.endswith(".py") and file != "__init__.py":
-            mod = importlib.import_module("pyauto.extras." + file.replace(".py", ""))
-            if hasattr(mod, "apply"):
-                mod.apply(world)
+    global _extras
+    if len(_extras) == 0:
+        for file in os.listdir(os.path.dirname(os.path.realpath(__file__)) + "/extras"):
+            if file.endswith(".py") and file != "__init__.py":
+                mod = importlib.import_module("pyauto.extras." + file.replace(".py", ""))
+                _extras.append(mod)
+    else:
+        for mod in _extras:
+            importlib.reload(mod)
 
 
 @monkeypatch(owlready2.World)
