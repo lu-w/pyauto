@@ -105,6 +105,14 @@ def _add_extras(world: owlready2.World = owlready2.default_world):
 
 @monkeypatch(owlready2.World)
 def save_abox(self, file: str = None, format: str = "rdfxml", **kargs):
+    """
+    Works analogously to the save() method of owlready2.World, but saves the ABox auf A.U.T.O. only.
+    Note that right now, only the "rdfxml" format is supported. If some other format is given, the plain save() method
+    is executed.
+    Note: This method overwrites existing files.
+    :param file: A string to a file location to save the ABox to.
+    :param format: The format to save in (one of: rdfxml, ntriples, nquads). Recommended: rdfxml.
+    """
     self.save(file, format, **kargs)
     if file is not None and format == "rdfxml":
         # Read in file again
