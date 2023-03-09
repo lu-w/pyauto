@@ -64,6 +64,27 @@ def get_ontology(ontology: Ontology, world: owlready2.World = owlready2.default_
         return world.get_ontology("http://anonymous#").get_namespace(iri)
 
 
+def new_scenario(num: int) -> list:
+    """
+    Creates a new scenario, i.e., a list of scenes of length num. Loads A.U.T.O. into each scene, which may takes some
+    time. Each scene is an empty owlready2 world.
+    :param num: The number of scenes within this scenario.
+    """
+    assert(num >= 0)
+    return [new_scene() for _ in range(num)]
+
+
+def new_scene() -> owlready2.World:
+    """
+    Creates a new scene. In A.U.T.O., this is a new owlready2 world. This function loads A.U.T.O. into this world, which
+    may takes some time.
+    :return: The new empty world representing the scene.
+    """
+    scene_world = owlready2.World()
+    load(world=scene_world)
+    return scene_world
+
+
 def load(folder: str = None, world: owlready2.World = None, add_extras: bool = True, load_cp: bool = False) -> None:
     """
     Loads A.U.T.O. from a given folder location.
