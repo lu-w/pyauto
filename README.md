@@ -18,42 +18,33 @@ This small example loads A.U.T.O., creates a vehicle in the ABox, saves, and vis
 
 ```python
 # imports relevant modules
-import owlready2
-from pyauto import auto, visualizer
+from pyauto import auto
+from pyauto.visualizer import visualizer
 
 # loads A.U.T.O. into the default world
-auto.load()
+scene = auto.new_scene()
 # accesses the relevant sub-ontologies easily
-l4_de = auto.get_ontology(auto.Ontology.L4_DE)
+l4_de = auto.get_ontology(auto.Ontology.L4_DE, scene)
 # creates one vehicle
 ego = l4_de.Passenger_Car()
 ego.set_geometry(5, 10, 5.1, 2.2)
 # saves the ABox
-owlready2.default_world.save("/tmp/world.owl")
+scene.save_abox("/tmp/scene.owl")
 # visualizes the ABox
-visualizer.visualize_scenario([owlready2.default_world])
+visualizer.visualize_scenario([scene])
 ```
 
 For a larger example on how to use this package, look at the [example of the criticality recognition](https://github.com/lu-w/criticality-recognition/blob/main/inputs/example_fuc_2_3.py).
 
-# TODO
-- implement functions that abstract creation of commonly used objects (e.g. geometry etc.)
-  - provide some convenience functions for accessing geometries, calculating distances etc.
+# TODO for convenience functions in extas
 
-## List of convenience functions needed
-
-- take over everything from augmentation functions
-  - create a method augment(worlds) in pyauto
 - setting geometries
   - 2d rectangles (done) (set width automatically TODO)
-  - points (done)
   - 3d rectangles (set height automatically)
+  - circles
   - add_geometry_from_polygon
   - create line from point list (not a polygon) (with and without height)
     - with and without width (buffer by geometry)
-  - getting geometries as shapely objects?
-- setting velocity (and add speed vector directly from this)
-- same for acceleration
 - Environment class
   - add_precipitation(mmh: float) that automatically stores the amount and assigns the correct classification
   - same for wind

@@ -9,6 +9,7 @@ def augment(*worlds: owlready2.World):
     are decorated with @augment_class.
     :param worlds: The worlds to run the augmentation on (in the given order). Worlds' individuals will be changed.
     """
+    # TODO enforce ordering of ontologies to be correct (i.e. physics first)
     for world in worlds:
         owlready2_augmentator.reset()
         owlready2_augmentator.do_augmentation(*world.ontologies.values())

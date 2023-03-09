@@ -2,6 +2,7 @@ owlready
 matplotlib
 mpld3
 shapely
+sympy
 numpy
 screeninfo
 tqdm

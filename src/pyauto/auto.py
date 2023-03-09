@@ -64,24 +64,28 @@ def get_ontology(ontology: Ontology, world: owlready2.World = owlready2.default_
         return world.get_ontology("http://anonymous#").get_namespace(iri)
 
 
-def new_scenario(num: int) -> list:
+def new_scenario(num: int, add_extras: bool = True, load_cp: bool = False) -> list:
     """
     Creates a new scenario, i.e., a list of scenes of length num. Loads A.U.T.O. into each scene, which may takes some
     time. Each scene is an empty owlready2 world.
     :param num: The number of scenes within this scenario.
+    :param add_extras: Whether to import the extra functionality that is added the classes from owlready2.
+    :param load_cp: Whether to load the criticality_phenomena.owl (and formalization) as well.
     """
     assert(num >= 0)
-    return [new_scene() for _ in range(num)]
+    return [new_scene(add_extras=add_extras, load_cp=load_cp) for _ in range(num)]
 
 
-def new_scene() -> owlready2.World:
+def new_scene(add_extras: bool = True, load_cp: bool = False) -> owlready2.World:
     """
     Creates a new scene. In A.U.T.O., this is a new owlready2 world. This function loads A.U.T.O. into this world, which
     may takes some time.
+    :param add_extras: Whether to import the extra functionality that is added the classes from owlready2.
+    :param load_cp: Whether to load the criticality_phenomena.owl (and formalization) as well.
     :return: The new empty world representing the scene.
     """
     scene_world = owlready2.World()
-    load(world=scene_world)
+    load(world=scene_world, add_extras=add_extras, load_cp=load_cp)
     return scene_world
 
 
