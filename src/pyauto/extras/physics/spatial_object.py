@@ -79,7 +79,8 @@ with physics:
             :returns: The left front point of self's boundary (front-left determined through its yaw).
             """
             try:
-                for p in zip(self.boundary.xy[0], self.boundary.xy[1]):
+                g = self.get_geometry()
+                for p in zip(g.boundary.xy[0], g.boundary.xy[1]):
                     angle = self.compute_angle_between_yaw_and_point(p)
                     if 270 <= angle < 360:
                         return p
@@ -91,7 +92,8 @@ with physics:
             :returns: The right front point of self's boundary (front-left determined through its yaw).
             """
             try:
-                for p in zip(self.boundary.xy[0], self.boundary.xy[1]):
+                g = self.get_geometry()
+                for p in zip(g.boundary.xy[0], g.boundary.xy[1]):
                     angle = self.compute_angle_between_yaw_and_point(p)
                     if 0 <= angle < 90:
                         return p
@@ -103,7 +105,8 @@ with physics:
             :returns: The right front point of self's boundary (front-left determined through its yaw).
             """
             try:
-                for p in zip(self.boundary.xy[0], self.boundary.xy[1]):
+                g = self.get_geometry()
+                for p in zip(g.boundary.xy[0], g.boundary.xy[1]):
                     angle = self.compute_angle_between_yaw_and_point(p)
                     if 180 <= angle < 270:
                         return p
@@ -115,7 +118,8 @@ with physics:
             :returns: The right front point of self's boundary (front-left determined through its yaw).
             """
             try:
-                for p in zip(self.boundary.xy[0], self.boundary.xy[1]):
+                g = self.get_geometry()
+                for p in zip(g.boundary.xy[0], g.boundary.xy[1]):
                     angle = self.compute_angle_between_yaw_and_point(p)
                     if 90 <= angle < 180:
                         return p
