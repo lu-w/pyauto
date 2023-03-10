@@ -81,16 +81,23 @@ def load(folder: str = None, world: owlready2.World = None, add_extras: bool = T
 
 def _add_extras():
     """
-    Loads all extra module functionality (i.e. those members specified in `extras`) into the classes provided by
-    owlready2. The global _world is the world to load the functionality into. Note that all other worlds won't have this
-    functionality!
+    Loads all extra module functionality (i.e. those members specified in the `extras` module and its sobmodules) into
+    the classes provided by owlready2. The global _world is the world to load the functionality into. Note that all
+    other worlds won't have this functionality!
     """
     global _extras
     if len(_extras) == 0:
-        for file in os.listdir(os.path.dirname(os.path.realpath(__file__)) + "/extras"):
-            if file.endswith(".py") and file != "__init__.py":
-                mod = importlib.import_module("pyauto.extras." + file.replace(".py", ""))
-                _extras.append(mod)
+        for root, dirs, files in os.walk(os.path.dirname(os.path.realpath(__file__)) + "/extras"):
+            for file in files:
+                if file.endswith(".py") and file != "__init__.py":
+                    extra_mod = "pyauto.extras" + root.split("pyauto/src")[-1].replace("/pyauto/extras", "").\
+                        replace("/", ".") + "." + file.replace(".py", "")
+                    try:
+                        mod = importlib.import_module(extra_mod)
+                        _extras.append(mod)
+                        logger.debug("Loaded extra module " + extra_mod + " into A.U.T.O.")
+                    except ModuleNotFoundError:
+                        logger.debug("Extra module " + extra_mod + " not installed, not loaded into A.U.T.O.")
     else:
         for mod in _extras:
             importlib.reload(mod)

@@ -12,8 +12,7 @@ def augment(model: scene.Scene | scenario.Scenario):
     """
     if isinstance(model, scenario.Scenario):
         for _scene in model:
-            print(_scene)
-            # _augment_scene(_scene)
+            _augment_scene(_scene)
     else:
         _augment_scene(model)
 

@@ -66,8 +66,9 @@ class Scenario(list):
                 if "." in file:
                     s = file.split(".")
                     s[len(s) - 2] = s[len(s) - 2] + "_" + str(i)
-                    file = ".".join(s)
+                    scene_file = ".".join(s)
                 else:
-                    file = file + "_" + str(i)
-                print(file)
-            _scene.save_abox(file, format, **kargs)
+                    scene_file = file + "_" + str(i)
+            else:
+                scene_file = None
+            _scene.save_abox(scene_file, format, **kargs)

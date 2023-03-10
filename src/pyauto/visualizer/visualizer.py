@@ -544,10 +544,20 @@ def visualize(model: Scene | Scenario, scenario_name: str = None, cps=None):
 
     # Starts webserver
     os.chdir(tmp_dir)
-    threading.Thread(target=socketserver.TCPServer(("", 8000),
-                                                   http.server.SimpleHTTPRequestHandler).serve_forever).start()
-    logger.info("Visualization is available at: http://localhost:8000")
-    webbrowser.open("http://localhost:8000")
+    not_running = True
+    port = 8000
+    while not_running and port < 65536:
+        try:
+            threading.Thread(target=socketserver.TCPServer(("", port),
+                                                           http.server.SimpleHTTPRequestHandler).serve_forever).start()
+            not_running = False
+        except OSError:
+            port += 1
+    if not not_running:
+        logger.info("Visualization is available at: http://localhost:" + str(port))
+        webbrowser.open("http://localhost:" + str(port))
+    else:
+        logger.info("Unable to create local web server")
     return tmp_dir
 
 
