@@ -304,7 +304,8 @@ def visualize(model: Scene | Scenario, scenario_name: str = None, cps=None):
                             ent_color = "red"
                         else:
                             ent_color = "black"
-                        if entity.identifier and len(entity.identifier) > 0 and not entity.is_persistent and not \
+                        # TODO fixme plot names of individuals instead (maybe only of l4 things)
+                        if entity.identifier and len(entity.identifier) > 0 and not \
                                 (isinstance(entity.identifier[0], str) and entity.identifier[0].startswith("repr")):
                             plt.annotate(entity.identifier[0], (x+0.2, y+0.2), color=ent_color)
                         already_drawn_cps = []
@@ -387,7 +388,7 @@ def visualize(model: Scene | Scenario, scenario_name: str = None, cps=None):
             elif len(set([str(y) for y in entity.INDIRECT_is_a]).intersection(_NO_PRINTING_CLASSES)) == 0:
                 no_geo_entities.append(_describe_entity(entity))
         logger.info("Done with layout, creating MPLD3 plot, JS plugins, and HTML string")
-        pl2 = plt.plot(centroids_x, centroids_y, "o", color="b", mec="k", markersize=2, mew=1, alpha=.4)
+        pl2 = plt.plot(centroids_x, centroids_y, "o", color="b", mec="k", markersize=14, mew=1, alpha=.4)
         tooltip_individuals = ToolTipAndClickInfo(pl2[0], labels=entity_labels, targets=entity_relations,
                                                   targets_per_cp=relations_per_cp_class)
         fig.tight_layout()
