@@ -19,6 +19,8 @@ from shapely import geometry
 import numpy as np
 
 from pyauto import utils
+from pyauto.models.scene import Scene
+from pyauto.models.scenario import Scenario
 
 # TODO
 # - visualize scenario level CPs
@@ -124,10 +126,10 @@ scenario_css = """
         </style>"""
 
 
-def visualize_scenario(scenes: list, scenario_name: str = None, cps=None):
+def visualize(model: Scene | Scenario, scenario_name: str = None, cps=None):
     """
-    Creates an HTML visualization of the given scenario. Starts a simple web server at localhost:8000 (blocking).
-    :param scenes: A list of worlds, each world representing a single scene - temporally sorted
+    Creates an HTML visualization of the given scene or scenario. Starts a web server at localhost:8000 (blocking).
+    :param model: The scenario to visualize.
     :param cps: A list of criticality phenomena which optionally to visualize as well.
     :param scenario_name: An optional name for the scenario to display.
     :return: The path to the directory in which to find the created HTML visualization.
@@ -136,14 +138,12 @@ def visualize_scenario(scenes: list, scenario_name: str = None, cps=None):
     scenario_inst = None
     if cps is None:
         cps = []
-
-    scenario = owlready2.default_world
+    if isinstance(model, Scene):
+        model = Scenario(scenes=[model])
 
     # Assemble scenario title
-    title = "Scenario"
-    if scenario_name:
-        title += " " + scenario_name
-    scenario_info = "(" + str(len(scenes)) + " Scenes)"
+    title = str(model)
+    scenario_info = "(" + str(len(model)) + " Scenes)"
     # Main HTML code for index.html
     html_body = """<!DOCTYPE html>
 <html>
@@ -157,7 +157,7 @@ def visualize_scenario(scenes: list, scenario_name: str = None, cps=None):
     <body>
         <div class=\"d-flex flex-row justify-content-center\"><div class=\"mt-3 py-1 px-6 alert alert-info\" style=\"display: inline-block\" role=\"alert\"><center><h5>""" + title + """ """ + scenario_info + """</h5></center></div></div>
         <div class="slidecontainer m-2">
-            <input type="range" min="1" max=\"""" + str(len(scenes)) + """\" value="1" class="slider" id="myRange">
+            <input type="range" min="1" max=\"""" + str(len(model)) + """\" value="1" class="slider" id="myRange">
         </div>
         <script>
             var slider = document.getElementById("myRange");
@@ -237,8 +237,8 @@ def visualize_scenario(scenes: list, scenario_name: str = None, cps=None):
         return "#" + "%06x" % color
 
     # Create HTML for each scene
-    for i, scene in enumerate(scenes):
-        logger.info("Plotting scene " + str(i + 1) + " / " + str(len(scenes)))
+    for i, scene in enumerate(model):
+        logger.info("Plotting scene " + str(i + 1) + " / " + str(len(model)))
         scene_cps = [cp for cp in cps if cp.is_representable_in_scene(scene)]
         cp_colors = list(map(get_color, range(len([x for c in scene_cps for x in c.subjects]))))
         cp_color = 0
@@ -496,7 +496,7 @@ def visualize_scenario(scenes: list, scenario_name: str = None, cps=None):
         <div class="card m-2">
             <div class="card-title d-flex flex-row justify-content-center m-1">
                 <h5>"""
-        time = str(i + 1) + " / " + str(len(scenes))
+        time = str(i + 1) + " / " + str(len(model))
         iframe_html += "Scene " + time + "<br />"
         iframe_html += """
                 </h5>

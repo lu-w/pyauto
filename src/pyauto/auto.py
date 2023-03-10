@@ -2,10 +2,7 @@ import owlready2
 import os
 import importlib
 import logging
-from xml.etree import ElementTree
 from enum import Enum
-
-from pyauto.utils import monkeypatch
 
 """
 Loads A.U.T.O. globally into owlready2. Also provides an easier enum interface to access the sub-ontologies of A.U.T.O.
@@ -46,47 +43,6 @@ class Ontology(Enum):
     L5_DE = "http://purl.org/auto/l5_de#"
     L6_Core = "http://purl.org/auto/l6_core#"
     L6_DE = "http://purl.org/auto/l6_de#"
-
-
-def get_ontology(ontology: Ontology, world: owlready2.World = owlready2.default_world) -> owlready2.Ontology:
-    """
-    Can be used to fetch a specific sub-ontology of A.U.T.O. from a given world. Also handles the case of saving and
-    re-loading ontologies into owlready2, where (due to import aggregation into a single ontology), ontologies were
-    merged but namespaces remain.
-    :param ontology: The ontology to fetch.
-    :param world: The world to search for the ontology (the default world if not set)
-    :return: The ontology object corresponding to the given ontology.
-    """
-    iri = ontology.value
-    if world.ontologies and iri in world.ontologies.keys():
-        return world.ontologies[iri]
-    else:
-        return world.get_ontology("http://anonymous#").get_namespace(iri)
-
-
-def new_scenario(num: int, add_extras: bool = True, load_cp: bool = False) -> list:
-    """
-    Creates a new scenario, i.e., a list of scenes of length num. Loads A.U.T.O. into each scene, which may takes some
-    time. Each scene is an empty owlready2 world.
-    :param num: The number of scenes within this scenario.
-    :param add_extras: Whether to import the extra functionality that is added the classes from owlready2.
-    :param load_cp: Whether to load the criticality_phenomena.owl (and formalization) as well.
-    """
-    assert(num >= 0)
-    return [new_scene(add_extras=add_extras, load_cp=load_cp) for _ in range(num)]
-
-
-def new_scene(add_extras: bool = True, load_cp: bool = False) -> owlready2.World:
-    """
-    Creates a new scene. In A.U.T.O., this is a new owlready2 world. This function loads A.U.T.O. into this world, which
-    may takes some time.
-    :param add_extras: Whether to import the extra functionality that is added the classes from owlready2.
-    :param load_cp: Whether to load the criticality_phenomena.owl (and formalization) as well.
-    :return: The new empty world representing the scene.
-    """
-    scene_world = owlready2.World()
-    load(world=scene_world, add_extras=add_extras, load_cp=load_cp)
-    return scene_world
 
 
 def load(folder: str = None, world: owlready2.World = None, add_extras: bool = True, load_cp: bool = False) -> None:
@@ -138,50 +94,3 @@ def _add_extras():
     else:
         for mod in _extras:
             importlib.reload(mod)
-
-
-@monkeypatch(owlready2.World)
-def save_abox(self, file: str = None, format: str = "rdfxml", **kargs):
-    """
-    Works analogously to the save() method of owlready2.World, but saves the ABox auf A.U.T.O. only.
-    Note that right now, only the "rdfxml" format is supported. If some other format is given, the plain save() method
-    is executed. This method also removes all existing color individuals of A.U.T.O.'s physics ontology since we do not
-    want to have those individuals doubly present.
-    It adds an import to the internet location of A.U.T.O. such that the ABox is well-defined by the imports.
-    Note: This method overwrites existing files.
-    :param file: A string to a file location to save the ABox to.
-    :param format: The format to save in (one of: rdfxml, ntriples, nquads). Recommended: rdfxml.
-    """
-    self.save(file, format, **kargs)
-    if file is not None and format == "rdfxml":
-        # Read in file again
-        tree = ElementTree.parse(file)
-
-        # Remove all unwanted elements
-        _TO_DELETE = {"Class", "Datatype", "AllDisjointClasses", "Description", "DatatypeProperty", "ObjectProperty",
-                      "Ontology", "AnnotationProperty"}
-        _COLORS_DELETE = {"Blue", "Green", "Red", "White", "Yellow"}
-
-        root = tree.getroot()
-        for child in reversed(root):
-            _, _, tag = child.tag.rpartition("}")
-            if tag in _TO_DELETE or (tag in "Color" and
-                                     child.attrib["{http://www.w3.org/1999/02/22-rdf-syntax-ns#}about"].split("#")[ -1]
-                                     in _COLORS_DELETE):
-                root.remove(child)
-
-        # Adds owl prefix
-        root.set("xmlns:owl", "http://www.w3.org/2002/07/owl#")
-
-        # Set ontology name and add AUTO as import (since all other ontologies and imports were removed)
-        onto = ElementTree.Element("owl:Ontology")
-        filename = os.path.basename(file)
-        if "." in filename:
-            filename = filename.split(".")[:-1]
-            filename = ".".join(filename)
-        onto.set("rdf:about", "http://purl.org/auto/" + filename)
-        ElementTree.SubElement(onto, "owl:imports", {"rdf:resource": "http://purl.org/auto/"})
-        root.insert(0, onto)
-
-        # Save file again
-        tree.write(file)

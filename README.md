@@ -39,7 +39,6 @@ For a larger example on how to use this package, look at the [example of the cri
 # TODO for convenience functions in extas
 
 - setting geometries
-  - 2d rectangles (done) (set width automatically TODO)
   - 3d rectangles (set height automatically)
   - circles
   - add_geometry_from_polygon

@@ -36,11 +36,15 @@ with physics:
             geom = geosparql.Geometry()
             if length is None or width is None:
                 geom.asWKT = [geometry.Point(x, y).wkt]
+                self.has_width = 0
             else:
                 geom.asWKT = [geometry.Polygon([((x - length) / 2, (y - width) / 2),
                                                 ((x - length) / 2, (y + width) / 2),
                                                 ((x + length) / 2, (y + width) / 2),
                                                 ((x + length) / 2, (y - width) / 2)]).wkt]
+                self.has_length = length
+                self.has_width = width
+
             self.hasGeometry = [geom]
 
         def has_geometry(self) -> bool:
