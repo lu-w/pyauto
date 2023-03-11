@@ -10,7 +10,7 @@ It basically provides an easier access to
 ## Install
 
 First, initialize submodules: `git submodule update --init --recursive`.
-Install this package via `pip install .`.
+Install the requirements using `pip install -r requirements.txt`, and then this package via `pip install .`.
 
 ## Example
 

@@ -11,7 +11,7 @@ setup(
         "matplotlib",
         "mpld3",
         "shapely",
-        "sumpy",
+        "sympy",
         "numpy",
         "screeninfo",
         "tqdm",
