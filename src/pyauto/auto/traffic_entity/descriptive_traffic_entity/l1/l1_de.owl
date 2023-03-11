@@ -1,0 +1,1708 @@
+<?xml version="1.0"?>
+<rdf:RDF xmlns="http://purl.org/auto/l1_de#"
+     xml:base="http://purl.org/auto/l1_de"
+     xmlns:dc="http://purl.org/dc/elements/1.1/"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:xml="http://www.w3.org/XML/1998/namespace"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+     xmlns:l1_de="http://purl.org/auto/l1_de#"
+     xmlns:swrla="http://swrl.stanford.edu/ontologies/3.3/swrla.owl#"
+     xmlns:terms="http://purl.org/dc/terms/"
+     xmlns:physics="http://purl.org/auto/physics#"
+     xmlns:owlready_ontology="http://www.lesfleursdunormal.fr/static/_downloads/owlready_ontology.owl#">
+    <owl:Ontology rdf:about="http://purl.org/auto/l1_de">
+        <owl:imports rdf:resource="http://purl.org/auto/l1_core"/>
+    </owl:Ontology>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://purl.org/auto/l1_core#has_lane -->
+
+    <rdf:Description rdf:about="http://purl.org/auto/l1_core#has_lane">
+        <rdfs:domain rdf:resource="http://purl.org/auto/l1_de#Roadway"/>
+    </rdf:Description>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#has_boundary -->
+
+    <owl:ObjectProperty rdf:about="http://purl.org/auto/l1_de#has_boundary">
+        <rdfs:subPropertyOf rdf:resource="http://purl.org/auto/l1_core#lane_property"/>
+        <rdfs:domain rdf:resource="http://purl.org/auto/l1_core#Lane"/>
+        <rdfs:comment xml:lang="en">A lane can have a bordering entity that encloses the lane spatially.</rdfs:comment>
+        <rdfs:label xml:lang="de">hat_begrenzung</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#has_boundary_left -->
+
+    <owl:ObjectProperty rdf:about="http://purl.org/auto/l1_de#has_boundary_left">
+        <rdfs:subPropertyOf rdf:resource="http://purl.org/auto/l1_de#has_boundary"/>
+        <rdfs:domain rdf:resource="http://purl.org/auto/l1_core#Lane"/>
+        <rdfs:comment xml:lang="en">A lane can have a bordering entity that encloses the lane spatially on the left (measured in driving direction).</rdfs:comment>
+        <rdfs:label xml:lang="de">hat_begrenzung_links</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#has_boundary_right -->
+
+    <owl:ObjectProperty rdf:about="http://purl.org/auto/l1_de#has_boundary_right">
+        <rdfs:subPropertyOf rdf:resource="http://purl.org/auto/l1_de#has_boundary"/>
+        <rdfs:domain rdf:resource="http://purl.org/auto/l1_core#Lane"/>
+        <rdfs:comment xml:lang="en">A lane can have a bordering entity that encloses the lane spatially on the right (measured in driving direction).</rdfs:comment>
+        <rdfs:label xml:lang="de">hat_begrenzung_rechts</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Data properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://purl.org/auto/l1_de#has_degradation_degree -->
+
+    <owl:DatatypeProperty rdf:about="http://purl.org/auto/l1_de#has_degradation_degree">
+        <rdfs:subPropertyOf rdf:resource="http://purl.org/auto/l1_core#L1_data_property"/>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+        <rdfs:domain rdf:resource="http://purl.org/auto/l1_core#Marker"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+        <physics:range xml:lang="en">[0,100]</physics:range>
+        <physics:unit xml:lang="en">%</physics:unit>
+        <rdfs:comment xml:lang="en">Degree of degradation of a marker. 0 is a perfect state, as freshly produced. 100 is completely degraded and (almost) not recognizable anymore. 
+Warning: This is a subjective data property.</rdfs:comment>
+        <rdfs:label xml:lang="de">hat_degradationsgrad</rdfs:label>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#has_lettering -->
+
+    <owl:DatatypeProperty rdf:about="http://purl.org/auto/l1_de#has_lettering">
+        <rdfs:subPropertyOf rdf:resource="http://purl.org/auto/l1_core#L1_data_property"/>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+        <rdfs:domain rdf:resource="http://purl.org/auto/l1_de#Lettering_Road_Marker"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>A lettering road marker represents a string of letters.</rdfs:comment>
+        <rdfs:label xml:lang="de">hat_schriftzug</rdfs:label>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#has_sign_value -->
+
+    <owl:DatatypeProperty rdf:about="http://purl.org/auto/l1_de#has_sign_value">
+        <rdfs:subPropertyOf rdf:resource="http://purl.org/auto/l1_core#L1_data_property"/>
+        <rdfs:domain rdf:resource="http://purl.org/auto/l1_core#Traffic_Sign"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+        <rdfs:comment xml:lang="en">The numerical value a sign may represent.</rdfs:comment>
+        <rdfs:label xml:lang="de">hat_zeichenwert</rdfs:label>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#has_surface_condition -->
+
+    <owl:DatatypeProperty rdf:about="http://purl.org/auto/l1_de#has_surface_condition">
+        <rdfs:subPropertyOf rdf:resource="http://purl.org/auto/l1_core#L1_data_property"/>
+        <rdfs:domain rdf:resource="http://purl.org/auto/l1_core#Road_Material"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+        <physics:range xml:lang="en">[0,100]</physics:range>
+        <physics:unit xml:lang="en">PCI</physics:unit>
+        <rdfs:comment xml:lang="en">As measured by the pavement condition index.
+
+https://en.wikipedia.org/wiki/Pavement_condition_index</rdfs:comment>
+        <rdfs:label xml:lang="de">hat_oberflächenzustand</rdfs:label>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://purl.org/auto/l1_core#Crossing_Site -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_core#Crossing_Site"/>
+    
+
+
+    <!-- http://purl.org/auto/l1_core#Junction -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_core#Junction"/>
+    
+
+
+    <!-- http://purl.org/auto/l1_core#Road_Material -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_core#Road_Material"/>
+    
+
+
+    <!-- http://purl.org/auto/l1_core#Road_Network_Segment -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_core#Road_Network_Segment"/>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Acceleration_Lane -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Acceleration_Lane">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_core#Driveable_Lane"/>
+        <rdfs:label xml:lang="de">Einfädelungsstreifen</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Arial_Road_Marker -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Arial_Road_Marker">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_core#Road_Marker"/>
+        <rdfs:comment xml:lang="en">This king of road markers are placed on an area on the road.</rdfs:comment>
+        <rdfs:label xml:lang="de">Flächenmarkierung</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Arrow_Road_Marker -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Arrow_Road_Marker">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_core#Road_Marker"/>
+        <rdfs:comment xml:lang="en">An arrow indicating directions on the road&apos;s surface.</rdfs:comment>
+        <rdfs:comment xml:lang="de">StVO 297</rdfs:comment>
+        <rdfs:label xml:lang="de">Pfeilmarkierung</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Asphalt -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Asphalt">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Road_Surface_Material"/>
+        <rdfs:label xml:lang="de">Asphalt</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Avenue -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Avenue">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Rural_Road"/>
+        <rdfs:comment xml:lang="en">A rural road surrounded by lines of trees.</rdfs:comment>
+        <rdfs:label xml:lang="de">Allee</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Banquette -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Banquette">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_core#Cross_Section_Element"/>
+        <rdfs:label xml:lang="de">Bankett</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Bicycle_Lane -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Bicycle_Lane">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Vehicle_Lane"/>
+        <rdfs:label xml:lang="de">Radfahrstreifen</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Bicycle_Traffic_Light -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Bicycle_Traffic_Light">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Vehicle_Traffic_Light"/>
+        <rdfs:comment xml:lang="en">Traffic light for bicycles.</rdfs:comment>
+        <rdfs:label xml:lang="de">Radfahr_Lichtsignalanlage</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Bikeway -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Bikeway">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Way"/>
+        <rdfs:label xml:lang="de">Radweg</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Bikeway_Arial_Road_Marker -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Bikeway_Arial_Road_Marker">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Arial_Road_Marker"/>
+        <rdfs:comment xml:lang="en">Farbige_durchgehende Flächenmarkierung, meist in Rot gehalten.</rdfs:comment>
+        <rdfs:label xml:lang="de">Radwegflächenmarkierung</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Bikeway_Ford -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Bikeway_Ford">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_core#Crossing_Site"/>
+        <rdfs:label xml:lang="de">Radwegefurt</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Bikeway_Lane -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Bikeway_Lane">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Way_Lane"/>
+        <rdfs:label xml:lang="de">Radwegstreifen</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Bilateral_Lane_Boundary_Marker -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Bilateral_Lane_Boundary_Marker">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Lane_Boundary_Marker"/>
+        <rdfs:comment xml:lang="en">Standardausführung der Fahrstreifenbegrenzung.</rdfs:comment>
+        <rdfs:label xml:lang="de">Beidseitige_Fahrstreifenbegrenzung</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Bitumen_Rapir -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Bitumen_Rapir">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Road_Surface_Modiciations"/>
+        <rdfs:comment xml:lang="en">Dark glue material, that is also component of asphalt, used to fix cracks in the surface.</rdfs:comment>
+        <rdfs:label xml:lang="de">Bitumenausbesserung</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Boundary_Marker_For_Parking_Zone -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Boundary_Marker_For_Parking_Zone">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Arial_Road_Marker"/>
+        <rdfs:comment xml:lang="de">StVO 299</rdfs:comment>
+        <rdfs:label xml:lang="de">Grenzmarkierung_Für_Halt_Oder_Parkverbote</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Bus_Bay -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Bus_Bay">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Road_Bay"/>
+        <rdfs:label xml:lang="de">Bushaltebucht</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Bus_Lane -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Bus_Lane">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Vehicle_Lane"/>
+        <rdfs:label xml:lang="de">Busfahrstreifen</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Bus_Traffic_Light -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Bus_Traffic_Light">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Vehicle_Traffic_Light"/>
+        <rdfs:comment xml:lang="en">Traffic light for busses.</rdfs:comment>
+        <rdfs:label xml:lang="de">Bus_Lichtsignalanlage</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Carpool_Lane -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Carpool_Lane">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Vehicle_Lane"/>
+        <rdfs:label xml:lang="de">Fahrgemeinschaftsspur</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Closed_Lane -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Closed_Lane">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_core#Lane"/>
+        <rdfs:label xml:lang="de">Gesperrter_Streifen</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Cobblestone -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Cobblestone">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Road_Surface_Material"/>
+        <rdfs:label xml:lang="de">Kopfsteinpflaster</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Concrete -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Concrete">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Road_Surface_Material"/>
+        <rdfs:label xml:lang="de">Beton</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Crossing -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Crossing">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_core#Junction"/>
+        <rdfs:label xml:lang="de">Kreuzung</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Crossing_Site_Road_Marker -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Crossing_Site_Road_Marker">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Lateral_Road_Marker"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://purl.org/auto/l1_core#applies_to"/>
+                <owl:qualifiedCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:qualifiedCardinality>
+                <owl:onClass rdf:resource="http://purl.org/auto/l1_core#Crossing_Site"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:comment xml:lang="en">Marks a crossing site.</rdfs:comment>
+        <rdfs:label xml:lang="de">Querungsanlagenmarkierung</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Deceleration_Lane -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Deceleration_Lane">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_core#Driveable_Lane"/>
+        <rdfs:label xml:lang="de">Ausfädelungsstreifen</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Directional_Arrow -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Directional_Arrow">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Arrow_Road_Marker"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://purl.org/auto/l1_core#applies_to"/>
+                <owl:qualifiedCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:qualifiedCardinality>
+                <owl:onClass rdf:resource="http://purl.org/auto/l1_core#Lane"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <owl:disjointWith rdf:resource="http://purl.org/auto/l1_de#Indicational_Arrow"/>
+        <rdfs:comment xml:lang="en">Sind auf Fahrstreifen an Knotenpunkten angebracht und ermöglichen ein frühzeitiges Orientieren der Verkehrsteilnehmer und das Auswählen der gewünschten Fahrtrichtung.</rdfs:comment>
+        <rdfs:comment xml:lang="de">StVO 297.1-20</rdfs:comment>
+        <rdfs:label xml:lang="de">Richtungspfeil</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Directional_Arrow_Left -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Directional_Arrow_Left">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Directional_Arrow"/>
+        <rdfs:label xml:lang="de">Richtungspfeil_Links</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Directional_Arrow_Left_Ending_Lane -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Directional_Arrow_Left_Ending_Lane">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Directional_Arrow"/>
+        <rdfs:comment xml:lang="en">Auf freier Strecke weisen die Richtungspfeile auf endende Fahrstreifen hin und werden dreimal wiederholt.</rdfs:comment>
+        <rdfs:label xml:lang="de">Richtungspfeil_Links_Endender_Fahrstreifen</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Directional_Arrow_Left_Right -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Directional_Arrow_Left_Right">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Directional_Arrow"/>
+        <rdfs:label xml:lang="de">Richtungspfeil_Links_Rechts</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Directional_Arrow_Right -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Directional_Arrow_Right">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Directional_Arrow"/>
+        <rdfs:label xml:lang="de">Richtungspfeil_Rechts</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Directional_Arrow_Right_Ending_Lane -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Directional_Arrow_Right_Ending_Lane">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Directional_Arrow"/>
+        <rdfs:comment xml:lang="en">Auf freier Strecke weisen die Richtungspfeile auf endende Fahrstreifen hin und werden dreimal wiederholt.</rdfs:comment>
+        <rdfs:label xml:lang="de">Richtungspfeil_Rechts_Endender_Fahrstreifen</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Directional_Arrow_Straight -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Directional_Arrow_Straight">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Directional_Arrow"/>
+        <rdfs:label xml:lang="de">Richtungspfeil_Geradeaus</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Directional_Arrow_Straight_Left -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Directional_Arrow_Straight_Left">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Directional_Arrow"/>
+        <rdfs:label xml:lang="de">Richtungspfeil_Geradeaus_Links</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Directional_Arrow_Straight_Left_Right -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Directional_Arrow_Straight_Left_Right">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Directional_Arrow"/>
+        <rdfs:label xml:lang="de">Richtungspfeil_Geradeaus_Links_Rechts</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Directional_Arrow_Straight_Right -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Directional_Arrow_Straight_Right">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Directional_Arrow"/>
+        <rdfs:label xml:lang="de">Richtungspfeil_Geradeaus_Rechts</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Directional_Traffic_Lights -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Directional_Traffic_Lights">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_core#Traffic_Light"/>
+        <rdfs:comment xml:lang="en">Traffic light indicating directions.</rdfs:comment>
+        <rdfs:label xml:lang="de">Richtungsanweisende_Lichtsignalanlage</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Divider_Lane -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Divider_Lane">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_core#Non_Driveable_Lane"/>
+        <rdfs:label xml:lang="de">Trennstreifen</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Double_Lane_Boundary_Marker -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Double_Lane_Boundary_Marker">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Lane_Boundary_Marker"/>
+        <rdfs:comment xml:lang="en">Besteht aus zwei durchgezogenen parallelen Linien die von keinem Fahrzeugteil überragt werden darf.</rdfs:comment>
+        <rdfs:label xml:lang="de">Doppelte_Fahrstreifenbegrenzung</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Double_Line_Marker -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Double_Line_Marker">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Line_Marker"/>
+        <rdfs:comment xml:lang="en">Marks lanes that can be used in both driving directions.</rdfs:comment>
+        <rdfs:label xml:lang="de">Doppelte_Leitlinie</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Double_Traffic_Light -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Double_Traffic_Light">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_core#Traffic_Light"/>
+        <rdfs:comment xml:lang="en">Traffic light with only red and amber light, e.g. at railroad intersections.</rdfs:comment>
+        <rdfs:label xml:lang="de">Zweifache_Lichtsignalanlage</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Embankment -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Embankment">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_core#Cross_Section_Element"/>
+        <rdfs:label xml:lang="de">Böschung</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Emergency_Bay -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Emergency_Bay">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Road_Bay"/>
+        <rdfs:label xml:lang="de">Nothaltebucht</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Exit_Road -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Exit_Road">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Highway_Road"/>
+        <rdfs:label xml:lang="de">Autobahnabfahrt</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Fallback_Traffic_Post -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Fallback_Traffic_Post">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_core#Traffic_Post"/>
+        <rdfs:comment xml:lang="en">A traffic sign that is applicable if a connected traffic sign is non-functional.</rdfs:comment>
+        <rdfs:label xml:lang="de">Rückfall_Verkehrsschild</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Grating -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Grating">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Road_Surface_Modiciations"/>
+        <rdfs:comment xml:lang="en">Any kind of grating, mainly used to cover drains.</rdfs:comment>
+        <rdfs:label xml:lang="de">Abdeckgitter</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Gravel -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Gravel">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Unpaved_Material"/>
+        <rdfs:label xml:lang="de">Schotter</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Haptic_Road_Marker -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Haptic_Road_Marker">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_core#Road_Marker"/>
+        <rdfs:comment xml:lang="en">A road marker that provides haptic feedback to the road user.</rdfs:comment>
+        <rdfs:label xml:lang="de">Haptische_Straßenmarkierung</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Hard_Shoulder -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Hard_Shoulder">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Shoulder"/>
+        <rdfs:label xml:lang="de">Befestigter_Seitenstreifen</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Highway_Road -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Highway_Road">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_core#Road"/>
+        <rdfs:label xml:lang="de">Autobahnstraße</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Indicational_Arrow -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Indicational_Arrow">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Arrow_Road_Marker"/>
+        <rdfs:comment xml:lang="de">StVO 297.1</rdfs:comment>
+        <rdfs:comment xml:lang="en">Zeigt das Ende eines Fahrstreifens an oder kündigen eine Fahrstreifenbegrenzung an.</rdfs:comment>
+        <rdfs:label xml:lang="de">Vorankündigungspfeil</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Intersection_Driveable_Lane -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Intersection_Driveable_Lane">
+        <owl:equivalentClass>
+            <owl:Class>
+                <owl:intersectionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="http://purl.org/auto/l1_core#Driveable_Lane"/>
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="http://purl.org/auto/physics#is_part_of"/>
+                        <owl:someValuesFrom rdf:resource="http://purl.org/auto/l1_de#Crossing"/>
+                    </owl:Restriction>
+                </owl:intersectionOf>
+            </owl:Class>
+        </owl:equivalentClass>
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Junction_Driveable_Lane"/>
+        <rdfs:label xml:lang="de">Fahrstreifen_Auf_Kreuzung</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Junction_Driveable_Lane -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Junction_Driveable_Lane">
+        <owl:equivalentClass>
+            <owl:Class>
+                <owl:intersectionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="http://purl.org/auto/l1_core#Driveable_Lane"/>
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="http://purl.org/auto/physics#is_part_of"/>
+                        <owl:someValuesFrom rdf:resource="http://purl.org/auto/l1_core#Junction"/>
+                    </owl:Restriction>
+                </owl:intersectionOf>
+            </owl:Class>
+        </owl:equivalentClass>
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_core#Driveable_Lane"/>
+        <rdfs:label xml:lang="de">Fahrstreifen_Auf_Knotenpunkt</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Keepout_Arial_Road_Marker -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Keepout_Arial_Road_Marker">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Arial_Road_Marker"/>
+        <rdfs:comment xml:lang="en">Dient zum Anzeigen von Flächen_die von keinem Kraftfahrzeug überfahren werden dürfen. Sein Einsatzbereich liegt überwiegend im Knotenpunktbereich.</rdfs:comment>
+        <rdfs:comment xml:lang="de">StVO 298</rdfs:comment>
+        <rdfs:label xml:lang="de">Sperrflächenmarkierung</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Lane_Boundary_Marker -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Lane_Boundary_Marker">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Longitudinal_Boundary_Marker"/>
+        <owl:disjointWith rdf:resource="http://purl.org/auto/l1_de#Roadway_Boundary_Marker"/>
+        <rdfs:comment xml:lang="en">Eine durchgehende Linie_die nicht überfahren werden darf. Anwendbar für alle Fahrstreifen_bspw. auch Radfahrstreifen).</rdfs:comment>
+        <rdfs:label xml:lang="de">Fahrstreifenbegrenzung</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Lane_Traffic_Light -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Lane_Traffic_Light">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Vehicle_Traffic_Light"/>
+        <rdfs:comment xml:lang="en">Traffic light showing if lane is usable_green arrow_red cross or amber diagonal arrow).</rdfs:comment>
+        <rdfs:label xml:lang="de">Streifen_Lichtsignalanlage</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Lateral_Road_Marker -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Lateral_Road_Marker">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_core#Road_Marker"/>
+        <rdfs:comment xml:lang="en">Diese Art von Markierungszeichen ist quer zur Fahrtrichtung aufgetragen und kennzeichnet querende Fußgänger_oder Radwegefurten oder dient als Halt- beziehungsweise Wartelinien im Knotenpunktbereich. Des Weiteren zählt auch der Fußgängerüberweg zu den Quermarkierungen.</rdfs:comment>
+        <rdfs:label xml:lang="de">Quermarkierung</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Left_Traffic_Light -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Left_Traffic_Light">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Directional_Traffic_Lights"/>
+        <rdfs:comment xml:lang="en">Traffic light regulating turning left activities. Often indicated by a left arrow.</rdfs:comment>
+        <rdfs:label xml:lang="de">Links_Lichtsignalanlage</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Lettering_Road_Marker -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Lettering_Road_Marker">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Special_Sign_Road_Marker"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://purl.org/auto/l1_de#has_lettering"/>
+                <owl:qualifiedCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:qualifiedCardinality>
+                <owl:onDataRange rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <owl:disjointWith rdf:resource="http://purl.org/auto/l1_de#Symbol_Road_Marker"/>
+        <rdfs:label xml:lang="de">Schriftzugmarkierung</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Lettering_Road_Marker_Bus -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Lettering_Road_Marker_Bus">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Lettering_Road_Marker"/>
+        <owl:disjointWith rdf:resource="http://purl.org/auto/l1_de#Lettering_Road_Marker_Fire_Department"/>
+        <rdfs:label xml:lang="de">Markierung_Schriftzug_Bus</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Lettering_Road_Marker_Fire_Department -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Lettering_Road_Marker_Fire_Department">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Lettering_Road_Marker"/>
+        <rdfs:label xml:lang="de">Markierung_Schriftzug_Feuerwehr</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Line_Marker -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Line_Marker">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Longitudinal_Road_Marker"/>
+        <owl:disjointWith rdf:resource="http://purl.org/auto/l1_de#Longitudinal_Boundary_Marker"/>
+        <rdfs:label xml:lang="de">Leitlinie</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Longitudinal_Boundary_Marker -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Longitudinal_Boundary_Marker">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Longitudinal_Road_Marker"/>
+        <rdfs:comment xml:lang="de">StVO 295</rdfs:comment>
+        <rdfs:label xml:lang="de">Bregrenzungsmarkierung</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Longitudinal_Road_Marker -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Longitudinal_Road_Marker">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_core#Road_Marker"/>
+        <rdfs:comment xml:lang="en">Längsmarkierungen werden längs zur Fahrtrichtung angeordnet und übernehmen weitgehend die optische Führung des Verkehrsteilnehmers. Des Weiteren gliedern sie den vorhandenen Straßenraum.</rdfs:comment>
+        <rdfs:label xml:lang="de">Längsmarkierung</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Manholve_Cover -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Manholve_Cover">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Road_Surface_Modiciations"/>
+        <rdfs:comment xml:lang="en">A cover for a canal or pipe_mainly made from cast iron.</rdfs:comment>
+        <rdfs:label xml:lang="de">Schachtdeckel</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Parking_Lane -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Parking_Lane">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Hard_Shoulder"/>
+        <rdfs:label xml:lang="de">Parkstreifen</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Parking_Lot_Marker -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Parking_Lot_Marker">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Arial_Road_Marker"/>
+        <rdfs:comment xml:lang="en">This kind of arial marker regulates the order of parking spaces and their distinction to the flowing traffic. The lines show where and how parking vehicles shall be placed.</rdfs:comment>
+        <rdfs:label xml:lang="de">Parkflächenmarkierung</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Parking_Lot_Road_Marker_For_Lateral_Positioning -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Parking_Lot_Road_Marker_For_Lateral_Positioning">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Parking_Lot_Marker"/>
+        <owl:disjointWith rdf:resource="http://purl.org/auto/l1_de#Parking_Lot_Road_Marker_For_Longitudinal_Positioning"/>
+        <rdfs:label xml:lang="de">Parkflächenmarkierung_für_Senkrechtaufstellung</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Parking_Lot_Road_Marker_For_Longitudinal_Positioning -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Parking_Lot_Road_Marker_For_Longitudinal_Positioning">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Parking_Lot_Marker"/>
+        <rdfs:label xml:lang="de">Parkflächenmarkierung_für_Längsaufstellung</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Pedestrian_Crossing -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Pedestrian_Crossing">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_core#Crossing_Site"/>
+        <rdfs:comment>A pedestrian crossing as defined by § 26 VwV-StVO.</rdfs:comment>
+        <rdfs:label xml:lang="de">Fußgängerübergang</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Pedestrian_Ford -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Pedestrian_Ford">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_core#Crossing_Site"/>
+        <rdfs:comment>A pedestrian ford as defined by § 25 VwV-StVO.</rdfs:comment>
+        <rdfs:label xml:lang="de">Fußgängerfurt</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Pedestrian_Traffic_Light -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Pedestrian_Traffic_Light">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_core#Traffic_Light"/>
+        <rdfs:comment xml:lang="en">Traffic light for pedestrians.</rdfs:comment>
+        <rdfs:label xml:lang="de">Fußgänger_Lichtsignalanlage</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Pothole -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Pothole">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Road_Surface_Modiciations"/>
+        <rdfs:comment xml:lang="en">Any type of crack or hole in the upper surface of the road.</rdfs:comment>
+        <rdfs:label xml:lang="de">Schlagloch</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Ramp_Road -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Ramp_Road">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Highway_Road"/>
+        <rdfs:label xml:lang="de">Autobahnauffahrt</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Right_Traffic_Light -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Right_Traffic_Light">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Directional_Traffic_Lights"/>
+        <rdfs:comment xml:lang="en">Traffic light regulating turning right activities. Often indicated by a rightarrow.</rdfs:comment>
+        <rdfs:label xml:lang="de">Rechts_Lichtsignalanlage</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Road_Bay -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Road_Bay">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_core#Lane"/>
+        <rdfs:label xml:lang="de">Straßenbucht</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Road_Marker_Amphibian -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Road_Marker_Amphibian">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Symbol_Road_Marker"/>
+        <rdfs:label xml:lang="de">Markierung_Amphibie</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Road_Marker_Avenue -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Road_Marker_Avenue">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Symbol_Road_Marker"/>
+        <rdfs:label xml:lang="de">Markierung_Allee</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Road_Marker_Bikeway_Ford -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Road_Marker_Bikeway_Ford">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Crossing_Site_Road_Marker"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://purl.org/auto/l1_core#applies_to"/>
+                <owl:qualifiedCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:qualifiedCardinality>
+                <owl:onClass rdf:resource="http://purl.org/auto/l1_de#Bikeway_Ford"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:label xml:lang="de">Markierung_Radwegefurt</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Road_Marker_Bus -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Road_Marker_Bus">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Symbol_Road_Marker"/>
+        <rdfs:label xml:lang="de">Markierung_Bus</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Road_Marker_Carriage -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Road_Marker_Carriage">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Symbol_Road_Marker"/>
+        <rdfs:label xml:lang="de">Markierung_Gespann</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Road_Marker_Carsharing -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Road_Marker_Carsharing">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Symbol_Road_Marker"/>
+        <rdfs:label xml:lang="de">Markierung_Carsharing</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Road_Marker_Cattle_Drive -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Road_Marker_Cattle_Drive">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Symbol_Road_Marker"/>
+        <rdfs:label xml:lang="de">Markierung_Viehtrieb</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Road_Marker_Crosswalk -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Road_Marker_Crosswalk">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Symbol_Road_Marker"/>
+        <rdfs:label xml:lang="de">Markierung_Fußgängerüberweg</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Road_Marker_Cyclist -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Road_Marker_Cyclist">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Symbol_Road_Marker"/>
+        <rdfs:label xml:lang="de">Markierung_Radfahrer</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Road_Marker_Delivery_Bike -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Road_Marker_Delivery_Bike">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Symbol_Road_Marker"/>
+        <rdfs:label xml:lang="de">Markierung_Lieferrad</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Road_Marker_E_Scooter -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Road_Marker_E_Scooter">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Symbol_Road_Marker"/>
+        <rdfs:label xml:lang="de">Markierung_E_Scooter</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Road_Marker_Electric_Bicycle -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Road_Marker_Electric_Bicycle">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Symbol_Road_Marker"/>
+        <rdfs:label xml:lang="de">Markierung_Elektrisches_Fahrrad</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Road_Marker_Electrical_Vehicle -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Road_Marker_Electrical_Vehicle">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Symbol_Road_Marker"/>
+        <rdfs:label xml:lang="de">Markierung_Elektrisches_Fahrzeug</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Road_Marker_Gravel -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Road_Marker_Gravel">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Symbol_Road_Marker"/>
+        <rdfs:label xml:lang="de">Markierung_Splitt</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Road_Marker_Handicapped -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Road_Marker_Handicapped">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Symbol_Road_Marker"/>
+        <rdfs:label xml:lang="de">Markierung_Handicapped</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Road_Marker_Horse_Rider -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Road_Marker_Horse_Rider">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Symbol_Road_Marker"/>
+        <rdfs:label xml:lang="de">Markierung_Pferdereiter</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Road_Marker_Mobile_Home -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Road_Marker_Mobile_Home">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Symbol_Road_Marker"/>
+        <rdfs:label xml:lang="de">Markierung_Wohnmobil</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Road_Marker_Moped -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Road_Marker_Moped">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Symbol_Road_Marker"/>
+        <rdfs:label xml:lang="de">Markierung_Moped</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Road_Marker_Motorcycle -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Road_Marker_Motorcycle">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Symbol_Road_Marker"/>
+        <rdfs:label xml:lang="de">Markierung_Motorrad</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Road_Marker_Movable_Bridge -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Road_Marker_Movable_Bridge">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Symbol_Road_Marker"/>
+        <rdfs:label xml:lang="de">Markierung_Bewegliche_Brücke</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Road_Marker_Pedestrian -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Road_Marker_Pedestrian">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Symbol_Road_Marker"/>
+        <rdfs:label xml:lang="de">Markierung_Fußgänger</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Road_Marker_Pedestrian_Crossing -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Road_Marker_Pedestrian_Crossing">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Crossing_Site_Road_Marker"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://purl.org/auto/l1_core#applies_to"/>
+                <owl:qualifiedCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:qualifiedCardinality>
+                <owl:onClass rdf:resource="http://purl.org/auto/l1_de#Pedestrian_Crossing"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:comment xml:lang="de">StVO 293</rdfs:comment>
+        <rdfs:label xml:lang="de">Markierung_Fußgängerübergang</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Road_Marker_Pedestrian_Ford -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Road_Marker_Pedestrian_Ford">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Crossing_Site_Road_Marker"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://purl.org/auto/l1_core#applies_to"/>
+                <owl:qualifiedCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:qualifiedCardinality>
+                <owl:onClass rdf:resource="http://purl.org/auto/l1_de#Pedestrian_Ford"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:label xml:lang="de">Markierung_Fußgängerfurt</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Road_Marker_Plane -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Road_Marker_Plane">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Symbol_Road_Marker"/>
+        <rdfs:label xml:lang="de">Markierung_Flugzeug</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Road_Marker_Rockfall -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Road_Marker_Rockfall">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Symbol_Road_Marker"/>
+        <rdfs:label xml:lang="de">Markierung_Felssturz</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Road_Marker_Shore -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Road_Marker_Shore">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Symbol_Road_Marker"/>
+        <rdfs:label xml:lang="de">Markierung_Klippe</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Road_Marker_Snow_Ice -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Road_Marker_Snow_Ice">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Symbol_Road_Marker"/>
+        <rdfs:label xml:lang="de">Markierung_Schnee_Eis</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Road_Marker_Speed_Limit -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Road_Marker_Speed_Limit">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Symbol_Road_Marker"/>
+        <rdfs:label xml:lang="de">Markierung_Höchstgeschwindigkeit</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Road_Marker_Tractor -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Road_Marker_Tractor">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Symbol_Road_Marker"/>
+        <rdfs:label xml:lang="de">Markierung_Traktor</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Road_Marker_Tram -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Road_Marker_Tram">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Symbol_Road_Marker"/>
+        <rdfs:label xml:lang="de">Markierung_Straßenbahn</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Road_Marker_Truck -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Road_Marker_Truck">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Symbol_Road_Marker"/>
+        <rdfs:label xml:lang="de">Markierung_LKW</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Road_Marker_Truck_With_Trailer -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Road_Marker_Truck_With_Trailer">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Symbol_Road_Marker"/>
+        <rdfs:label xml:lang="de">Markierung_LKW_Mit_Anhänger</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Road_Marker_Vehicle -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Road_Marker_Vehicle">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Symbol_Road_Marker"/>
+        <rdfs:label xml:lang="de">Markierung_Fahrzeug</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Road_Marker_Vehicle_Front -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Road_Marker_Vehicle_Front">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Symbol_Road_Marker"/>
+        <rdfs:label xml:lang="de">Markierung_Fahrzeug_Vorne</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Road_Marker_Vehicle_Multiple_Passengers -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Road_Marker_Vehicle_Multiple_Passengers">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Symbol_Road_Marker"/>
+        <rdfs:label xml:lang="de">Markierung_Fahrzeug_Mehrere_Passagiere</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Road_Marker_Vehicle_With_Trailer -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Road_Marker_Vehicle_With_Trailer">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Symbol_Road_Marker"/>
+        <rdfs:label xml:lang="de">Markierung_Fahrzeug_Mit_Anhänger</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Road_Surface_Material -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Road_Surface_Material">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_core#Road_Material"/>
+        <rdfs:label xml:lang="de">Fahrbahndeckenmaterial</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Road_Surface_Modiciations -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Road_Surface_Modiciations">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_core#Road_Structure"/>
+        <rdfs:comment xml:lang="en">A modification of the mainly present road&apos;s surface.</rdfs:comment>
+        <rdfs:label xml:lang="de">Straßenoberflächenmodifikation</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Road_Vehicle_Traffic_Light -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Road_Vehicle_Traffic_Light">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Vehicle_Traffic_Light"/>
+        <rdfs:comment xml:lang="en">Traffic light for &apos;ordinary&apos; vehicles.</rdfs:comment>
+        <rdfs:label xml:lang="de">Kraftwagen_Lichtsignalanlage</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Roadway -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Roadway">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_core#Road_Network_Segment"/>
+        <rdfs:label xml:lang="de">Fahrbahn</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Roadway_Boundary_Marker -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Roadway_Boundary_Marker">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Longitudinal_Boundary_Marker"/>
+        <rdfs:comment xml:lang="en">Ein durchgehender Strich und kennzeichnet den Rand der Fahrbahn.</rdfs:comment>
+        <rdfs:label xml:lang="de">Fahrbahnbegrenzung</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Roundabout -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Roundabout">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_core#Junction"/>
+        <rdfs:label xml:lang="de">Kreisverkehr</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Roundabout_Center -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Roundabout_Center">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_core#Road_Structure"/>
+        <rdfs:comment xml:lang="en">Center of a roundabout. Can be asphalt with road markings, other traversable coverings with visible boundaries, shallow vegatation or some kind of decoration.</rdfs:comment>
+        <rdfs:label xml:lang="de">Kreisverkehrmittelinsel</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Roundabout_Driveable_Lane -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Roundabout_Driveable_Lane">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Junction_Driveable_Lane"/>
+        <rdfs:label xml:lang="de">Fahrstreifen_Auf_Kreisverkehr</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Rural_Road -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Rural_Road">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_core#Road"/>
+        <rdfs:label xml:lang="de">Landstraße</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Rut -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Rut">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Road_Surface_Modiciations"/>
+        <rdfs:comment xml:lang="en">Groove in the road surface caused by frequent use of heavy vehicles. Best visible when rain gathers inside the rut.</rdfs:comment>
+        <rdfs:label xml:lang="de">Spurrille</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Shark_Tooth_Marker -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Shark_Tooth_Marker">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Lateral_Road_Marker"/>
+        <rdfs:comment xml:lang="de">StVO 342</rdfs:comment>
+        <rdfs:label xml:lang="de">Haifischzahnmarkierung</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Shoulder -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Shoulder">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_core#Non_Driveable_Lane"/>
+        <rdfs:label xml:lang="de">Seitenstreifen</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Single_Traffic_Light -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Single_Traffic_Light">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_core#Traffic_Light"/>
+        <rdfs:comment xml:lang="en">Traffic light with only a single signal, e.g. at railroad intersections or warning lights.</rdfs:comment>
+        <rdfs:label xml:lang="de">Einzelne_Lichtsignalanlage</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Soft_Shoulder -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Soft_Shoulder">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Shoulder"/>
+        <rdfs:label xml:lang="de">Unbefestigter_Seitenstreifen</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Special_Lane_Boundary_Marker -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Special_Lane_Boundary_Marker">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Lane_Boundary_Marker"/>
+        <rdfs:comment xml:lang="en">Begrenzt Sonderfahrstreifen wie beispielsweise Bus- und Taxifahrstreifen. Kann ein- oder beidseitig sein.</rdfs:comment>
+        <rdfs:label xml:lang="de">Sonderfahrstreifenbegrenzung</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Special_Sign_Road_Marker -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Special_Sign_Road_Marker">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_core#Road_Marker"/>
+        <rdfs:comment xml:lang="en">Sonderzeichen werden auf die Fahrbahn aufgebracht, um den Verkehrsablauf und die Verkehrsführung zu verdeutlichen. Verwendet werden Zahlen_Verkehrszeichen_Piktogramme sowie Buchstaben.</rdfs:comment>
+        <rdfs:label xml:lang="de">Sondermarkierung</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Speed_Bump -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Speed_Bump">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_core#Road_Structure"/>
+        <rdfs:comment xml:lang="en">Slight elevation in road surface to force deceleration. Can be made of asphalt, concrete_pavers or plastics. Is visibly announced by sharktooth or other noticable road markings.</rdfs:comment>
+        <rdfs:label xml:lang="de">Bremsschwelle</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Standstreifen -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Standstreifen">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Hard_Shoulder"/>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Stop_Line -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Stop_Line">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Lateral_Road_Marker"/>
+        <rdfs:comment xml:lang="en">Sind dort anzubringen_wo der Verkehr anhalten muss.</rdfs:comment>
+        <rdfs:comment xml:lang="de">StVO 294</rdfs:comment>
+        <rdfs:label xml:lang="de">Haltelinie</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Straight_Traffic_Light -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Straight_Traffic_Light">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Directional_Traffic_Lights"/>
+        <rdfs:comment xml:lang="en">Traffic light regulating driving straight activities. Often indicated by a straight arrow.</rdfs:comment>
+        <rdfs:label xml:lang="de">Geradeaus_Lichtsignalanlage</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Switchable_Traffic_Light -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Switchable_Traffic_Light">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_core#Traffic_Light"/>
+        <rdfs:comment xml:lang="en">Traffic light whose contents are switchable_e.g. dynamic speed limits.</rdfs:comment>
+        <rdfs:label xml:lang="de">Schaltbare_Lichtsignalanlage</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Symbol_Road_Marker -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Symbol_Road_Marker">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Special_Sign_Road_Marker"/>
+        <rdfs:label xml:lang="de">Symbolmarkierung</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Time_Dependent_Sign_Post -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Time_Dependent_Sign_Post">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_core#Traffic_Post"/>
+        <rdfs:comment xml:lang="en">A sign whose applicability depends on the time.</rdfs:comment>
+        <rdfs:label xml:lang="de">Zeitabhängiges_Verkehrsschild</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Traffic_Island -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Traffic_Island">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_core#Road_Structure"/>
+        <rdfs:comment xml:lang="en">Isle in between two traffic lanes. Used to direct traffic in a certain way.</rdfs:comment>
+        <rdfs:label xml:lang="de">Verkehrsinsel</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Tram_Lane -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Tram_Lane">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Vehicle_Lane"/>
+        <rdfs:label xml:lang="de">Straßenbahnstreifen</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Unilateral_Lane_Boundary_Marker -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Unilateral_Lane_Boundary_Marker">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Lane_Boundary_Marker"/>
+        <rdfs:comment xml:lang="en">Kombinierte Fahrstreifenbegrenzungs- und Leitlinie_besteht aus einer Fahrstreifenbegrenzungslinie und einer dazu parallelen Leitlinie. Sie darf von der Seite der Leitlinie überfahren werden_von der anderen Seite nicht.</rdfs:comment>
+        <rdfs:comment xml:lang="de">StVO 296</rdfs:comment>
+        <rdfs:label xml:lang="de">Einseitige_Fahrstreifenbegrenzung</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Unpaved_Material -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Unpaved_Material">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Road_Surface_Material"/>
+        <rdfs:label xml:lang="de">Unbefestigtes_Material</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Urban_Road -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Urban_Road">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_core#Road"/>
+        <rdfs:label xml:lang="de">Stadtstraße</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Vehicle_Lane -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Vehicle_Lane">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_core#Driveable_Lane"/>
+        <rdfs:label xml:lang="de">Fahrzeugstreifen</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Vehicle_Traffic_Light -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Vehicle_Traffic_Light">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_core#Traffic_Light"/>
+        <rdfs:comment xml:lang="en">Traffic light applicable to a specific class of vehicles.</rdfs:comment>
+        <rdfs:label xml:lang="de">Fahrzeug_Lichtsignalanlage</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Wait_Line -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Wait_Line">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Lateral_Road_Marker"/>
+        <rdfs:comment xml:lang="en">Begrenzt Bereiche auf der Fahrbahn_die als Aufstellfläche für Abbiegevorgänge vorgesehen sind.</rdfs:comment>
+        <rdfs:label xml:lang="de">Wartelinie</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Walkway -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Walkway">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Way"/>
+        <rdfs:label xml:lang="de">Gehweg</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Walkway_Lane -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Walkway_Lane">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Way_Lane"/>
+        <rdfs:label xml:lang="de">Gehwegstreifen</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Warning_Line_Marker -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Warning_Line_Marker">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_de#Line_Marker"/>
+        <rdfs:comment xml:lang="en">Eine Abwandlung der Leitlinie und dient zur Ankündigung von Hindernissen, Fahrbahnteilungen oder Fahrstreifenbegrenzungen.</rdfs:comment>
+        <rdfs:label xml:lang="de">Warnlinie</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Wather_Dependent_Sign_Post -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Wather_Dependent_Sign_Post">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_core#Traffic_Post"/>
+        <rdfs:comment xml:lang="en">A sign whose applicability depends on the weather.</rdfs:comment>
+        <rdfs:label xml:lang="de">Wetterabhängiges_Verkehrsschild</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Way -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Way">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_core#Road_Network_Segment"/>
+        <rdfs:label xml:lang="de">Weg</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/auto/l1_de#Way_Lane -->
+
+    <owl:Class rdf:about="http://purl.org/auto/l1_de#Way_Lane">
+        <rdfs:subClassOf rdf:resource="http://purl.org/auto/l1_core#Lane"/>
+        <rdfs:label xml:lang="de">Wegstreifen</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // General axioms
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    <rdf:Description>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#AllDisjointClasses"/>
+        <owl:members rdf:parseType="Collection">
+            <rdf:Description rdf:about="http://purl.org/auto/l1_de#Arial_Road_Marker"/>
+            <rdf:Description rdf:about="http://purl.org/auto/l1_de#Arrow_Road_Marker"/>
+            <rdf:Description rdf:about="http://purl.org/auto/l1_de#Lateral_Road_Marker"/>
+            <rdf:Description rdf:about="http://purl.org/auto/l1_de#Longitudinal_Road_Marker"/>
+            <rdf:Description rdf:about="http://purl.org/auto/l1_de#Special_Sign_Road_Marker"/>
+        </owl:members>
+    </rdf:Description>
+    <rdf:Description>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#AllDisjointClasses"/>
+        <owl:members rdf:parseType="Collection">
+            <rdf:Description rdf:about="http://purl.org/auto/l1_de#Bilateral_Lane_Boundary_Marker"/>
+            <rdf:Description rdf:about="http://purl.org/auto/l1_de#Double_Lane_Boundary_Marker"/>
+            <rdf:Description rdf:about="http://purl.org/auto/l1_de#Special_Lane_Boundary_Marker"/>
+            <rdf:Description rdf:about="http://purl.org/auto/l1_de#Unilateral_Lane_Boundary_Marker"/>
+        </owl:members>
+    </rdf:Description>
+    <rdf:Description>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#AllDisjointClasses"/>
+        <owl:members rdf:parseType="Collection">
+            <rdf:Description rdf:about="http://purl.org/auto/l1_de#Directional_Arrow_Left"/>
+            <rdf:Description rdf:about="http://purl.org/auto/l1_de#Directional_Arrow_Left_Ending_Lane"/>
+            <rdf:Description rdf:about="http://purl.org/auto/l1_de#Directional_Arrow_Left_Right"/>
+            <rdf:Description rdf:about="http://purl.org/auto/l1_de#Directional_Arrow_Right"/>
+            <rdf:Description rdf:about="http://purl.org/auto/l1_de#Directional_Arrow_Right_Ending_Lane"/>
+            <rdf:Description rdf:about="http://purl.org/auto/l1_de#Directional_Arrow_Straight"/>
+            <rdf:Description rdf:about="http://purl.org/auto/l1_de#Directional_Arrow_Straight_Left"/>
+            <rdf:Description rdf:about="http://purl.org/auto/l1_de#Directional_Arrow_Straight_Left_Right"/>
+            <rdf:Description rdf:about="http://purl.org/auto/l1_de#Directional_Arrow_Straight_Right"/>
+        </owl:members>
+    </rdf:Description>
+    <rdf:Description>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#AllDisjointClasses"/>
+        <owl:members rdf:parseType="Collection">
+            <rdf:Description rdf:about="http://purl.org/auto/l1_de#Directional_Arrow_Left"/>
+            <rdf:Description rdf:about="http://purl.org/auto/l1_de#Directional_Arrow_Left_Ending_Lane"/>
+            <rdf:Description rdf:about="http://purl.org/auto/l1_de#Directional_Arrow_Left_Right"/>
+            <rdf:Description rdf:about="http://purl.org/auto/l1_de#Directional_Arrow_Right"/>
+            <rdf:Description rdf:about="http://purl.org/auto/l1_de#Directional_Arrow_Right_Ending_Lane"/>
+            <rdf:Description rdf:about="http://purl.org/auto/l1_de#Directional_Arrow_Straight"/>
+            <rdf:Description rdf:about="http://purl.org/auto/l1_de#Directional_Arrow_Straight_Left"/>
+            <rdf:Description rdf:about="http://purl.org/auto/l1_de#Directional_Arrow_Straight_Right"/>
+        </owl:members>
+    </rdf:Description>
+    <rdf:Description>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#AllDisjointClasses"/>
+        <owl:members rdf:parseType="Collection">
+            <rdf:Description rdf:about="http://purl.org/auto/l1_de#Road_Marker_Cyclist"/>
+            <rdf:Description rdf:about="http://purl.org/auto/l1_de#Road_Marker_Handicapped"/>
+            <rdf:Description rdf:about="http://purl.org/auto/l1_de#Road_Marker_Pedestrian"/>
+            <rdf:Description rdf:about="http://purl.org/auto/l1_de#Road_Marker_Speed_Limit"/>
+        </owl:members>
+    </rdf:Description>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi -->
+

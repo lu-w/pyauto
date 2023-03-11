@@ -6,6 +6,8 @@ setup(
     description="Python module for accessing A.U.T.O. based on owlready2",
     author ="Lukas Westhofen",
     author_email="lukas.westhofen@dlr.de",
+    include_package_data=True,
+    package_data={"pyauto": ["auto"]},
     install_requires=[
         "owlready2",
         "matplotlib",

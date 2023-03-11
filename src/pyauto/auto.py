@@ -62,7 +62,7 @@ def load(folder: str = None, world: owlready2.World = None, add_extras: bool = T
     else:
         _world = world
     if folder is None:
-        folder = os.path.dirname(os.path.realpath(__file__)) + "/../../auto"
+        folder = os.path.dirname(os.path.realpath(__file__)) + "/auto"
     if os.path.isdir(folder):
         # Setting correct path for owlready2
         for i, j, k in os.walk(folder + "/"):
@@ -90,14 +90,14 @@ def _add_extras():
         for root, dirs, files in os.walk(os.path.dirname(os.path.realpath(__file__)) + "/extras"):
             for file in files:
                 if file.endswith(".py") and file != "__init__.py":
-                    extra_mod = "pyauto.extras" + root.split("pyauto/src")[-1].replace("/pyauto/extras", "").\
-                        replace("/", ".") + "." + file.replace(".py", "")
+                    print( root.split("/pyauto")[-1])
+                    extra_mod = "pyauto." + root.split("pyauto/")[-1].replace("/", ".") + "." + file.replace(".py", "")
                     try:
                         mod = importlib.import_module(extra_mod)
                         _extras.append(mod)
-                        logger.debug("Loaded extra module " + extra_mod + " into A.U.T.O.")
+                        print("Loaded extra module " + extra_mod + " into A.U.T.O.")
                     except ModuleNotFoundError:
-                        logger.debug("Extra module " + extra_mod + " not installed, not loaded into A.U.T.O.")
+                        print("Extra module " + extra_mod + " not installed, not loaded into A.U.T.O.")
     else:
         for mod in _extras:
             importlib.reload(mod)
