@@ -90,7 +90,6 @@ def _add_extras():
         for root, dirs, files in os.walk(os.path.dirname(os.path.realpath(__file__)) + "/extras"):
             for file in files:
                 if file.endswith(".py") and file != "__init__.py":
-                    print( root.split("/pyauto")[-1])
                     extra_mod = "pyauto." + root.split("pyauto/")[-1].replace("/", ".") + "." + file.replace(".py", "")
                     try:
                         mod = importlib.import_module(extra_mod)
