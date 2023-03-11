@@ -17,26 +17,30 @@ Install the requirements using `pip install -r requirements.txt`, and then this 
 This small example loads A.U.T.O., creates a vehicle in the ABox, saves, and visualizes it.
 
 ```python
-# imports relevant modules
 from pyauto import auto
+from pyauto.models.scene import Scene
 from pyauto.visualizer import visualizer
 
-# loads A.U.T.O. into the default world
-scene = auto.new_scene()
+# creates a scene and loads A.U.T.O. into it
+scene = Scene()
+
 # accesses the relevant sub-ontologies easily
-l4_de = auto.get_ontology(auto.Ontology.L4_DE, scene)
+l4_de = scene.ontology(auto.Ontology.L4_DE)
+
 # creates one vehicle
 ego = l4_de.Passenger_Car()
 ego.set_geometry(5, 10, 5.1, 2.2)
+
 # saves the ABox
 scene.save_abox("/tmp/scene.owl")
+
 # visualizes the ABox
-visualizer.visualize_scenario([scene])
+visualizer.visualize(scene)
 ```
 
-For a larger example on how to use this package, look at the [example of the criticality recognition](https://github.com/lu-w/criticality-recognition/blob/main/inputs/example_fuc_2_3.py).
+For examples, have a look at the `examples` folder in this repository.
 
-# TODO for convenience functions in extas
+# TODO for convenience functions in extras
 
 - setting geometries
   - 3d rectangles (set height automatically)
