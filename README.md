@@ -62,3 +62,4 @@ For examples, have a look at the `examples` folder in this repository.
     - e.g. `fill_road({l1_core.Roadwalk: 0.1, l1_core.Lane: 0.4, l1_core.Lane: 0.4, l1_core.Roadwalk: 0.1})`
 - Bicyclist (create a bicycle automatically that is driven by it)
 - copy from a previously created world
+- integrate this repo in omega2auto
