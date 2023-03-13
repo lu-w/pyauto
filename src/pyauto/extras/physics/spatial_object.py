@@ -10,7 +10,6 @@ _IS_NEAR_DISTANCE = 4              # m, the distance for which spatial objects a
 _IS_IN_PROXIMITY_DISTANCE = 15     # m, the distance for which spatial objects are in proximity to each other
 
 physics = auto._world.get_ontology(auto.Ontology.Physics.value)
-geosparql = auto._world.get_ontology(auto.Ontology.GeoSPARQL.value)
 
 with physics:
 
@@ -26,7 +25,7 @@ with physics:
             :param length: The length of the rectangle to create.
             :param width: The width of the rectangle to create.
             """
-            geom = geosparql.Geometry()
+            geom = self.namespace.world.get_ontology(auto.Ontology.GeoSPARQL.value).Geometry()
             if length is None or width is None:
                 geom.asWKT = [geometry.Point(x, y).wkt]
                 self.has_width = 0

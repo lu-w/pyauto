@@ -9,7 +9,7 @@ logging.basicConfig(level=logging.DEBUG)
 # creates a scenario with two empty scenes (and loads A.U.T.O.)
 sc = Scenario(2, load_cp=True)
 
-# scene 1: creates ego vehicle & dog
+# scene 1: creates ego vehicle & pedestrian
 l4_de_1 = sc[0].ontology(auto.Ontology.L4_DE)
 l4_co_1 = sc[0].ontology(auto.Ontology.L4_Core)
 ego_1 = l4_de_1.Passenger_Car()
@@ -20,7 +20,7 @@ ped_1.set_geometry(9, 1, 0.6, 0.3)
 ped_1.set_velocity(0, 3)
 ped_1.has_height = 1.7
 
-# scene 2: creates ego vehicle & dog
+# scene 2: creates ego vehicle & pedestrian
 l4_de_2 = sc[1].ontology(auto.Ontology.L4_DE)
 l4_co_2 = sc[1].ontology(auto.Ontology.L4_Core)
 ego_2 = l4_de_2.Passenger_Car()

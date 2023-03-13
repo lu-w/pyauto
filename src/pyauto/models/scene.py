@@ -1,8 +1,14 @@
+from __future__ import annotations
+
+import logging
 import os
 import owlready2
+
 from xml.etree import ElementTree
 
 from pyauto import auto
+
+logger = logging.getLogger(__name__)
 
 
 class Scene(owlready2.World):
@@ -19,6 +25,8 @@ class Scene(owlready2.World):
         super().__init__()
         self._scenario = parent_scenario
         self._timestamp = timestamp
+        self._added_extras = add_extras
+        self._loaded_cp = load_cp
         auto.load(world=self, add_extras=add_extras, load_cp=load_cp)
 
     def __str__(self):
@@ -85,3 +93,67 @@ class Scene(owlready2.World):
 
             # Save file again
             tree.write(file)
+
+    def copy(self, delta_t: float | int = 0, to_keep: set = None) -> \
+            tuple[dict[owlready2.NamedIndividual, owlready2.NamedIndividual], Scene]:
+        """
+        Copies this scene, i.e., creates a new scene object and copies over:
+        - all individuals with their given name,
+        - their directly specified classes, and
+        - all properties specified in the to_keep set (can be specified as strings, or anything whose __str__ maps to a
+            suitable representation of the property).
+        Sets the new time stamp of the new scene according to delta_t. Can be 0, then the new scene has the same time
+        stamp as this scene.
+        :param delta_t: The time difference from the new to this scene.
+        :param to_keep: The properties of individuals to copy over during copying.
+        :returns: A tuple of a mapping from the old (i.e. in this scene) to the new individuals (i.e. in the returned
+            scene) and the newly created scene.
+        """
+        new = Scene(self._timestamp + delta_t, self._scenario, self._added_extras, self._loaded_cp)
+        mapping = {}
+
+        # Creates all new individuals
+        for ind in self.individuals():
+            # Only create individuals that are not already there (e.g. exclude colors)
+            if ind.iri not in [x.iri for x in new.individuals()]:
+                if len(ind.is_a) > 0:
+                    cls = new.get_ontology(ind.is_a[0].namespace.base_iri)
+                    new_ind = getattr(cls, ind.is_a[0].name)(ind.name)
+                    mapping[ind] = new_ind
+                    for cls in ind.is_a[1:]:
+                        new_cls = new.get_ontology(cls.namespace.base_iri)
+                        new_ind.is_a.append(new_cls)
+                else:
+                    logger.warning("Can not copy over an individual " + str(ind) + " which has no classes.")
+
+        # After copying all individuals, we copy the relations that were to_keep
+        for ind in mapping.keys():
+            for var in vars(ind).keys():
+                if var in [t._name for t in to_keep]:
+                    vals = vars(ind)[var]
+                    if not isinstance(vals, list):
+                        vals = [vals]
+                    for val in vals:
+                        if val in mapping.keys():
+                            val = mapping[val]
+                        if not isinstance(vars(ind)[var], list):
+                            setattr(mapping[ind], var, val)
+                        else:
+                            getattr(mapping[ind], var).append(val)
+
+        return mapping, new
+
+    def simulate(self, delta_t: float | int) -> Scene:
+        """
+        Performs one simulation step, starting from this scene. Creates a new scene (by means of copying) and calls
+        the simulate method for the given time difference for each individual.
+        :param delta_t: The time difference to simulate.
+        """
+        ge = self.ontology(auto.Ontology.GeoSPARQL)
+        ph = self.ontology(auto.Ontology.Physics)
+        to_keep = {ge.hasGeometry, ge.asWKT, ph.has_height}
+        mapping, new = self.copy(delta_t, to_keep)
+        for ind in mapping.keys():
+            if hasattr(ind, "simulate"):
+                ind.simulate(mapping, delta_t)
+        return new

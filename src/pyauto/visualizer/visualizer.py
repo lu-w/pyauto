@@ -31,7 +31,8 @@ from pyauto.models.scenario import Scenario
 ####################
 
 # Classes to not show in visualization
-_NO_PRINTING_CLASSES = {"physics.Has_Distance_To", "perception.Is_Full_Occlusion", "perception.Is_Occlusion"}
+_NO_PRINTING_CLASSES = {"physics.Has_Distance_To", "perception.Is_Full_Occlusion", "perception.Is_Occlusion",
+                        "geosparql.Geometry"}
 # Data/object properties to hide from the individual tables shown when hovering
 _NO_PRINTING_PROPERTIES = {"perceptional_property", "traffic_related_concept_property",
                            "descriptive_traffic_entity_property", "traffic_entity_property", "activity_property",
@@ -304,10 +305,9 @@ def visualize(model: Scene | Scenario, scenario_name: str = None, cps=None):
                             ent_color = "red"
                         else:
                             ent_color = "black"
-                        # TODO fixme plot names of individuals instead (maybe only of l4 things)
-                        if entity.identifier and len(entity.identifier) > 0 and not \
-                                (isinstance(entity.identifier[0], str) and entity.identifier[0].startswith("repr")):
-                            plt.annotate(entity.identifier[0], (x+0.2, y+0.2), color=ent_color)
+                        if len({"l4_core.L4_Entity", "l4_core.Traffic_Object", "l4_core.Traffic_Subject"}.intersection(
+                                [str(c) for c in entity.INDIRECT_is_a])) > 0:
+                            plt.annotate(entity.name, (x+0.2, y+0.2), color=ent_color)
                         already_drawn_cps = []
                         # init dict
                         for cp in entity_scene_cps:
@@ -570,7 +570,9 @@ def _describe_entity(entity):
     """
     cls = utils.get_most_specific_classes([entity])
     label = "<table class=\"m-2\"><thead><tr><th>Individual</th><th>" + str(entity)
-    label += " (" + ", ".join(cls[0][1]) + ")</th></tr></thead><tbody><tr><td>is_a</td><td>"
+    if len(cls) > 0:
+        label += " (" + ", ".join(cls[0][1]) + ")"
+    label += "</th></tr></thead><tbody><tr><td>is_a</td><td>"
     label += ", ".join([str(x) for x in entity.is_a])
     label += "</td></tr>"
     for prop in entity.get_properties():
