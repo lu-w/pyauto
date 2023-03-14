@@ -198,18 +198,18 @@ class Scene(owlready2.World):
 
         # After copying all individuals, we copy the relations that were to_keep
         for ind in mapping.keys():
-            for var in vars(ind).keys():
-                if var in [t._name for t in to_keep]:
-                    vals = vars(ind)[var]
+            for var in ind.get_properties():
+                if var in to_keep:
+                    vals = getattr(ind, var.python_name)
                     if not isinstance(vals, list):
                         vals = [vals]
                     for val in vals:
                         if val in mapping.keys():
                             val = mapping[val]
-                        if not isinstance(vars(ind)[var], list):
-                            setattr(mapping[ind], var, val)
+                        if not isinstance(getattr(ind, var.python_name), list):
+                            setattr(mapping[ind], var.python_name, val)
                         else:
-                            getattr(mapping[ind], var).append(val)
+                            getattr(mapping[ind], var.python_name).append(val)
 
         return mapping, new
 
