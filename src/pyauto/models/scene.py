@@ -76,7 +76,7 @@ class Scene(owlready2.World):
         """
         # First, we remove all individuals from the scenery, if an import is given (as these will be imported later)
         undos_scenery = []
-        if save_scenery or scenery_file is not None:
+        if save_scenery and scenery_file is not None:
             for i in self.individuals():
                 if Scene._SCENERY_COMMENT in i.comment:
                     undos_scenery.append(owlready2.destroy_entity(i, undoable=True))
@@ -107,7 +107,7 @@ class Scene(owlready2.World):
                 file_name = ".".join(file_name)
 
             # Saves scenery to have a scenery file name that we can later import
-            if save_scenery and not scenery_file:
+            if save_scenery and scenery_file is not None:
                 scenery_file = file_name + "_scenery" + file_ending
                 self._scenery.save_abox(scenery_file, format, kargs)
 

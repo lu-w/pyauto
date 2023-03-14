@@ -33,14 +33,13 @@ ego.is_in_front_of = [ped]
 sc.append(sc[0].simulate(delta_t=0.1))
 
 # augment - will infer speed and yaw from set velocity
-#augmentator.augment(sc)
+augmentator.augment(sc)
 
 # saves the ABoxes (scenery and single scenes) - "scenario.owl" only serves as a template
 sc.save_abox("/tmp/scenario_full.owl")
 
 # and once more for a reduced, non-geometrical version
-# TODO test this functionality
-#sc.save_abox("/tmp/scenario_reduced.owl", to_ignore={"geosparql.Geometry"})
+sc.save_abox("/tmp/scenario_reduced.owl", to_ignore={"geosparql.Geometry"})
 
 # visualizes the ABoxes
-#visualizer.visualize(sc)
+visualizer.visualize(sc)
