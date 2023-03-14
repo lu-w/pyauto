@@ -153,15 +153,17 @@ class Scene(owlready2.World):
         self._scenery = scenery
         # We load the scenery by saving only its ABox (temporarily) and loading it from the file. This is the easiest
         # way to prevent double loading of individuals.
-        file = tempfile.NamedTemporaryFile(suffix=".owl").name
-        scenery.save_abox(file)
-        self.get_ontology("file://" + file).load()
+        with tempfile.NamedTemporaryFile(suffix=".owl") as f:
+            file = f.name
+            if self._scenery is not None:
+                self._scenery.save_abox(file)
+            self.get_ontology("file://" + file).load()
         # We make individuals from the scenery identifiable later on by adding a comment.
         for i in self.get_ontology("file://" + file + "#").individuals():
             i.comment.append(Scene._SCENERY_COMMENT)
         # Propagates scenario to scenery, if needed.
-        if scenery._scenario is None:
-            scenery._scenario = self._scenario
+        if self._scenery is not None and self._scenery._scenario is None:
+            self._scenery._scenario = self._scenario
 
     def copy(self, delta_t: float | int = 0, to_keep: set = None) -> \
             tuple[dict[owlready2.NamedIndividual, owlready2.NamedIndividual], Scene]:
