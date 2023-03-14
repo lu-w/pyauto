@@ -11,10 +11,10 @@ logging.basicConfig(level=logging.DEBUG)
 statics = Scenery(load_cp=True)
 l1_core = statics.ontology(auto.Ontology.L1_Core)
 lane = l1_core.Lane()
-lane.set_geometry(5, 0, 20, 5)
+lane.set_geometry(10, 10, 20, 5)
 
 # creates a scenario with one empty scene, adds the scenery to it
-sc = Scenario(1, scenery=statics, load_cp=True, more_extras=["tobm.sim_models.vehicle"])
+sc = Scenario(1, scenery=statics, name="Simulation Example", load_cp=True, more_extras=["tobm.sim_models.vehicle"])
 sc.set_scenery(statics)
 
 # populates scene 1: creates ego vehicle & pedestrian
@@ -33,10 +33,10 @@ ego.is_in_front_of = [ped]
 sc.append(sc[0].simulate(delta_t=0.1))
 sc.append(sc[1].simulate(delta_t=0.1))
 
-# augment - will infer speed and yaw from set velocity
+# augment - will infer e.g. speed and yaw from set velocity in all ABoxes
 augmentator.augment(sc)
 
-# saves the ABoxes (scenery and single scenes) - "scenario.owl" only serves as a template
+# saves the ABoxes (scenery and single scenes) - "scenario_full.owl" serves as a template
 sc.save_abox("/tmp/scenario_full.owl")
 
 # and once more for a reduced, non-geometrical version
