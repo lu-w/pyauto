@@ -5,7 +5,9 @@ It basically provides an easier access to
 - loading A.U.T.O. into owlready2
 - A.U.T.O.'s set of IRIs
 - retrieving a single ontology of A.U.T.O. based on a given IRI
-- a web-based visualizer for ABoxes specified in the A.U.T.O. TBox
+- creating scenarios, scenes, and sceneries within A.U.T.O.
+- saving such models to an OWL file
+- a web-based visualizer for A.U.T.O. scenarios and scenes
 
 ## Install
 
@@ -43,7 +45,7 @@ For examples, have a look at the `examples` folder in this repository.
 # TODO for convenience functions in extras
 
 - setting geometries
-  - 3d rectangles (set height automatically)
+  - 3d rectangles (and set height automatically)
   - circles
   - add_geometry_from_polygon
   - create line from point list (not a polygon) (with and without height)
@@ -61,5 +63,4 @@ For examples, have a look at the `examples` folder in this repository.
   - create an n-lane road given its overall width and length and a querschnitt -> list of classes and their proportion of the overall road
     - e.g. `fill_road({l1_core.Roadwalk: 0.1, l1_core.Lane: 0.4, l1_core.Lane: 0.4, l1_core.Roadwalk: 0.1})`
 - Bicyclist (create a bicycle automatically that is driven by it)
-- copy from a previously created world
-- integrate this repo in omega2auto
+- integrate this package in omega2auto
