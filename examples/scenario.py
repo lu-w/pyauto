@@ -7,7 +7,7 @@ from pyauto.visualizer import visualizer
 logging.basicConfig(level=logging.DEBUG)
 
 # creates a scenario with two empty scenes (and loads A.U.T.O.)
-sc = Scenario(2, load_cp=True)
+sc = Scenario(2, name="Example Scenario", load_cp=True)
 
 # scene 1: creates ego vehicle & pedestrian
 l4_de_1 = sc[0].ontology(auto.Ontology.L4_DE)
