@@ -80,7 +80,9 @@ class Scenario(list):
                 scenery_file = ".".join(s)
             else:
                 scenery_file = file + "_scenery"
-        self._scenery.save_abox(file=scenery_file, format=format, to_ignore=to_ignore, **kargs)
+
+        if self._scenery is not None:
+            self._scenery.save_abox(file=scenery_file, format=format, to_ignore=to_ignore, **kargs)
 
         # Saves all scenes
         for i, _scene in enumerate(self):
