@@ -1,4 +1,10 @@
+import logging
+import numpy
+
 from . import scene, scenery
+
+# Logging
+logger = logging.Logger(__name__)
 
 
 class Scenario(list):
@@ -108,3 +114,17 @@ class Scenario(list):
         scenery._scenario = self
         for sc in self:
             sc.set_scenery(scenery)
+
+    def simulate(self, duration: float | int, hz: int):
+        """
+        Simulates the future of this scenario, starting from its last scene up to the given duration. Discretizes with
+        the given Hertz. Only works if this scenario has at least one scene.
+        Note: Changes this scenario, and returns nothing.
+        :param duration: The duration (in seconds) which to simulate.
+        :param hz: The rate with which to simulate each second.
+        """
+        if len(self) > 0:
+            for _ in numpy.arange(0, duration, 1 / hz):
+                self.append(self[-1].simulate(delta_t=1 / hz))
+        else:
+            logger.warning("Can not simulate without an initial scene.")

@@ -30,8 +30,7 @@ ped.has_height = 1.7
 ego.is_in_front_of = [ped]
 
 # creates two new scenes by means of simulation and adds it to the scenario (scenery will be added automatically)
-sc.append(sc[0].simulate(delta_t=0.1))
-sc.append(sc[1].simulate(delta_t=0.1))
+sc.simulate(duration=2, hz=1)
 
 # augment - will infer e.g. speed and yaw from set velocity in all ABoxes
 augmentator.augment(sc)
