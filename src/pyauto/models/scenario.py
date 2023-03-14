@@ -3,7 +3,8 @@ from . import scene, scenery
 
 class Scenario(list):
     def __init__(self, scene_number: int = None, scenes: list[scene.Scene] = None, scenery: scenery.Scenery = None,
-                 name: str = "Unnamed Scenario", add_extras: bool = True, load_cp: bool = False):
+                 name: str = "Unnamed Scenario", add_extras: bool = True, more_extras: list[str] = None,
+                 load_cp: bool = False):
         """
         Creates a new scenario, i.e., a list of scenes, which is iterable and supports indexing.
         :param scene_number: Optional number of empty scenes to create.
@@ -12,6 +13,7 @@ class Scenario(list):
         :param scenery: An optional scenery (i.e., static elements) of this scenario.
         :param name: Name of this scenario (for printing), "Unnamed Scenario" if not set.
         :param add_extras: Whether to import the extra functionality that is added the classes from owlready2.
+        :param more_extras: A name of an importable module that contains more extra functionality to load from.
         :param load_cp: Whether to load the criticality_phenomena.owl (and formalization) as well.
         """
         self._name = name
@@ -25,25 +27,26 @@ class Scenario(list):
             if scene_number is None:
                 scene_number = 0
             for _ in range(scene_number):
-                self.new_scene(add_extras=add_extras, load_cp=load_cp, scenery=scenery)
+                self.new_scene(add_extras=add_extras, more_extras=more_extras, load_cp=load_cp, scenery=scenery)
 
     def __str__(self):
         return str(self._name)
 
     def new_scene(self, position: int = -1, timestamp: float | int = None, add_extras: bool = True,
-                  load_cp: bool = False, scenery=None):
+                  more_extras: list[str] = None, load_cp: bool = False, scenery=None):
         """
         Adds a new scene to the scenario.
         :param position: Optional position at which to insert. If -1, the new scene is added at the end.
         :param timestamp: Optional timestamp of the scene. If None, the position is used.
         :param add_extras: Whether to import the extra functionality that is added the classes from owlready2.
+        :param more_extras: A name of an importable module that contains more extra functionality to load from.
         :param load_cp: Whether to load the criticality_phenomena.owl (and formalization) as well.
         :param scenery: The scenery of the new scene to add.
         """
         if timestamp is None:
             timestamp = position if position >= 0 else len(self)
         self.add_scene(scene.Scene(timestamp=timestamp, parent_scenario=self, scenery=scenery, add_extras=add_extras,
-                                   load_cp=load_cp), position)
+                                   more_extras=more_extras, load_cp=load_cp), position)
 
     def add_scene(self, new_scene: scene.Scene, position: int = -1):
         """

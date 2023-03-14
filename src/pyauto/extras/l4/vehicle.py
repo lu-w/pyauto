@@ -7,7 +7,6 @@ from owlready2_augmentator import augment, augment_class, AugmentationType
 
 from ... import auto
 from ..l4.utils import _MAX_TIME_SMALL_DISTANCE
-from ..owl import simulate
 
 physics = auto._world.get_ontology(auto.Ontology.Physics.value)
 l4_core = auto._world.get_ontology(auto.Ontology.L4_Core.value)
@@ -75,10 +74,3 @@ with l4_core:
                         t_pos)) % 360
             return speed_pos * t_pos * math.cos(math.radians(theta)) + a_pos[0], \
                        speed_pos * t_pos * math.sin(math.radians(theta)) + a_pos[1]
-
-        def simulate(self, mapping: dict[owlready2.NamedIndividual, owlready2.NamedIndividual],
-                     delta_t: float | int = 0):
-            simulate(self, mapping)
-            new_veh = mapping[self]
-            k = 20
-            new_veh.set_velocity(self.has_velocity_x + k * delta_t, self.has_velocity_y, self.has_velocity_z)

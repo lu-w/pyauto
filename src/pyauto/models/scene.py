@@ -17,13 +17,14 @@ class Scene(owlready2.World):
     _SCENERY_COMMENT = "_auto_scenery"
 
     def __init__(self, timestamp: float | int = 0, parent_scenario=None, scenery=None, add_extras: bool = True,
-                 load_cp: bool = False):
+                 more_extras: list[str] = None, load_cp: bool = False):
         """
         Creates a new scene and loads A.U.T.O. into this scene (this may take some time).
         :param timestamp: Optional point in time of this scene.
         :param parent_scenario: If the scene belongs to a list of scenes, this points to the parent scenario of type
             pyauto.models.scenario.Scenario.
         :param add_extras: Whether to import the extra functionality that is added the classes from owlready2.
+        :param more_extras: A name of an importable module that contains more extra functionality to load from.
         :param load_cp: Whether to load the criticality_phenomena.owl (and formalization) as well.
         """
         super().__init__()
@@ -32,7 +33,7 @@ class Scene(owlready2.World):
         self._added_extras = add_extras
         self._loaded_cp = load_cp
         self._scenery = scenery
-        auto.load(world=self, add_extras=add_extras, load_cp=load_cp)
+        auto.load(world=self, add_extras=add_extras, more_extras=more_extras, load_cp=load_cp)
 
     def __str__(self):
         if self._scenario is not None:

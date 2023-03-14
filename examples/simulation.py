@@ -14,7 +14,7 @@ lane = l1_core.Lane()
 lane.set_geometry(5, 0, 20, 5)
 
 # creates a scenario with one empty scene, adds the scenery to it
-sc = Scenario(1, scenery=statics, load_cp=True)
+sc = Scenario(1, scenery=statics, load_cp=True, more_extras=["tobm.sim_models.vehicle"])
 sc.set_scenery(statics)
 
 # populates scene 1: creates ego vehicle & pedestrian
@@ -29,8 +29,9 @@ ped.set_velocity(0, 3)
 ped.has_height = 1.7
 ego.is_in_front_of = [ped]
 
-# creates a new scene by means of simulation and adds it to the scenario (scenery will be added automatically)
+# creates two new scenes by means of simulation and adds it to the scenario (scenery will be added automatically)
 sc.append(sc[0].simulate(delta_t=0.1))
+sc.append(sc[1].simulate(delta_t=0.1))
 
 # augment - will infer speed and yaw from set velocity
 augmentator.augment(sc)
