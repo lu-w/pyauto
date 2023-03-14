@@ -20,6 +20,7 @@ class Ontology(Enum):
     """
     Contains an enumeration of all sub-ontologies of A.U.T.O. pointing to their IRIs (as str)
     """
+    AUTO = "http://purl.org/auto/#"
     Criticality_Phenomena = "http://purl.org/auto/criticality_phenomena#"
     Criticality_Phenomena_Formalization = "http://purl.org/auto/criticality_phenomena_formalization#"
     Physics = "http://purl.org/auto/physics#"

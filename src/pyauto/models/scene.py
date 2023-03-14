@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import logging
 import os
+import tempfile
+
 import owlready2
 
 from xml.etree import ElementTree
@@ -12,7 +14,9 @@ logger = logging.getLogger(__name__)
 
 
 class Scene(owlready2.World):
-    def __init__(self, timestamp: float | int = 0, parent_scenario=None, add_extras: bool = True,
+    _SCENERY_COMMENT = "_auto_scenery"
+
+    def __init__(self, timestamp: float | int = 0, parent_scenario=None, scenery=None, add_extras: bool = True,
                  load_cp: bool = False):
         """
         Creates a new scene and loads A.U.T.O. into this scene (this may take some time).
@@ -27,6 +31,7 @@ class Scene(owlready2.World):
         self._timestamp = timestamp
         self._added_extras = add_extras
         self._loaded_cp = load_cp
+        self._scenery = scenery
         auto.load(world=self, add_extras=add_extras, load_cp=load_cp)
 
     def __str__(self):
@@ -49,7 +54,8 @@ class Scene(owlready2.World):
         else:
             return self.get_ontology("http://anonymous#").get_namespace(iri)
 
-    def save_abox(self, file: str = None, format: str = "rdfxml", **kargs):
+    def save_abox(self, file: str = None, format: str = "rdfxml", save_scenery=False, scenery_file: str = None,
+                  to_ignore: set[str] = None, **kargs) -> str:
         """
         Works analogously to the save() method of owlready2.World, but saves the ABox auf A.U.T.O. only.
         Note that right now, only the "rdfxml" format is supported. If some other format is given, the plain save()
@@ -59,9 +65,52 @@ class Scene(owlready2.World):
         Note: This method overwrites existing files.
         :param file: A string to a file location to save the ABox to.
         :param format: The format to save in (one of: rdfxml, ntriples, nquads). Recommended: rdfxml.
+        :param save_scenery: The scenery is always an imported ontology. Therefore, we can control whether to ignore it,
+            or to save it as well in a separate file (then, called file_scenery.owl). Default is False, since we assume
+            that the top level scenario takes care of saving the scenery. Then, however, we can use the scenery_file.
+        :param scenery_file: A file location to the scenery file that is to be imported. Can be useful if the scenery
+            was already saved somewhere else, and we want to avoid saving it again. If set, save_scenery is ignored.
+        :param to_ignore: If given, individuals (also indirectly) belonging to this set of classes are not saved.
+            Classes are given as their string representation including their namespace (e.g. geosparql.Geometry).
+        :returns: The IRI that was assigned to the ABox as str.
         """
+        # First, we remove all individuals from the scenery, if an import is given (as these will be imported later)
+        undos_scenery = []
+        if save_scenery or scenery_file is not None:
+            for i in self.individuals():
+                if Scene._SCENERY_COMMENT in i.comment:
+                    undos_scenery.append(owlready2.destroy_entity(i, undoable=True))
+
+        # Then, we will remove all individuals belonging to some class in to_ignore.
+        undos_ignore = []
+        if to_ignore is not None:
+            for i in self.individuals():
+                if not set([str(x) for x in i.INDIRECT_is_a]).isdisjoint(to_ignore):
+                    undos_ignore.append(owlready2.destroy_entity(i, undoable=True))
+
+        # Saves ABox - we will parse it and remove irrelevant stuff later
         self.save(file, format, **kargs)
+
+        # Undo deletion of individuals - in case we want to work further with the scene
+        for undo in list(reversed(undos_ignore)) + list(reversed(undos_scenery)):
+            undo()
+
+        # Post-processing
         if file is not None and format == "rdfxml":
+            # First, create the file name of the scene
+            file_name = os.path.basename(file)
+            file_ending = ""
+            if "." in file_name:
+                split = file_name.split(".")
+                file_name = split[:-1]
+                file_ending = split[-1]
+                file_name = ".".join(file_name)
+
+            # Saves scenery to have a scenery file name that we can later import
+            if save_scenery and not scenery_file:
+                scenery_file = file_name + "_scenery" + file_ending
+                self._scenery.save_abox(scenery_file, format, kargs)
+
             # Read in file again
             tree = ElementTree.parse(file)
 
@@ -83,16 +132,36 @@ class Scene(owlready2.World):
 
             # Set ontology name and add AUTO as import (since all other ontologies and imports were removed)
             onto = ElementTree.Element("owl:Ontology")
-            filename = os.path.basename(file)
-            if "." in filename:
-                filename = filename.split(".")[:-1]
-                filename = ".".join(filename)
-            onto.set("rdf:about", "http://purl.org/auto/" + filename)
+            iri = "http://purl.org/auto/" + file_name
+            onto.set("rdf:about", iri)
             ElementTree.SubElement(onto, "owl:imports", {"rdf:resource": "http://purl.org/auto/"})
+            # If scenery needs to be imported, do so
+            if scenery_file:
+                ElementTree.SubElement(onto, "owl:imports", {"rdf:resource": scenery_file})
             root.insert(0, onto)
 
             # Save file again
             tree.write(file)
+
+            return iri
+
+    def set_scenery(self, scenery):
+        """
+        Sets the scenery for the given scene.
+        :param scenery: The scenery to set.
+        """
+        self._scenery = scenery
+        # We load the scenery by saving only its ABox (temporarily) and loading it from the file. This is the easiest
+        # way to prevent double loading of individuals.
+        file = tempfile.NamedTemporaryFile(suffix=".owl").name
+        scenery.save_abox(file)
+        self.get_ontology("file://" + file).load()
+        # We make individuals from the scenery identifiable later on by adding a comment.
+        for i in self.get_ontology("file://" + file + "#").individuals():
+            i.comment.append(Scene._SCENERY_COMMENT)
+        # Propagates scenario to scenery, if needed.
+        if scenery._scenario is None:
+            scenery._scenario = self._scenario
 
     def copy(self, delta_t: float | int = 0, to_keep: set = None) -> \
             tuple[dict[owlready2.NamedIndividual, owlready2.NamedIndividual], Scene]:
@@ -109,7 +178,8 @@ class Scene(owlready2.World):
         :returns: A tuple of a mapping from the old (i.e. in this scene) to the new individuals (i.e. in the returned
             scene) and the newly created scene.
         """
-        new = Scene(self._timestamp + delta_t, self._scenario, self._added_extras, self._loaded_cp)
+        new = Scene(timestamp=self._timestamp + delta_t, parent_scenario=self._scenario, scenery=self._scenery,
+                    add_extras=self._added_extras, load_cp=self._loaded_cp)
         mapping = {}
 
         # Creates all new individuals

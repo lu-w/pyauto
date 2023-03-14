@@ -2,14 +2,22 @@ import logging
 
 from pyauto import auto, augmentator
 from pyauto.models.scenario import Scenario
+from pyauto.models.scenery import Scenery
 from pyauto.visualizer import visualizer
 
 logging.basicConfig(level=logging.DEBUG)
 
-# creates a scenario with two empty scenes (and loads A.U.T.O.)
-sc = Scenario(1, load_cp=True)
+# first, create a scenery with one lane
+statics = Scenery(load_cp=True)
+l1_core = statics.ontology(auto.Ontology.L1_Core)
+lane = l1_core.Lane()
+lane.set_geometry(5, 0, 20, 5)
 
-# scene 1: creates ego vehicle & pedestrian
+# creates a scenario with one empty scene, adds the scenery to it
+sc = Scenario(1, scenery=statics, load_cp=True)
+sc.set_scenery(statics)
+
+# populates scene 1: creates ego vehicle & pedestrian
 l4_de = sc[0].ontology(auto.Ontology.L4_DE)
 l4_co = sc[0].ontology(auto.Ontology.L4_Core)
 ego = l4_de.Passenger_Car("ego")
@@ -21,16 +29,18 @@ ped.set_velocity(0, 3)
 ped.has_height = 1.7
 ego.is_in_front_of = [ped]
 
-# TODO allow to create a static world which is imported by every scene and set as a property of the scenario.
-# but does this work?...
-
+# creates a new scene by means of simulation and adds it to the scenario (scenery will be added automatically)
 sc.append(sc[0].simulate(delta_t=0.1))
 
 # augment - will infer speed and yaw from set velocity
 #augmentator.augment(sc)
 
-# saves the ABoxes
-#sc.save_abox("/tmp/scenario.owl")
+# saves the ABoxes (scenery and single scenes) - "scenario.owl" only serves as a template
+sc.save_abox("/tmp/scenario_full.owl")
 
-# visualizes the ABox
-visualizer.visualize(sc)
+# and once more for a reduced, non-geometrical version
+# TODO test this functionality
+#sc.save_abox("/tmp/scenario_reduced.owl", to_ignore={"geosparql.Geometry"})
+
+# visualizes the ABoxes
+#visualizer.visualize(sc)

@@ -27,7 +27,6 @@ def simulate(thing, mapping: dict[owlready2.NamedIndividual, owlready2.NamedIndi
                     setattr(mapping[thing], var, val)
                 else:
                     getattr(mapping[thing], var).append(val)
-                print("Set " + str(thing) + "." + str(var) + " = " + str(val))
 
 
 with auto._world.get_ontology("http://www.w3.org/2002/07/owl#"):
@@ -36,10 +35,7 @@ with auto._world.get_ontology("http://www.w3.org/2002/07/owl#"):
         def simulate(self, mapping: dict[owlready2.NamedIndividual, owlready2.NamedIndividual],
                      delta_t: float | int = 0):
             """
-            Generic simulation method - keeps everything 'as is', i.e. no changes occur. This means that every
-            unprotected property of the individual as specified in the mapping will be copied over to this individual.
-            Thus, this method does not create a new individual but rather updates the properties of a copied individual.
-            This requires therefore the copy() method of its Scene to be called beforehand.
+            Generic simulation method of OWL Things. Calls owl.simulate(mapping) and ignores the given delta_t.
             :param mapping: A mapping from the individuals of the previous state of the simulation to the new one.
                 For example, {vehicle_t0: vehicle@_t1}.
             :param delta_t: The time step to simulate. For generic OWL Things, this is ignored (defaults to 0).
