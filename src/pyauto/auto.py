@@ -109,7 +109,7 @@ def _add_extras(more_extras: list[str] = None):
             _extras.append(mod)
             logger.debug("Loaded extra module " + extra_mod + " into A.U.T.O.")
         except ModuleNotFoundError:
-            logger.debug("Extra module " + extra_mod + " not installed, not loaded into A.U.T.O.")
+            logger.warning("Extra module " + extra_mod + " not installed, not loaded into A.U.T.O.")
     # Reload all already loaded modules
     for mod in _extras:
         importlib.reload(mod)
