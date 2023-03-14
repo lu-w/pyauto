@@ -5,9 +5,9 @@ import owlready2
 from shapely.geometry import Polygon
 from owlready2_augmentator import augment, augment_class, AugmentationType
 
-from pyauto import auto
-from pyauto.extras.l4.utils import _MAX_TIME_SMALL_DISTANCE
-from pyauto.extras.owl import simulate
+from ... import auto
+from ..l4.utils import _MAX_TIME_SMALL_DISTANCE
+from ..owl import simulate
 
 physics = auto._world.get_ontology(auto.Ontology.Physics.value)
 l4_core = auto._world.get_ontology(auto.Ontology.L4_Core.value)

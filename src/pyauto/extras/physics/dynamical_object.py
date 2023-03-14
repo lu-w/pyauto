@@ -4,8 +4,8 @@ import owlready2
 
 from shapely import wkt
 from owlready2_augmentator import augment, augment_class, AugmentationType
-from pyauto import auto
-from pyauto.extras.physics.spatial_object import _SPATIAL_PREDICATE_THRESHOLD
+from ... import auto
+from .spatial_object import _SPATIAL_PREDICATE_THRESHOLD
 
 physics = auto._world.get_ontology(auto.Ontology.Physics.value)
 geosparql = auto._world.get_ontology(auto.Ontology.GeoSPARQL.value)

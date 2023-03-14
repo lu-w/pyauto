@@ -1,4 +1,4 @@
-from pyauto.models import scene, scenery
+from . import scene, scenery
 
 
 class Scenario(list):

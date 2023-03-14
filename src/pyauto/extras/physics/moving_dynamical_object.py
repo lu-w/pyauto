@@ -5,7 +5,7 @@ import owlready2
 from shapely import geometry, wkt
 import sympy.geometry
 from owlready2_augmentator import augment, augment_class, AugmentationType
-from pyauto import auto
+from ... import auto
 
 _INTERSECTING_PATH_THRESHOLD = 8   # s, the time interval in which future intersecting paths shall be detected
 _INTERSECTING_PATH_MAX_PET = 3     # s, the time interval in which future intersecting paths shall be detected

@@ -3,7 +3,7 @@ import owlready2
 
 from shapely import geometry, wkt
 from owlready2_augmentator import augment, augment_class, AugmentationType
-from pyauto import auto
+from ... import auto
 
 _SPATIAL_PREDICATE_THRESHOLD = 50  # m, the distance in which spatial predicates are augmented
 _IS_NEAR_DISTANCE = 4              # m, the distance for which spatial objects are close to each other

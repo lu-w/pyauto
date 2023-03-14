@@ -14,13 +14,12 @@ import mpld3
 import screeninfo
 import tempfile
 import webbrowser
-import owlready2
 from shapely import geometry
 import numpy as np
 
-from pyauto import utils
-from pyauto.models.scene import Scene
-from pyauto.models.scenario import Scenario
+from .. import utils
+from ..models.scene import Scene
+from ..models.scenario import Scenario
 
 # TODO
 # - visualize scenario level CPs

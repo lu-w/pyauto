@@ -8,7 +8,7 @@ import owlready2
 
 from xml.etree import ElementTree
 
-from pyauto import auto
+from .. import auto
 
 logger = logging.getLogger(__name__)
 

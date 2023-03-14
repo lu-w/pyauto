@@ -3,7 +3,7 @@ Utils for A.U.T.O.
 """
 
 import logging
-from pyauto import auto
+from . import auto
 
 logger = logging.getLogger(__name__)
 

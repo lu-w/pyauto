@@ -7,7 +7,8 @@ from shapely import wkt
 from matplotlib import pyplot as plt
 
 from owlready2_augmentator import augment, augment_class, AugmentationType
-from pyauto import auto
+
+from ... import auto
 
 _DEFAULT_VISIBILITY = 50  # m, the visibility that is assumed if the observer does not have a specific visibility given
 _OCCLUSION_SAMPLING_STEP = 0.25  # °, the step size that is used to sample the circular segment for occluded areas

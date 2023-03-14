@@ -1,7 +1,7 @@
-from pyauto.models.scene import Scene
+from . import scene
 
 
-class Scenery(Scene):
+class Scenery(scene.Scene):
     def __init__(self, add_extras: bool = True, load_cp: bool = False):
         super().__init__(add_extras, load_cp)
         self.iri = None  # can only be set once save_abox was called since the IRI depends on the file name

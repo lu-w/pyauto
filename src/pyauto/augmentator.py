@@ -1,6 +1,6 @@
 import owlready2_augmentator
 
-from pyauto.models import scene, scenario
+from .models import scene, scenario
 
 
 def augment(model: scene.Scene | scenario.Scenario):

@@ -1,6 +1,6 @@
 import owlready2
 
-from pyauto import auto
+from .. import auto
 
 
 def simulate(thing, mapping: dict[owlready2.NamedIndividual, owlready2.NamedIndividual]):

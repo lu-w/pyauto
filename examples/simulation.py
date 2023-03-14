@@ -41,6 +41,5 @@ sc.save_abox("/tmp/scenario_full.owl")
 # and once more for a reduced, non-geometrical version
 sc.save_abox("/tmp/scenario_reduced.owl", to_ignore={"geosparql.Geometry"})
 
-# TODO move visualizer into its own package
 # visualizes the ABoxes
 visualizer.visualize(sc)
