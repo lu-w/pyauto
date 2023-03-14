@@ -127,12 +127,11 @@ scenario_css = """
         </style>"""
 
 
-def visualize(model: Scene | Scenario, scenario_name: str = None, cps=None):
+def visualize(model: Scene | Scenario, cps: list = None):
     """
     Creates an HTML visualization of the given scene or scenario. Starts a web server at localhost:8000 (blocking).
     :param model: The scenario to visualize.
     :param cps: A list of criticality phenomena which optionally to visualize as well.
-    :param scenario_name: An optional name for the scenario to display.
     :return: The path to the directory in which to find the created HTML visualization.
     """
     pl_html = []
@@ -264,7 +263,7 @@ def visualize(model: Scene | Scenario, scenario_name: str = None, cps=None):
         centroids_y = []
         plotted_labels = []
         entity_points = dict()
-        for entity in scene.individuals():
+        for entity in sorted(list(scene.individuals()), key=lambda x: str(x.is_a[0]) if len(x.is_a) > 0 else str(x)):
             if len(entity.hasGeometry) > 0:
                 for geo in entity.hasGeometry:
                     shape = wkt.loads(geo.asWKT[0])
