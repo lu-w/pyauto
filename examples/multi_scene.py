@@ -1,6 +1,6 @@
 import logging
 
-from pyauto import auto, augmentator
+from pyauto import auto
 from pyauto.models.scenario import Scenario
 from pyauto.visualizer import visualizer
 
@@ -31,7 +31,7 @@ ped_2.set_geometry(9, 2, 0.6, 0.3)
 ped_2.set_velocity(0, 0.5)
 
 # augment - will infer speed and yaw from set velocity
-augmentator.augment(sc)
+sc.augment()
 
 # saves the ABoxes
 sc.save_abox("/tmp/scenario.owl")

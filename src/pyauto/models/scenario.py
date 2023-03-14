@@ -124,7 +124,19 @@ class Scenario(list):
         :param hz: The rate with which to simulate each second.
         """
         if len(self) > 0:
-            for _ in numpy.arange(0, duration, 1 / hz):
+            for i in numpy.arange(0, duration, 1 / hz):
+                logger.info("Simulating " + str(i) + "/" + str(duration))
                 self.append(self[-1].simulate(delta_t=1 / hz))
         else:
             logger.warning("Can not simulate without an initial scene.")
+
+    def augment(self):
+        """
+        Augments the scenes in this scenario by using the `owlready2_augmentator`. Augmentation methods are given in
+        `extras`.
+        Note that only those methods will be called for augmentations that are decorated with @augment within classes
+        that are decorated with @augment_class and loaded by a Python import.
+        """
+        for _scene in self:
+            _scene.augment()
+

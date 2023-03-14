@@ -5,6 +5,7 @@ import os
 import tempfile
 
 import owlready2
+import owlready2_augmentator
 
 from xml.etree import ElementTree
 
@@ -230,3 +231,12 @@ class Scene(owlready2.World):
             if hasattr(ind, "simulate"):
                 ind.simulate(mapping, delta_t)
         return new
+
+    def augment(self):
+        """
+        Augments this scene by using the `owlready2_augmentator`. Augmentation methods are given in `extras`.
+        Note that only those methods will be called for augmentations that are decorated with @augment within classes
+        that are decorated with @augment_class and loaded by a Python import.
+        """
+        owlready2_augmentator.reset()
+        owlready2_augmentator.do_augmentation(*self.ontologies.values())

@@ -1,6 +1,6 @@
 import logging
 
-from pyauto import auto, augmentator
+from pyauto import auto
 from pyauto.models.scenario import Scenario
 from pyauto.models.scenery import Scenery
 from pyauto.visualizer import visualizer
@@ -33,7 +33,7 @@ ego.is_in_front_of = [ped]
 sc.simulate(duration=2, hz=1)
 
 # augment - will infer e.g. speed and yaw from set velocity in all ABoxes
-augmentator.augment(sc)
+sc.augment()
 
 # saves the ABoxes (scenery and single scenes) - "scenario_full.owl" serves as a template
 sc.save_abox("/tmp/scenario_full.owl")
