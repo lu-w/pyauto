@@ -29,7 +29,7 @@ def simulate(thing, mapping: dict[owlready2.NamedIndividual, owlready2.NamedIndi
                     getattr(mapping[thing], var).append(val)
 
 
-with auto._world.get_ontology("http://www.w3.org/2002/07/owl#"):
+with auto.world.get_ontology("http://www.w3.org/2002/07/owl#"):
 
     class Thing(owlready2.Thing):
         def simulate(self, mapping: dict[owlready2.NamedIndividual, owlready2.NamedIndividual],

@@ -8,8 +8,8 @@ from owlready2_augmentator import augment, augment_class, AugmentationType
 from ... import auto
 from ..l4.utils import _MAX_TIME_SMALL_DISTANCE
 
-physics = auto._world.get_ontology(auto.Ontology.Physics.value)
-l4_core = auto._world.get_ontology(auto.Ontology.L4_Core.value)
+physics = auto.world.get_ontology(auto.Ontology.Physics.value)
+l4_core = auto.world.get_ontology(auto.Ontology.L4_Core.value)
 
 with l4_core:
     @augment_class

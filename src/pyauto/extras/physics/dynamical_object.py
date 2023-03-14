@@ -7,8 +7,8 @@ from owlready2_augmentator import augment, augment_class, AugmentationType
 from ... import auto
 from .spatial_object import _SPATIAL_PREDICATE_THRESHOLD
 
-physics = auto._world.get_ontology(auto.Ontology.Physics.value)
-geosparql = auto._world.get_ontology(auto.Ontology.GeoSPARQL.value)
+physics = auto.world.get_ontology(auto.Ontology.Physics.value)
+geosparql = auto.world.get_ontology(auto.Ontology.GeoSPARQL.value)
 
 with physics:
 

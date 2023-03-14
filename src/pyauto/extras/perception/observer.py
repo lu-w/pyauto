@@ -93,7 +93,7 @@ def get_occlusions(others: list, cutoffs: dict, fov):
     return occs
 
 
-perception = auto._world.get_ontology(auto.Ontology.Perception.value)
+perception = auto.world.get_ontology(auto.Ontology.Perception.value)
 
 with perception:
 

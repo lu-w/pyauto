@@ -1,19 +1,20 @@
-from itertools import chain
-from enum import Enum
-
 import owlready2
 import os
 import importlib
 import logging
 
+from enum import Enum
+
 """
 Loads A.U.T.O. globally into owlready2. Also provides an easier enum interface to access the sub-ontologies of A.U.T.O.
 """
 
+# Logging
 logger = logging.Logger(__name__)
 
 # The world that A.U.T.O. was loaded into the last time load() was called. Standard is owlready2.default_world.
-_world = owlready2.default_world
+world = owlready2.default_world
+
 # Imported modules of extras (in order to be able to reload them in case of more than one world)
 _extras = []
 
@@ -48,24 +49,24 @@ class Ontology(Enum):
     L6_DE = "http://purl.org/auto/l6_de#"
 
 
-def load(folder: str = None, world: owlready2.World = None, add_extras: bool = True, more_extras: list[str] = None,
-         load_cp: bool = False):
+def load(folder: str = None, load_into_world: owlready2.World = None, add_extras: bool = True,
+         more_extras: list[str] = None, load_cp: bool = False):
     """
     Loads A.U.T.O. from a given folder location.
     :param folder: The folder to look for, should contain the `automotive_urban_traffic_ontology.owl`. Can be None, in
         this case, it takes the ontology located in this repository.
-    :param world: The world to load A.U.T.O. into. If None, loads into the default world.
+    :param load_into_world: The world to load A.U.T.O. into. If None, loads into the default world.
     :param add_extras: Whether to import the extra functionality that is added the classes from owlready2.
     :param more_extras: A name of an importable module that contains more extra functionality to load from.
     :param load_cp: Whether to load the criticality_phenomena.owl (and formalization) as well.
     :raise FileNotFoundError: if given an invalid folder location.
     """
-    global _world
+    global world
     # Loading ontology into world (or default world)
-    if world is None:
-        _world = owlready2.default_world
+    if load_into_world is None:
+        world = owlready2.default_world
     else:
-        _world = world
+        world = load_into_world
     if folder is None:
         folder = os.path.dirname(os.path.realpath(__file__)) + "/auto"
     if os.path.isdir(folder):
@@ -73,12 +74,12 @@ def load(folder: str = None, world: owlready2.World = None, add_extras: bool = T
         for i, j, k in os.walk(folder + "/"):
             owlready2.onto_path.append(i)
         owlready2.onto_path.remove(folder + "/")
-        _world.get_ontology(folder + "/automotive_urban_traffic_ontology.owl").load()
+        world.get_ontology(folder + "/automotive_urban_traffic_ontology.owl").load()
         if load_cp:
-            _world.get_ontology(folder + "/criticality_phenomena.owl").load()
-            _world.get_ontology(folder + "/criticality_phenomena_formalization.owl").load()
+            world.get_ontology(folder + "/criticality_phenomena.owl").load()
+            world.get_ontology(folder + "/criticality_phenomena_formalization.owl").load()
         # Importing extras only required for non-default worlds as otherwise this is handled via owlready2 already.
-        if add_extras and _world is not owlready2.default_world:
+        if add_extras and world is not owlready2.default_world:
             _add_extras(more_extras)
     else:
         raise FileNotFoundError(folder)
@@ -87,7 +88,7 @@ def load(folder: str = None, world: owlready2.World = None, add_extras: bool = T
 def _add_extras(more_extras: list[str] = None):
     """
     Loads all extra module functionality (i.e. those members specified in the `extras` module and its submodules) into
-    the classes provided by owlready2. The global _world is the world to load the functionality into. Note that all
+    the classes provided by owlready2. The global world is the world to load the functionality into. Note that all
     other worlds won't have this functionality!
     :param more_extras: A name of an importable module that contains more extra functionality to load from.
     """
@@ -103,13 +104,11 @@ def _add_extras(more_extras: list[str] = None):
                 extra_mod = "pyauto." + root.split("pyauto/")[-1].replace("/", ".") + "." + file.replace(".py", "")
                 extra_mods.append(extra_mod)
     for extra_mod in extra_mods:
-        print(extra_mod)
         try:
             mod = importlib.import_module(extra_mod)
             _extras.append(mod)
             logger.debug("Loaded extra module " + extra_mod + " into A.U.T.O.")
         except ModuleNotFoundError:
-            print("Not loaded...")
             logger.debug("Extra module " + extra_mod + " not installed, not loaded into A.U.T.O.")
     # Reload all already loaded modules
     for mod in _extras:

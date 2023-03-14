@@ -13,8 +13,8 @@ _HIGH_REL_SPEED_THRESHOLD = 0.25   # rel., the relative difference in total spee
 _DEFAULT_SPEED_LIMIT = 50          # km/h, the default speed limit that is assumed
 _DEFAULT_MAX_SPEED = 50            # km/h, the default speed maximum speed that is assumed
 
-physics = auto._world.get_ontology(auto.Ontology.Physics.value)
-geosparql = auto._world.get_ontology(auto.Ontology.GeoSPARQL.value)
+physics = auto.world.get_ontology(auto.Ontology.Physics.value)
+geosparql = auto.world.get_ontology(auto.Ontology.GeoSPARQL.value)
 
 with physics:
 
