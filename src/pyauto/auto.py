@@ -10,7 +10,7 @@ Loads A.U.T.O. globally into owlready2. Also provides an easier enum interface t
 """
 
 # Logging
-logger = logging.Logger(__name__)
+logger = logging.getLogger(__name__)
 
 # The world that A.U.T.O. was loaded into the last time load() was called. Standard is owlready2.default_world.
 world = owlready2.default_world
@@ -70,6 +70,7 @@ def load(folder: str = None, load_into_world: owlready2.World = None, add_extras
     if folder is None:
         folder = os.path.dirname(os.path.realpath(__file__)) + "/auto"
     if os.path.isdir(folder):
+        logger.info("Loading A.U.T.O. from " + str(folder))
         # Setting correct path for owlready2
         for i, j, k in os.walk(folder + "/"):
             owlready2.onto_path.append(i)
@@ -80,8 +81,11 @@ def load(folder: str = None, load_into_world: owlready2.World = None, add_extras
             world.get_ontology(folder + "/criticality_phenomena_formalization.owl").load()
         # Importing extras only required for non-default worlds as otherwise this is handled via owlready2 already.
         if add_extras and world is not owlready2.default_world:
+            logger.info("Loading extra modules into A.U.T.O.")
             _add_extras(more_extras)
+        logger.info("Done loading A.U.T.O.")
     else:
+        logger.error("A.U.T.O. not found")
         raise FileNotFoundError(folder)
 
 
@@ -93,7 +97,11 @@ def _add_extras(more_extras: list[str] = None):
     :param more_extras: A name of an importable module that contains more extra functionality to load from.
     """
     global _extras
-    # Load all modules (does not reload already loaded module - will handle later)
+    # Reload all already loaded modules
+    for mod in _extras:
+        importlib.reload(mod)
+
+    # Load all modules that are not already loaded (handled by importlib)
     if more_extras is None:
         extra_mods = []
     else:
@@ -103,13 +111,15 @@ def _add_extras(more_extras: list[str] = None):
             if file.endswith(".py") and file != "__init__.py":
                 extra_mod = "pyauto." + root.split("pyauto/")[-1].replace("/", ".") + "." + file.replace(".py", "")
                 extra_mods.append(extra_mod)
+    succ_mods = []
+    fail_mods = []
     for extra_mod in extra_mods:
         try:
             mod = importlib.import_module(extra_mod)
             _extras.append(mod)
-            logger.debug("Loaded extra module " + extra_mod + " into A.U.T.O.")
+            succ_mods.append(extra_mod)
         except ModuleNotFoundError:
-            logger.warning("Extra module " + extra_mod + " not installed, not loaded into A.U.T.O.")
-    # Reload all already loaded modules
-    for mod in _extras:
-        importlib.reload(mod)
+            fail_mods.append(extra_mod)
+    logger.info("Loaded extra modules " + ", ".join(succ_mods) + " into A.U.T.O.")
+    if len(fail_mods) > 0:
+        logger.warning("Extra modules " + ", ".join(fail_mods) + " not installed, not loaded into A.U.T.O.")

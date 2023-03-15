@@ -5,7 +5,7 @@ from pyauto.models.scenario import Scenario
 from pyauto.models.scenery import Scenery
 from pyauto.visualizer import visualizer
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 # first, create a scenery with one lane
 statics = Scenery(load_cp=True)
@@ -30,7 +30,7 @@ ped.has_height = 1.7
 ego.is_in_front_of = [ped]
 
 # creates two new scenes by means of simulation and adds it to the scenario (scenery will be added automatically)
-sc.simulate(duration=2, hz=1)
+sc.simulate(duration=2, delta_t=1)
 
 # augment - will infer e.g. speed and yaw from set velocity in all ABoxes
 sc.augment()

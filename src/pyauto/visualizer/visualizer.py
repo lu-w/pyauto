@@ -48,6 +48,8 @@ _AVOID_LABEL_COLLISIONS = False
 
 # Logging
 logger = logging.getLogger(__name__)
+# Suppresses unnecessary logging in debug mode by imported libraries for plotting.
+logging.getLogger("matplotlib.font_manager").setLevel(logging.ERROR)
 
 
 # Helper function for sorting CPs & individuals
