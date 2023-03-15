@@ -25,7 +25,9 @@ class Scene(owlready2.World):
         :param parent_scenario: If the scene belongs to a list of scenes, this points to the parent scenario of type
             pyauto.models.scenario.Scenario.
         :param add_extras: Whether to import the extra functionality that is added the classes from owlready2.
-        :param more_extras: A name of an importable module that contains more extra functionality to load from.
+        :param more_extras: A name of an importable module that contains more extra functionality to load from. Will be
+            imported in the given order. Using wildcards at the end is possible, e.g. "a.b.*", which then recursively
+            imports *all* Python files located in the package's (sub)folder(s).
         :param load_cp: Whether to load the criticality_phenomena.owl (and formalization) as well.
         :param name: An optional name (string) of this scenario. If not set, will use a generic name based on timestamp.
         """

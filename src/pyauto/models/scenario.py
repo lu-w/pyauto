@@ -19,7 +19,9 @@ class Scenario(list):
         :param scenery: An optional scenery (i.e., static elements) of this scenario.
         :param name: Name of this scenario (for printing), "Unnamed Scenario" if not set.
         :param add_extras: Whether to import the extra functionality that is added the classes from owlready2.
-        :param more_extras: A name of an importable module that contains more extra functionality to load from.
+        :param more_extras: A name of an importable module that contains more extra functionality to load from. Will be
+            imported in the given order. Using wildcards at the end is possible, e.g. "a.b.*", which then recursively
+            imports *all* Python files located in the package's (sub)folder(s).
         :param load_cp: Whether to load the criticality_phenomena.owl (and formalization) as well.
         """
         self._name = name
@@ -46,7 +48,9 @@ class Scenario(list):
         :param position: Optional position at which to insert. If -1, the new scene is added at the end.
         :param timestamp: Optional timestamp of the scene. If None, the position is used.
         :param add_extras: Whether to import the extra functionality that is added the classes from owlready2.
-        :param more_extras: A name of an importable module that contains more extra functionality to load from.
+        :param more_extras: A name of an importable module that contains more extra functionality to load from. Will be
+            imported in the given order. Using wildcards at the end is possible, e.g. "a.b.*", which then recursively
+            imports *all* Python files located in the package's (sub)folder(s).
         :param load_cp: Whether to load the criticality_phenomena.owl (and formalization) as well.
         :param scenery: The scenery of the new scene to add.
         """

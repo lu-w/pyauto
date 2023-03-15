@@ -57,7 +57,9 @@ def load(folder: str = None, load_into_world: owlready2.World = None, add_extras
         this case, it takes the ontology located in this repository.
     :param load_into_world: The world to load A.U.T.O. into. If None, loads into the default world.
     :param add_extras: Whether to import the extra functionality that is added the classes from owlready2.
-    :param more_extras: A name of an importable module that contains more extra functionality to load from.
+    :param more_extras: A name of an importable module that contains more extra functionality to load from. Will be
+        imported in the given order. Using wildcards at the end is possible, e.g. "a.b.*", which then recursively
+        imports *all* Python files located in the package's (sub)folder(s).
     :param load_cp: Whether to load the criticality_phenomena.owl (and formalization) as well.
     :raise FileNotFoundError: if given an invalid folder location.
     """
@@ -94,7 +96,9 @@ def _add_extras(more_extras: list[str] = None):
     Loads all extra module functionality (i.e. those members specified in the `extras` module and its submodules) into
     the classes provided by owlready2. The global world is the world to load the functionality into. Note that all
     other worlds won't have this functionality!
-    :param more_extras: A name of an importable module that contains more extra functionality to load from.
+    :param more_extras: A name of an importable module that contains more extra functionality to load from. Will be
+        imported in the given order. Using wildcards at the end is possible, e.g. "a.b.*", which then recursively
+        imports *all* Python files located in the package's (sub)folder(s).
     """
     global _extras
     # Reload all already loaded modules
