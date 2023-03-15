@@ -5,10 +5,10 @@ from pyauto.models.scenario import Scenario
 from pyauto.models.scenery import Scenery
 from pyauto.visualizer import visualizer
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s: %(message)s")
 
 # first, create a scenery with one lane
-statics = Scenery(load_cp=True)
+statics = Scenery(load_cp=True, name="Simple Scenery")
 l1_core = statics.ontology(auto.Ontology.L1_Core)
 lane = l1_core.Lane()
 lane.set_geometry(10, 10, 20, 5)

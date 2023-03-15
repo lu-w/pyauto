@@ -24,6 +24,7 @@ class Scenario(list):
         """
         self._name = name
         self._scenery = scenery
+        logger.info("Creating scenario " + str(self))
         if scenes is not None and len(scenes) > 0:
             super().__init__(scenes)
             for s in scenes:

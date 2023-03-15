@@ -18,7 +18,7 @@ class Scene(owlready2.World):
     _SCENERY_COMMENT = "_auto_scenery"
 
     def __init__(self, timestamp: float | int = 0, parent_scenario=None, scenery=None, add_extras: bool = True,
-                 more_extras: list[str] = None, load_cp: bool = False):
+                 more_extras: list[str] = None, load_cp: bool = False, name: str = None):
         """
         Creates a new scene and loads A.U.T.O. into this scene (this may take some time).
         :param timestamp: Optional point in time of this scene.
@@ -27,6 +27,7 @@ class Scene(owlready2.World):
         :param add_extras: Whether to import the extra functionality that is added the classes from owlready2.
         :param more_extras: A name of an importable module that contains more extra functionality to load from.
         :param load_cp: Whether to load the criticality_phenomena.owl (and formalization) as well.
+        :param name: An optional name (string) of this scenario. If not set, will use a generic name based on timestamp.
         """
         super().__init__()
         self._scenario = parent_scenario
@@ -34,13 +35,18 @@ class Scene(owlready2.World):
         self._added_extras = add_extras
         self._loaded_cp = load_cp
         self._scenery = scenery
+        self._name = name
+        logger.info("Creating scene " + str(self))
         auto.load(load_into_world=self, add_extras=add_extras, more_extras=more_extras, load_cp=load_cp)
 
     def __str__(self):
-        if self._scenario is not None:
-            return "Scene[" + str(self._scenario) + "]@" + str(self._timestamp)
+        if self._name is not None:
+            return self._name
         else:
-            return "Scene@" + str(self._timestamp)
+            if self._scenario is not None:
+                return "Scene[" + str(self._scenario) + "]@" + str(self._timestamp)
+            else:
+                return "Scene@" + str(self._timestamp)
 
     def ontology(self, ontology: auto.Ontology) -> owlready2.Ontology:
         """
@@ -185,6 +191,8 @@ class Scene(owlready2.World):
         new = Scene(timestamp=self._timestamp + delta_t, parent_scenario=self._scenario, scenery=self._scenery,
                     add_extras=self._added_extras, load_cp=self._loaded_cp)
         mapping = {}
+
+        logger.info("Copying individuals and relations")
 
         # Creates all new individuals
         for ind in self.individuals():
