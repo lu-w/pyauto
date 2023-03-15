@@ -81,6 +81,7 @@ class Scenario(list):
         :param to_ignore: If given, individuals (also indirectly) belonging to this set of classes are not saved.
             Classes are given as their string representation including their namespace (e.g. geosparql.Geometry).
         """
+        logger.info("Saving ABox of " + str(self) + " to " + file)
         # Saves scenery
         scenery_file = None
         if save_scenery:
@@ -125,8 +126,9 @@ class Scenario(list):
         :param delta_t: The time period between each simulated scene (in seconds).
         """
         if len(self) > 0:
-            for i in numpy.arange(0, duration, delta_t):
-                logger.info("Simulating scene " + str(i + 1) + " / " + str(duration))
+            start_t = self[-1]._timestamp
+            for i in numpy.arange(start_t + delta_t, start_t + duration + delta_t, delta_t):
+                logger.info("Simulating scene " + str(i) + " / " + str(start_t + duration))
                 self.append(self[-1].simulate(delta_t=delta_t))
         else:
             logger.warning("Can not simulate without an initial scene.")
