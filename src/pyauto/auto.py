@@ -108,16 +108,29 @@ def _add_extras(more_extras: list[str] = None):
         extra_mods = more_extras
     for root, dirs, files in os.walk(os.path.dirname(os.path.realpath(__file__)) + "/extras"):
         for file in files:
-            if file.endswith(".py") and file != "__init__.py":
+            if file.endswith(".py") and not file.startswith("_"):
                 extra_mod = "pyauto." + root.split("pyauto/")[-1].replace("/", ".") + "." + file.replace(".py", "")
                 extra_mods.append(extra_mod)
     succ_mods = []
     fail_mods = []
     for extra_mod in extra_mods:
         try:
-            mod = importlib.import_module(extra_mod)
-            _extras.append(mod)
-            succ_mods.append(extra_mod)
+            mod = extra_mod
+            while mod.endswith(".*"):
+                mod = extra_mod[:-2]
+            imp = importlib.import_module(mod)
+            if extra_mod.endswith(".*"):
+                for root, dirs, files in os.walk("/".join(imp.__file__.split("/")[:-1])):
+                    for file in files:
+                        if file.endswith(".py") and not file.startswith("_"):
+                            wc_mod = mod + "." + file.replace(".py", "")
+                            wc_imp = importlib.import_module(wc_mod)
+                            succ_mods.append(wc_mod)
+                            _extras.append(wc_imp)
+            else:
+                succ_mods.append(mod)
+                _extras.append(imp)
+
         except ModuleNotFoundError:
             fail_mods.append(extra_mod)
     logger.info("Loaded extra modules " + ", ".join(succ_mods) + " into A.U.T.O.")

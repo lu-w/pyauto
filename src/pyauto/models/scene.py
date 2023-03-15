@@ -33,6 +33,7 @@ class Scene(owlready2.World):
         self._scenario = parent_scenario
         self._timestamp = timestamp
         self._added_extras = add_extras
+        self._more_extras = more_extras
         self._loaded_cp = load_cp
         self._scenery = scenery
         self._name = name
@@ -189,7 +190,7 @@ class Scene(owlready2.World):
             scene) and the newly created scene.
         """
         new = Scene(timestamp=self._timestamp + delta_t, parent_scenario=self._scenario, scenery=self._scenery,
-                    add_extras=self._added_extras, load_cp=self._loaded_cp)
+                    add_extras=self._added_extras, more_extras=self._more_extras, load_cp=self._loaded_cp)
         mapping = {}
 
         logger.info("Copying individuals and relations")
