@@ -10,11 +10,12 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s: %(mes
 # first, create a scenery with one lane
 statics = Scenery(load_cp=True, name="Simple Scenery")
 l1_core = statics.ontology(auto.Ontology.L1_Core)
-lane = l1_core.Lane()
-lane.set_geometry(10, 10, 20, 5)
+road = l1_core.Road()
+road.set_geometry(10, 10, 20, 5)
+road.cross_section((l1_core.Lane, 0.4), (l1_core.Lane, 0.6))
 
 # creates a scenario with one empty scene, adds the scenery to it
-sc = Scenario(1, scenery=statics, name="Simulation Example", load_cp=True, more_extras=["tobm.sim_models.vehicle"])
+sc = Scenario(1, scenery=statics, name="Simulation Example", load_cp=True, more_extras=["tobm.sim_models.generic.*"])
 sc.set_scenery(statics)
 
 # populates scene 1: creates ego vehicle & pedestrian
