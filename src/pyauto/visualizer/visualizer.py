@@ -575,7 +575,7 @@ def _describe_entity(entity):
     label += "</th></tr></thead><tbody><tr><td>is_a</td><td>"
     label += ", ".join([str(x) for x in entity.is_a])
     label += "</td></tr>"
-    for prop in entity.get_properties():
+    for prop in sorted(entity.get_properties(), key=lambda x: str(x)):
         if str(prop.python_name) not in _NO_PRINTING_PROPERTIES:
             label += "<tr>"
             label += "<td>"
