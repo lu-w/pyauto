@@ -17,7 +17,8 @@ with l4_core:
         @augment(AugmentationType.OBJECT_PROPERTY, "CP_150")
         def has_small_distance(self, other: physics.Spatial_Object):
             if self != other and self.has_geometry() and other.has_geometry() and self.has_speed is not None and \
-                    self.has_yaw is not None and other.has_height is not None and other.has_height > 0:
+                    self.has_yaw is not None and other.has_height is not None and other.has_height > 0 and \
+                    hasattr(other, "get_relevant_area"):
                 occ1 = self.get_relevant_area()
                 occ2 = other.get_relevant_area()
                 return occ1.intersects(occ2)
