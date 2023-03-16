@@ -7,7 +7,7 @@ from pyauto.visualizer import visualizer
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s: %(message)s")
 
-# first, create a scenery with one lane
+# first, create a scenery with one road and two lanes
 statics = Scenery(load_cp=True, name="Simple Scenery")
 l1_core = statics.ontology(auto.Ontology.L1_Core)
 road = l1_core.Road()

@@ -37,6 +37,8 @@ class Scenario(list):
                 scene_number = 0
             for _ in range(scene_number):
                 self.new_scene(add_extras=add_extras, more_extras=more_extras, load_cp=load_cp, scenery=scenery)
+        self._duration = self[-1]._timestamp - self[0]._timestamp
+        self._max_time = self[-1]._timestamp
 
     def __str__(self):
         return str(self._name)
@@ -68,6 +70,8 @@ class Scenario(list):
         if position == -1:
             position = len(self)
         self.insert(position, new_scene)
+        self._duration = self[-1]._timestamp - self[0]._timestamp
+        self._max_time = self[-1]._timestamp
 
     def save_abox(self, file: str = None, format: str = "rdfxml",  save_scenery: bool = True,
                   to_ignore: set[str] = None, **kargs):
@@ -133,7 +137,7 @@ class Scenario(list):
             start_t = self[-1]._timestamp
             for i in numpy.arange(start_t + delta_t, start_t + duration + delta_t, delta_t):
                 logger.info("Simulating scene " + str(i) + " / " + str(start_t + duration))
-                self.append(self[-1].simulate(delta_t=delta_t))
+                self.add_scene(self[-1].simulate(delta_t=delta_t))
         else:
             logger.warning("Can not simulate without an initial scene.")
 

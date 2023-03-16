@@ -29,11 +29,13 @@ with l1_core:
                 entity = ele[0]()
                 geom_e = geo.Geometry()
                 entity.hasGeometry = [geom_e]
-                lane_left = left.parallel_offset(offset)
+                if offset > 0:
+                    lane_left = left.parallel_offset(offset).coords
+                else:
+                    lane_left = reversed(left.coords)
                 offset += ele[1] * road_width
-                lane_right = left.parallel_offset(offset)
-                poly_e = Polygon(list(lane_left.coords) + list(lane_right.coords))
-                geom_e.asWKT = [poly_e.wkt]
+                lane_right = reversed(left.parallel_offset(offset).coords)
+                geom_e.asWKT = [Polygon(list(lane_right) + list(lane_left)).wkt]
             for c in cs:
                 c.has_road = self
                 self.has_lane.append(c)

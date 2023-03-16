@@ -497,7 +497,7 @@ def visualize(model: Scene | Scenario, cps: list = None):
         <div class="card m-2">
             <div class="card-title d-flex flex-row justify-content-center m-1">
                 <h5>"""
-        time = str(i + 1) + " / " + str(len(model))
+        time = str(scene._timestamp) + " / " + str(model._max_time)
         iframe_html += "Scene " + time + "<br />"
         iframe_html += """
                 </h5>

@@ -22,18 +22,25 @@ with physics:
             created.
             :param x: The x coordinate of the center of the object.
             :param y: The y coordinate of the center of the object.
-            :param length: The length of the rectangle to create.
-            :param width: The width of the rectangle to create.
+            :param length: The length of the rectangle to create (along the x-coordinate).
+            :param width: The width of the rectangle to create (along the y coordinate).
             """
             geom = self.namespace.world.get_ontology(auto.Ontology.GeoSPARQL.value).Geometry()
             if length is None or width is None:
                 geom.asWKT = [geometry.Point(x, y).wkt]
                 self.has_width = 0
             else:
-                geom.asWKT = [geometry.Polygon([((x - length) / 2, (y - width) / 2),
-                                                ((x - length) / 2, (y + width) / 2),
-                                                ((x + length) / 2, (y + width) / 2),
-                                                ((x + length) / 2, (y - width) / 2)]).wkt]
+                if length >= width:
+                    p = [((x - length) / 2, (y - width) / 2),
+                        ((x + length) / 2, (y - width) / 2),
+                        ((x + length) / 2, (y + width) / 2),
+                        ((x - length) / 2, (y + width) / 2)]
+                else:
+                    p = [((x + length) / 2, (y - width) / 2),
+                        ((x + length) / 2, (y + width) / 2),
+                        ((x - length) / 2, (y + width) / 2),
+                        ((x - length) / 2, (y - width) / 2)]
+                geom.asWKT = [geometry.Polygon(p).wkt]
                 self.has_length = length
                 self.has_width = width
 
