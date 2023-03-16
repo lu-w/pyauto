@@ -31,15 +31,15 @@ with physics:
                 self.has_width = 0
             else:
                 if length >= width:
-                    p = [((x - length) / 2, (y - width) / 2),
-                        ((x + length) / 2, (y - width) / 2),
-                        ((x + length) / 2, (y + width) / 2),
-                        ((x - length) / 2, (y + width) / 2)]
+                    p = [(x - length / 2, y - width / 2),
+                         (x + length / 2, y - width / 2),
+                         (x + length / 2, y + width / 2),
+                         (x - length / 2, y + width / 2)]
                 else:
-                    p = [((x + length) / 2, (y - width) / 2),
-                        ((x + length) / 2, (y + width) / 2),
-                        ((x - length) / 2, (y + width) / 2),
-                        ((x - length) / 2, (y - width) / 2)]
+                    p = [(x + length / 2, y - width / 2),
+                         (x + length / 2, y + width / 2),
+                         (x - length / 2, y + width / 2),
+                         (x - length / 2, y - width / 2)]
                 geom.asWKT = [geometry.Polygon(p).wkt]
                 self.has_length = length
                 self.has_width = width
