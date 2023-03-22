@@ -58,9 +58,4 @@ For examples, have a look at the `examples` folder in this repository.
   - same for air (temp, rel humd, visibility, pressure)
 - add_marker() for selected objects e.g. Pedestrian_Ford, Bicycle_Ford, etc. (see lateral_marking.py)
 - applies_to relation when adding marker's geometry automatically by checking which previously created lanes and their roads it intersects
-- creating a road network
-  - determining successor lanes based on connecting geometries?
-  - create an n-lane road given its overall width and length and a cross-section -> list of classes and their proportion of the overall road
-    - e.g. `fill_road({l1_core.Roadwalk: 0.1, l1_core.Lane: 0.4, l1_core.Lane: 0.4, l1_core.Roadwalk: 0.1})`
-- Bicyclist (create a bicycle automatically that is driven by it)
 - integrate this package in omega2auto

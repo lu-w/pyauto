@@ -75,7 +75,7 @@ with physics:
 
         @augment(AugmentationType.REIFIED_DATA_PROPERTY, physics.Has_Distance_To, "distance_from", "distance_to",
                  "has_distance")
-        def get_distance(self, other: physics.Spatial_Object) -> float:
+        def augment_distance(self, other: physics.Spatial_Object) -> float:
             """
             Gets the Euclidian distance from this dynamical object to another spatial object. Due to performance reasons
             augmentation is only performed based on dynamical objects.

@@ -14,6 +14,16 @@ l4_core = auto.world.get_ontology(auto.Ontology.L4_Core.value)
 with l4_core:
     @augment_class
     class Vehicle(owlready2.Thing):
+        def add_driver(self, cls: owlready2.ThingClass):
+            driver = cls(self.name + "_driver")
+            if self.has_geometry():
+                geo = self.get_geometry().centroid.xy
+                driver.set_geometry(*geo[0], *geo[1])
+            driver.has_speed = self.has_speed
+            driver.has_yaw = self.has_yaw
+            driver.drives = [self]
+            return driver
+
         @augment(AugmentationType.OBJECT_PROPERTY, "CP_150")
         def has_small_distance(self, other: physics.Spatial_Object):
             if self != other and self.has_geometry() and other.has_geometry() and self.has_speed is not None and \

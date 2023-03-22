@@ -1,7 +1,7 @@
 import math
 import owlready2
 
-from shapely import geometry, wkt
+from shapely import geometry, wkt, affinity
 from owlready2_augmentator import augment, augment_class, AugmentationType
 from ... import auto
 
@@ -15,7 +15,7 @@ with physics:
 
     @augment_class
     class Spatial_Object(owlready2.Thing):
-        def set_geometry(self, x: float, y: float, length: float = None, width: float = None):
+        def set_geometry(self, x: float, y: float, length: float = None, width: float = None, rotate: float = 0):
             """
             Sets the geometry for this object as a WKT using a new GeoSPARQL Geometry individual with the data property
             hasWKT. If only x, y are given, sets as a point. If length and width are given, a rectangle around x, y is
@@ -24,6 +24,9 @@ with physics:
             :param y: The y coordinate of the center of the object.
             :param length: The length of the rectangle to create (along the x-coordinate).
             :param width: The width of the rectangle to create (along the y coordinate).
+            :param rotate: An optional rotation angle in degrees. Positive angles are counter-clockwise and negative
+                are clockwise rotations (as stated in the shapely documentation). Rotation is performed around the
+                centroid.
             """
             geom = self.namespace.world.get_ontology(auto.Ontology.GeoSPARQL.value).Geometry()
             if length is None or width is None:
@@ -40,7 +43,10 @@ with physics:
                          (x + length / 2, y + width / 2),
                          (x - length / 2, y + width / 2),
                          (x - length / 2, y - width / 2)]
-                geom.asWKT = [geometry.Polygon(p).wkt]
+                g = geometry.Polygon(p)
+                if rotate != 0:
+                    g = affinity.rotate(g, rotate, origin="centroid")
+                geom.asWKT = [g.wkt]
                 self.has_length = length
                 self.has_width = width
 
@@ -66,6 +72,12 @@ with physics:
             if self.has_geometry():
                 return wkt.loads(self.hasGeometry[0].asWKT[0])  # .buffer(0)
 
+        def get_distance(self, other: physics.Spatial_Object):
+            if other is not None and self.has_geometry() and other.has_geometry():
+                p1 = wkt.loads(self.hasGeometry[0].asWKT[0])
+                p2 = wkt.loads(other.hasGeometry[0].asWKT[0])
+                return float(p1.distance(p2))
+
         def compute_angle_between_yaw_and_point(self, p) -> float:
             """
             Computes the angle between the point p and the vector starting from self's centroid with self's yaw angle.
@@ -79,6 +91,19 @@ with physics:
                 p_self = [p[0] - geom.centroid.x, p[1] - geom.centroid.y]
                 angle = math.degrees(math.atan2(*p_yaw) - math.atan2(*p_self)) % 360
                 return angle
+
+        def is_point_right_of(self, p) -> float:
+            """
+            :param p: A point (list, tuple, or geometry.Point)
+            :returns: True iff. p is right of self, given self has a yaw to determine its direction. None otherwise.
+            """
+            geom = self.get_geometry()
+            if geom is not None and self.has_yaw is not None:
+                p_yaw = [math.cos(math.radians(self.has_yaw)), math.sin(math.radians(self.has_yaw))]
+                p_self = [p[0] - geom.centroid.x, p[1] - geom.centroid.y]
+                angle = math.degrees(math.atan2(*p_self)) - math.degrees(math.atan2(*p_yaw))
+                return (0 < angle < 180) or (-360 < angle < -180)
+
 
         def compute_left_front_point(self) -> tuple:
             """
@@ -145,7 +170,7 @@ with physics:
 
         @augment(AugmentationType.OBJECT_PROPERTY, "is_in_proximity")
         def in_proximity(self, other: physics.Spatial_Object):
-            if self.has_geometry() and other.has_geometry():
+            if other is not None and self.has_geometry() and other.has_geometry():
                 p1 = wkt.loads(self.hasGeometry[0].asWKT[0])
                 p2 = wkt.loads(other.hasGeometry[0].asWKT[0])
                 if float(p1.distance(p2)) < _IS_IN_PROXIMITY_DISTANCE:
@@ -153,7 +178,7 @@ with physics:
 
         @augment(AugmentationType.OBJECT_PROPERTY, "is_near")
         def near(self, other: physics.Spatial_Object):
-            if self.has_geometry() and other.has_geometry():
+            if other is not None and self.has_geometry() and other.has_geometry():
                 p1 = wkt.loads(self.hasGeometry[0].asWKT[0])
                 p2 = wkt.loads(other.hasGeometry[0].asWKT[0])
                 if float(p1.distance(p2)) < _IS_NEAR_DISTANCE:
@@ -161,35 +186,35 @@ with physics:
 
         @augment(AugmentationType.OBJECT_PROPERTY, "sfIntersects")
         def intersects(self, other: physics.Spatial_Object):
-            if self.has_geometry() and other.has_geometry():
+            if other is not None and self.has_geometry() and other.has_geometry():
                 geo_self = wkt.loads(self.hasGeometry[0].asWKT[0])
                 geo_other = wkt.loads(other.hasGeometry[0].asWKT[0])
                 return geo_self.intersects(geo_other)
 
         @augment(AugmentationType.OBJECT_PROPERTY, "sfOverlaps")
         def overlaps(self, other: physics.Spatial_Object):
-            if self.has_geometry() and other.has_geometry():
+            if other is not None and self.has_geometry() and other.has_geometry():
                 geo_self = wkt.loads(self.hasGeometry[0].asWKT[0])
                 geo_other = wkt.loads(other.hasGeometry[0].asWKT[0])
                 return geo_self.overlaps(geo_other)
 
         @augment(AugmentationType.OBJECT_PROPERTY, "sfTouches")
         def touches(self, other: physics.Spatial_Object):
-            if self.has_geometry() and other.has_geometry():
+            if other is not None and self.has_geometry() and other.has_geometry():
                 geo_self = wkt.loads(self.hasGeometry[0].asWKT[0])
                 geo_other = wkt.loads(other.hasGeometry[0].asWKT[0])
                 return geo_self.touches(geo_other)
 
         @augment(AugmentationType.OBJECT_PROPERTY, "sfWithin")
         def within(self, other: physics.Spatial_Object):
-            if self.has_geometry() and other.has_geometry():
+            if other is not None and self.has_geometry() and other.has_geometry():
                 geo_self = wkt.loads(self.hasGeometry[0].asWKT[0])
                 geo_other = wkt.loads(other.hasGeometry[0].asWKT[0])
                 return geo_self.within(geo_other)
 
         @augment(AugmentationType.OBJECT_PROPERTY, "sfDisjoint")
         def disjoint(self, other: physics.Spatial_Object):
-            if self.has_geometry() and other.has_geometry():
+            if other is not None and self.has_geometry() and other.has_geometry():
                 geo_self = wkt.loads(self.hasGeometry[0].asWKT[0])
                 geo_other = wkt.loads(other.hasGeometry[0].asWKT[0])
                 if float(geo_self.distance(geo_other)) <= _SPATIAL_PREDICATE_THRESHOLD:
@@ -197,21 +222,22 @@ with physics:
 
         @augment(AugmentationType.OBJECT_PROPERTY, "sfCrosses")
         def crosses(self, other: physics.Spatial_Object):
-            if self.has_geometry() and other.has_geometry():
+            if other is not None and self.has_geometry() and other.has_geometry():
                 geo_self = wkt.loads(self.hasGeometry[0].asWKT[0])
                 geo_other = wkt.loads(other.hasGeometry[0].asWKT[0])
                 return geo_self.crosses(geo_other)
 
         @augment(AugmentationType.OBJECT_PROPERTY, "sfContains")
         def contains(self, other: physics.Spatial_Object):
-            if self.has_geometry() and other.has_geometry():
+            if other is not None and self.has_geometry() and other.has_geometry():
                 geo_self = wkt.loads(self.hasGeometry[0].asWKT[0])
                 geo_other = wkt.loads(other.hasGeometry[0].asWKT[0])
                 return geo_self.contains(geo_other)
 
         @augment(AugmentationType.OBJECT_PROPERTY, "is_behind")
         def behind(self, other: physics.Dynamical_Object):
-            if self != other and self.has_geometry() and other.has_geometry() and other.has_yaw is not None:
+            if other is not None and self != other and self.has_geometry() and other.has_geometry() and \
+                    other.has_yaw is not None:
                 p_1 = wkt.loads(self.hasGeometry[0].asWKT[0]).centroid
                 p_2 = wkt.loads(other.hasGeometry[0].asWKT[0]).centroid
                 if float(p_1.distance(p_2)) <= _SPATIAL_PREDICATE_THRESHOLD and not (math.isclose(p_1.x, p_2.x) and
@@ -223,7 +249,7 @@ with physics:
 
         @augment(AugmentationType.OBJECT_PROPERTY, "is_left_of")
         def left_of(self, other: physics.Dynamical_Object):
-            if self != other and self.has_geometry() and other.has_geometry() and \
+            if other is not None and self != other and self.has_geometry() and other.has_geometry() and \
                     other.has_yaw is not None:
                 p_1 = wkt.loads(self.hasGeometry[0].asWKT[0]).centroid
                 p_2 = wkt.loads(other.hasGeometry[0].asWKT[0]).centroid
@@ -236,7 +262,7 @@ with physics:
 
         @augment(AugmentationType.OBJECT_PROPERTY, "is_right_of")
         def right_of(self, other: physics.Dynamical_Object):
-            if self != other and self.has_geometry() and other.has_geometry() and \
+            if other is not None and self != other and self.has_geometry() and other.has_geometry() and \
                     other.has_yaw is not None:
                 p_1 = wkt.loads(self.hasGeometry[0].asWKT[0]).centroid
                 p_2 = wkt.loads(other.hasGeometry[0].asWKT[0]).centroid
@@ -249,7 +275,7 @@ with physics:
 
         @augment(AugmentationType.OBJECT_PROPERTY, "is_in_front_of")
         def in_front_of(self, other: physics.Dynamical_Object):
-            if self != other and self.has_geometry() and other.has_geometry() and \
+            if other is not None and self != other and self.has_geometry() and other.has_geometry() and \
                     other.has_yaw is not None:
                 p_1 = wkt.loads(self.hasGeometry[0].asWKT[0]).centroid
                 p_2 = wkt.loads(other.hasGeometry[0].asWKT[0]).centroid

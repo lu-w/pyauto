@@ -32,6 +32,13 @@ def simulate(thing, mapping: dict[owlready2.NamedIndividual, owlready2.NamedIndi
 with auto.world.get_ontology("http://www.w3.org/2002/07/owl#"):
 
     class Thing(owlready2.Thing):
+        def init(self):
+            """
+            Is called upon start of a simulation. Can be left empty if no initialization of the individual is needed
+            for simulation.
+            """
+            pass
+
         def simulate(self, mapping: dict[owlready2.NamedIndividual, owlready2.NamedIndividual],
                      delta_t: float | int = 0):
             """

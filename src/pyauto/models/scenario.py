@@ -125,19 +125,24 @@ class Scenario(list):
         for sc in self:
             sc.set_scenery(scenery)
 
-    def simulate(self, duration: float | int, delta_t: int | float):
+    def simulate(self, duration: float | int, delta_t: int | float, to_keep: set = None, prioritize: list[str] = None):
         """
         Simulates the future of this scenario, starting from its last scene up to the given duration. Discretizes with
         the given Hertz. Only works if this scenario has at least one scene.
         Note: Changes this scenario, and returns nothing.
         :param duration: The duration (in seconds) which to simulate.
         :param delta_t: The time period between each simulated scene (in seconds).
+        :param to_keep: The properties of individuals to copy over when creating new scenes.
+        :param prioritize: A list of OWL classes or attributes of those individuals who are to prioritize in simulation.
         """
         if len(self) > 0:
             start_t = self[-1]._timestamp
             for i in numpy.arange(start_t + delta_t, start_t + duration + delta_t, delta_t):
                 logger.info("Simulating scene " + str(i) + " / " + str(start_t + duration))
-                self.add_scene(self[-1].simulate(delta_t=delta_t))
+                for ind in self[-1].individuals():
+                    if hasattr(ind, "init"):
+                        ind.init()
+                self.add_scene(self[-1].simulate(delta_t=delta_t, to_keep=to_keep, prioritize=prioritize))
         else:
             logger.warning("Can not simulate without an initial scene.")
 
@@ -148,6 +153,7 @@ class Scenario(list):
         Note that only those methods will be called for augmentations that are decorated with @augment within classes
         that are decorated with @augment_class and loaded by a Python import.
         """
+        logger.info("Augmenting scenario " + str(self))
         for _scene in self:
             _scene.augment()
 

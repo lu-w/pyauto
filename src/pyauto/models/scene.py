@@ -214,7 +214,7 @@ class Scene(owlready2.World):
         # After copying all individuals, we copy the relations that were to_keep
         for ind in mapping.keys():
             for var in ind.get_properties():
-                if var in to_keep:
+                if str(var) in [str(x) for x in to_keep]:
                     vals = getattr(ind, var.python_name)
                     if not isinstance(vals, list):
                         vals = [vals]
@@ -223,22 +223,39 @@ class Scene(owlready2.World):
                             val = mapping[val]
                         if not isinstance(getattr(ind, var.python_name), list):
                             setattr(mapping[ind], var.python_name, val)
-                        else:
+                        elif val not in getattr(mapping[ind], var.python_name):
                             getattr(mapping[ind], var.python_name).append(val)
 
         return mapping, new
 
-    def simulate(self, delta_t: float | int) -> Scene:
+    def simulate(self, delta_t: float | int, to_keep: set = None, prioritize: list[str] = None) -> Scene:
         """
         Performs one simulation step, starting from this scene. Creates a new scene (by means of copying) and calls
         the simulate method for the given time difference for each individual.
         :param delta_t: The time difference to simulate.
+        :param to_keep: The properties of individuals to copy over when creating new scenes.
+        :param prioritize: A list of OWL classes or attributes of those individuals who are to prioritize in simulation.
         """
         ge = self.ontology(auto.Ontology.GeoSPARQL)
         ph = self.ontology(auto.Ontology.Physics)
-        to_keep = {ge.hasGeometry, ge.asWKT, ph.has_height}
-        mapping, new = self.copy(delta_t, to_keep)
-        for ind in mapping.keys():
+        ke = {ge.hasGeometry, ge.asWKT, ph.has_height}
+        if to_keep is not None:
+            ke = ke.union(to_keep)
+        mapping, new = self.copy(delta_t, ke)
+        # Ensures that things are in order (e.g. for prioritizing drivers in simulation)
+        if prioritize is not None:
+            def prio_key(a):
+                for i, prio in enumerate(prioritize):
+                    if prio in [str(x) for x in a.INDIRECT_is_a] or hasattr(a, prio):
+                        return i
+                return abs(hash(a) + len(prioritize))
+            key=prio_key
+        else:
+            key = hash
+        inds = sorted(mapping.keys(), key=key)
+        for ind in inds:
+            if hasattr(mapping[ind], "init"):
+                mapping[ind].init()
             if hasattr(ind, "simulate"):
                 ind.simulate(mapping, delta_t)
         return new

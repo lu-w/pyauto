@@ -20,8 +20,6 @@ with l1_core:
             :returns: A list of the newly created lanes
             """
             # assumption: road has constant width
-            # assumption: the left part of the road is the boundary with the western most point in 2D view
-            #  - if both boundaries share this point, then the northern most boundary is it
             cs_sum = reduce(lambda a, b: a + b, [x[1] for x in cross_section])
             if cs_sum > 1.0:
                 raise TypeError("Parts of cross section must be lower than or equal to 1, but is " + str(cs_sum))
