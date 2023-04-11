@@ -4,6 +4,7 @@ import logging
 import os
 import tempfile
 
+import numpy
 import owlready2
 import owlready2_augmentator
 
@@ -191,7 +192,9 @@ class Scene(owlready2.World):
         :returns: A tuple of a mapping from the old (i.e. in this scene) to the new individuals (i.e. in the returned
             scene) and the newly created scene.
         """
-        new = Scene(timestamp=self._timestamp + delta_t, parent_scenario=self._scenario, scenery=self._scenery,
+        if "." in str(delta_t):
+            timestamp = numpy.round(self._timestamp + delta_t, len(str(delta_t).split(".")[1]))
+        new = Scene(timestamp=timestamp, parent_scenario=self._scenario, scenery=self._scenery,
                     add_extras=self._added_extras, more_extras=self._more_extras, load_cp=self._loaded_cp)
         mapping = {}
 
@@ -246,7 +249,7 @@ class Scene(owlready2.World):
         if prioritize is not None:
             def prio_key(a):
                 for i, prio in enumerate(prioritize):
-                    if prio in [str(x) for x in a.INDIRECT_is_a] or hasattr(a, prio):
+                    if len([x for x in a.INDIRECT_is_a if prio in str(x)]) > 0 or hasattr(a, prio):
                         return i
                 return abs(hash(a) + len(prioritize))
             key=prio_key
