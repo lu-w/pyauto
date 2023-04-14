@@ -138,7 +138,8 @@ class Scenario(list):
         if len(self) > 0:
             start_t = self[-1]._timestamp
             for i in numpy.linspace(start_t + delta_t, start_t + duration, int(duration / delta_t)):
-                i = numpy.round(i, len(str(delta_t).split(".")[1]))
+                if "." in str(delta_t):
+                    i = numpy.round(i, len(str(delta_t).split(".")[1]))
                 logger.info("Simulating scene " + str(i) + " / " + str(start_t + duration))
                 for ind in self[-1].individuals():
                     if hasattr(ind, "init"):

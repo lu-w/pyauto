@@ -192,8 +192,9 @@ class Scene(owlready2.World):
         :returns: A tuple of a mapping from the old (i.e. in this scene) to the new individuals (i.e. in the returned
             scene) and the newly created scene.
         """
+        timestamp = self._timestamp + delta_t
         if "." in str(delta_t):
-            timestamp = numpy.round(self._timestamp + delta_t, len(str(delta_t).split(".")[1]))
+            timestamp = numpy.round(timestamp, len(str(delta_t).split(".")[1]))
         new = Scene(timestamp=timestamp, parent_scenario=self._scenario, scenery=self._scenery,
                     add_extras=self._added_extras, more_extras=self._more_extras, load_cp=self._loaded_cp)
         mapping = {}
