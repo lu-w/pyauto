@@ -131,6 +131,7 @@ scenario_css = """
 def visualize(model: Scene | Scenario, cps: list = None):
     """
     Creates an HTML visualization of the given scene or scenario. Starts a web server at localhost:8000 (blocking).
+    If port 8000 is used, it uses the first free port number after 8000.
     :param model: The scenario to visualize.
     :param cps: A list of criticality phenomena which optionally to visualize as well.
     :return: The path to the directory in which to find the created HTML visualization.
@@ -157,13 +158,57 @@ def visualize(model: Scene | Scenario, cps: list = None):
     </head>
     <body>
         <div class=\"d-flex flex-row justify-content-center\"><div class=\"mt-3 py-1 px-6 alert alert-info\" style=\"display: inline-block\" role=\"alert\"><center><h5>""" + title + """ """ + scenario_info + """</h5></center></div></div>
-        <div class="slidecontainer m-2">
-            <input type="range" min="1" max=\"""" + str(len(model)) + """\" value="1" class="slider" id="myRange">
+        <div class=\"row\">
+            <div class=\"col-md-1 text-center\">
+                <button id=\"playButton\" type=\"button\" class=\"btn btn-primary center\">Play</button>
+            </div>
+            <div class=\"col-md-11\">
+                <input type=\"range\" min=\"1\" max=\"""" + str(len(model)) + """\" value="1" class="slider" id="scenarioSlider">
+            </div>
         </div>
         <script>
-            var slider = document.getElementById("myRange");
-            var last_set = 1
-            var show_all_cps = true
+            function sleep(ms) {
+              return new Promise(resolve => setTimeout(resolve, ms));
+            }
+        
+            async function playScenario() {
+              scenario_paused = false;
+              $("#playButton").html("Pause");
+              $("#playButton").unbind("click").bind("click", function() { scenario_paused = true; });
+            
+              scenes = $("#scenarioSlider").attr("max");
+              var slider = document.getElementById("scenarioSlider");
+              slider.value = 1;
+              for (let i = last_set; i <= scenes; i++) {
+                if (scenario_paused) {
+                  break;
+                }
+                var t_prev = $("#plt" + last_set).find(".scene-plot").contents().find("#sceneTime").text();
+                var t_now = $("#plt" + i).find(".scene-plot").contents().find("#sceneTime").text();
+                var t_diff = t_now - t_prev;
+                await sleep(t_diff * 1000);
+                if (scenario_paused) {
+                  break;
+                }
+                var last_output = document.getElementById("plt" + last_set);
+                last_output.style.display = 'none';
+                var output = document.getElementById("plt" + i);
+                output.style.display = 'block';
+                slider.value = i;
+                last_set = i;
+              }
+              
+              $("#playButton").html("Play");
+              $("#playButton").unbind("click").bind("click", playScenario);
+            }
+            
+            var slider = document.getElementById("scenarioSlider");
+            var last_set = 1;
+            var show_all_cps = true;
+            var scenario_paused = true;
+            
+            $("#playButton").click(playScenario);
+            
             slider.oninput = function() {
               var output = document.getElementById("plt" + this.value);
               var last_output = document.getElementById("plt" + last_set);
@@ -171,6 +216,7 @@ def visualize(model: Scene | Scenario, cps: list = None):
               output.style.display = 'block';
               last_set = this.value
             }
+            
             function toggle_cps_all_iframes() {
                 show_all_cps = !show_all_cps
                 $(".cp-all-button").each(function(i) {
@@ -406,7 +452,7 @@ def visualize(model: Scene | Scenario, cps: list = None):
                     """
         cp_count_total = len([x for x in cps if (isinstance(x.traffic_model, list) and scene in x.traffic_model) or
                               x.traffic_model == scenario_inst])
-        html += """<div class="">
+        html += """<div style="margin-top: 45px;">
                         <label class="btn btn-primary active" style="margin-bottom: 10px; width: %s">
                             <input type="checkbox" class="cp-all-button" id="cp-all-button-%s" autocomplete="off" onclick="toggle_cps_all_iframes();" checked>
                             <span>Show all criticality phenomena (%s)</span>
@@ -497,7 +543,7 @@ def visualize(model: Scene | Scenario, cps: list = None):
         <div class="card m-2">
             <div class="card-title d-flex flex-row justify-content-center m-1">
                 <h5>"""
-        time = str(scene._timestamp) + " / " + str(model._max_time)
+        time = "<span id=\"sceneTime\">" + str(scene._timestamp) + "</span> / " + str(model._max_time)
         iframe_html += "Scene " + time + "<br />"
         iframe_html += """
                 </h5>
