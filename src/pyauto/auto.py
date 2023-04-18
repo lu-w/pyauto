@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 world = owlready2.default_world
 
 # Imported modules of extras (in order to be able to reload them in case of more than one world)
-_extras = []
+_extras = set()
 
 
 class Ontology(Enum):
@@ -114,7 +114,8 @@ def _add_extras(more_extras: list[str] = None):
         for file in files:
             if file.endswith(".py") and not file.startswith("_"):
                 extra_mod = "pyauto." + root.split("pyauto/")[-1].replace("/", ".") + "." + file.replace(".py", "")
-                extra_mods.append(extra_mod)
+                if extra_mod not in extra_mods:
+                    extra_mods.append(extra_mod)
     succ_mods = []
     fail_mods = []
     for extra_mod in extra_mods:
@@ -130,10 +131,10 @@ def _add_extras(more_extras: list[str] = None):
                             wc_mod = mod + "." + file.replace(".py", "")
                             wc_imp = importlib.import_module(wc_mod)
                             succ_mods.append(wc_mod)
-                            _extras.append(wc_imp)
+                            _extras.add(wc_imp)
             else:
                 succ_mods.append(mod)
-                _extras.append(imp)
+                _extras.add(imp)
 
         except ModuleNotFoundError:
             fail_mods.append(extra_mod)
