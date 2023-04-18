@@ -178,7 +178,6 @@ def visualize(model: Scene | Scenario, cps: list = None):
             
               scenes = $("#scenarioSlider").attr("max");
               var slider = document.getElementById("scenarioSlider");
-              slider.value = 1;
               for (let i = last_set; i <= scenes; i++) {
                 if (scenario_paused) {
                   break;
@@ -433,7 +432,6 @@ def visualize(model: Scene | Scenario, cps: list = None):
                         entity_relations.append(entity_cp_relations)
             elif len(set([str(y) for y in entity.INDIRECT_is_a]).intersection(_NO_PRINTING_CLASSES)) == 0:
                 no_geo_entities.append(_describe_entity(entity))
-        logger.info("Done with layout, creating MPLD3 plot, JS plugins, and HTML string")
         pl2 = plt.plot(centroids_x, centroids_y, "o", color="b", mec="k", markersize=14, mew=1, alpha=.4)
         tooltip_individuals = ToolTipAndClickInfo(pl2[0], labels=entity_labels, targets=entity_relations,
                                                   targets_per_cp=relations_per_cp_class)
