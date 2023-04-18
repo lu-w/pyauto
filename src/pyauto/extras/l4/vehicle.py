@@ -16,6 +16,7 @@ with l4_core:
     class Vehicle(owlready2.Thing):
         def add_driver(self, cls: owlready2.ThingClass):
             driver = cls(self.name + "_driver")
+            driver.is_a.append(l4_core.Driver)
             if self.has_geometry():
                 geo = self.get_geometry().centroid.xy
                 driver.set_geometry(*geo[0], *geo[1])
