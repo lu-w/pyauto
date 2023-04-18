@@ -210,7 +210,7 @@ class Scene(owlready2.World):
                     new_ind = getattr(cls, ind.is_a[0].name)(ind.name)
                     mapping[ind] = new_ind
                     for cls in ind.is_a[1:]:
-                        new_cls = new.get_ontology(cls.namespace.base_iri)
+                        new_cls = getattr(new.get_ontology(cls.namespace.base_iri), str(cls).split(".")[-1])
                         new_ind.is_a.append(new_cls)
                 else:
                     logger.warning("Can not copy over an individual " + str(ind) + " which has no classes.")
