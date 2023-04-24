@@ -1,9 +1,12 @@
 import math
 import owlready2
 
+from functools import cache
+
 from shapely import geometry, wkt, affinity
 from owlready2_augmentator import augment, augment_class, AugmentationType
 from ... import auto
+from .. import utils
 
 _SPATIAL_PREDICATE_THRESHOLD = 50  # m, the distance in which spatial predicates are augmented
 _IS_NEAR_DISTANCE = 4              # m, the distance for which spatial objects are close to each other
@@ -285,3 +288,40 @@ with physics:
                     p_self = [p_1.x - p_2.x, p_1.y - p_2.y]
                     angle = math.degrees(math.atan2(*p_yaw) - math.atan2(*p_self)) % 360
                     return angle < 90 or angle > 270
+
+        @cache
+        def get_end(self, angle: float, p: tuple, length: float = 1) -> geometry.Polygon:
+            """
+            Returns the end of the spatial object when viewed from the given point at the given angle.
+            Assumption: Only works if the geometry of this object is given as a polygon with a symmetrical point list.
+            :param angle: Viewing angle (in degrees, global)
+            :param p: Viewing point (as tuple)
+            :param length: Length (meters) of the end piece to find, default is 1 meter.
+            :returns: A polygon representing the end piece of the object, or the whole object geometry if no end could
+                be uniquely determined (i.e., p is exactly in the middle and the angle points similarly away w.r.t. both
+                ends.
+            """
+            def get_incremental_closest_point_from_yaw(line, p, angle, init_field_of_relevance=60,
+                                                       max_field_over_relevance=110, step_size=10):
+                i = 0
+                p_c = None
+                while p_c is None and init_field_of_relevance + i <= max_field_over_relevance:
+                    p_c = utils.get_closest_point_from_yaw(line, p, angle, init_field_of_relevance + i)
+                    i += step_size
+                return p_c
+
+            p = geometry.Point(p)
+            g = self.get_geometry()
+            _, _, front, back = utils.split_polygon_into_boundaries(g)
+            p_f = get_incremental_closest_point_from_yaw(front, p, angle)
+            p_b = get_incremental_closest_point_from_yaw(back, p, angle)
+            end = None
+            if p_b is None or (p_f is not None and p_f.distance(p) < p_b.distance(p)):
+                end = front
+            elif p_f is None or (p_b is not None and p_f.distance(p) >= p_b.distance(p)):
+                end = back
+            if end is not None:
+                return end.centroid.buffer(length * 2).intersection(g)
+            else:
+                logger.warning("No end found for object " + str(self) + " from " + str(p) + " angled " + str(angle))
+                return g
