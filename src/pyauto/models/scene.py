@@ -258,8 +258,6 @@ class Scene(owlready2.World):
             key = hash
         inds = sorted(mapping.keys(), key=key)
         for ind in inds:
-            if hasattr(mapping[ind], "init"):
-                mapping[ind].init()
             if hasattr(ind, "simulate"):
                 ind.simulate(mapping, delta_t)
         return new

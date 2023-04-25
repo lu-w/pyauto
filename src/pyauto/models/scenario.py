@@ -141,9 +141,6 @@ class Scenario(list):
                 if "." in str(delta_t):
                     i = numpy.round(i, len(str(delta_t).split(".")[1]))
                 logger.info("Simulating scene " + str(i) + " / " + str(start_t + duration))
-                for ind in self[-1].individuals():
-                    if hasattr(ind, "init"):
-                        ind.init()
                 self.add_scene(self[-1].simulate(delta_t=delta_t, to_keep=to_keep, prioritize=prioritize))
         else:
             logger.warning("Can not simulate without an initial scene.")
