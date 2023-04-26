@@ -55,6 +55,15 @@ with physics:
 
             self.hasGeometry = [geom]
 
+        def set_shapely_geometry(self, geometry: geometry.base.BaseGeometry):
+            """
+            Sets the given shapely geometry for the spatial object, by creating a WKT string an the GeoSPARQL objects.
+            :param geometry: The shapely geometry (has to support wkt property)
+            """
+            geom = self.namespace.world.get_ontology(auto.Ontology.GeoSPARQL.value).Geometry()
+            geom.asWKT = [geometry.wkt]
+            self.hasGeometry = [geom]
+
         def has_geometry(self) -> bool:
             """
             Returns true iff x has a geometry represented as a WKT literal.
@@ -290,7 +299,7 @@ with physics:
                     return angle < 90 or angle > 270
 
         @cache
-        def get_end(self, angle: float, p: tuple, length: float = 1) -> geometry.Polygon:
+        def get_end(self, angle: float, p: tuple, length: float=1) -> geometry.Polygon:
             """
             Returns the end of the spatial object when viewed from the given point at the given angle.
             Assumption: Only works if the geometry of this object is given as a polygon with a symmetrical point list.

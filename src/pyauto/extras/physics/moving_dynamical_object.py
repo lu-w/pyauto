@@ -29,7 +29,7 @@ with physics:
             :param other: The other moving dynamical object.
             :returns: True iff. the intersecting path condition is satisfied.
             """
-            t_self, t_other = self.intersects_path_with(other)
+            t_self, t_other, _ = self.intersects_path_with(other)
             if t_self is None or t_other is None:
                 return False
             else:
