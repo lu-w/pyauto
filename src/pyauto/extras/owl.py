@@ -15,8 +15,8 @@ def simulate(thing, mapping: dict[owlready2.NamedIndividual, owlready2.NamedIndi
     """
     # Copies over *all* properties (if they are not already present)
     for var in vars(thing).keys():
-        if (getattr(mapping[thing], var) == [] or getattr(mapping[thing], var) is None) and \
-                not var.startswith("_"):
+        if hasattr(mapping[thing], var) and (getattr(mapping[thing], var) == [] or
+                                             getattr(mapping[thing], var) is None) and not var.startswith("_"):
             vals = vars(thing)[var]
             if not isinstance(vals, list):
                 vals = [vals]
