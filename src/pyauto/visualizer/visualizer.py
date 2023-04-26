@@ -574,6 +574,7 @@ def visualize(model: Scene | Scenario, cps: list = None):
             <div class="card-body m-0 p-0 d-flex justify-content-center">
         """
         scene_html = mpld3.fig_to_html(fig, d3_url=d3_js, mpld3_url=mpld3_js)
+        plt.close(fig)
         iframe_html += ''.join("\t\t"+line+"\n" for line in scene_html.splitlines())
         iframe_html += """
             </div>

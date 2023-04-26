@@ -147,7 +147,7 @@ with physics:
             return t_1, t_2, soonest_intersection
 
         @cache
-        def prediction(self, delta_t: float | int = 0.1, horizon: float | int = 3.1):
+        def prediction(self, delta_t: float | int = 0.2, horizon: float | int = 4):
             """
             Implementation of a sampling-based, simple constant velocity, constant yaw rate prediction model based on
             bounding boxes.
