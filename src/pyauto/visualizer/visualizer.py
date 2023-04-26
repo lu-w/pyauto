@@ -1,5 +1,6 @@
 # Visualizer is for debugging purposes only
 import logging
+import shutil
 import math
 import random
 import threading
@@ -22,7 +23,6 @@ from ..models.scene import Scene
 from ..models.scenario import Scenario
 
 # TODO
-# - visualize scenario level CPs
 # - show has distance to in table for each individual - as ternary relations - instead of omitting it
 
 ####################
@@ -146,13 +146,38 @@ def visualize(model: Scene | Scenario, cps: list = None):
     # Assemble scenario title
     title = str(model)
     scenario_info = "(" + str(len(model)) + " Scenes)"
+
+    # Create folder to serve from, copy CSS/JS files there
+    tmp_dir = tempfile.mkdtemp()
+    file_location = dir_path = os.path.dirname(os.path.realpath(__file__)) + "/files"
+    bootstrap_css = "css/bootstrap.min.css"
+    bootstrap_js = "js/bootstrap.bundle.min.js"
+    jquery_js = "js/jquery-3.6.0.min.js"
+    d3_js = "js/d3.v5.js"
+    mpld3_js = "js/mpld3.v0.5.7.js"
+    ico = "ico/favicon.ico"
+    bootstrap_css_pkg = file_location + "/" + bootstrap_css
+    bootstrap_js_pkg = file_location + "/" + bootstrap_js
+    jquery_js_pkg = file_location + "/" + jquery_js
+    d3_js_pkg = file_location + "/" + d3_js
+    mpld3_js_pkg = file_location + "/" + mpld3_js
+    ico_pkg = file_location + "/" + ico
+    os.mkdir(tmp_dir + "/css")
+    os.mkdir(tmp_dir + "/js")
+    shutil.copy(bootstrap_css_pkg, tmp_dir + "/css")
+    shutil.copy(bootstrap_js_pkg, tmp_dir + "/js")
+    shutil.copy(jquery_js_pkg, tmp_dir + "/js")
+    shutil.copy(d3_js_pkg, tmp_dir + "/js")
+    shutil.copy(mpld3_js_pkg, tmp_dir + "/js")
+    shutil.copy(ico_pkg, tmp_dir)
+
     # Main HTML code for index.html
     html_body = """<!DOCTYPE html>
 <html>
     <head>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <link href=\"""" + str(bootstrap_css) + """\" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+        <script src=\"""" + str(bootstrap_js) + """\" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+        <script src=\"""" + str(jquery_js) + """\"></script>
         <meta charset="utf-8">""" + scenario_css + """
         <title>""" + title + """</title>
     </head>
@@ -476,9 +501,9 @@ def visualize(model: Scene | Scenario, cps: list = None):
     <head>
         <meta charset="utf-8">
         <meta HTTP-EQUIV="Access-Control-Allow-Origin" CONTENT="localhost">
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <link href=\"""" + str(bootstrap_css) + """\" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+        <script src=\"""" + str(bootstrap_js) + """\" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+        <script src=\"""" + str(jquery_js) + """\"></script>
     </head>
     <body>"""
         iframe_html += scene_css
@@ -548,7 +573,7 @@ def visualize(model: Scene | Scenario, cps: list = None):
             </div>
             <div class="card-body m-0 p-0 d-flex justify-content-center">
         """
-        scene_html = mpld3.fig_to_html(fig)
+        scene_html = mpld3.fig_to_html(fig, d3_url=d3_js, mpld3_url=mpld3_js)
         iframe_html += ''.join("\t\t"+line+"\n" for line in scene_html.splitlines())
         iframe_html += """
             </div>
@@ -574,7 +599,6 @@ def visualize(model: Scene | Scenario, cps: list = None):
     # Assemble main HTML
     pl_html.append("\n\t</body>\n</html>")
     # Write main HTML to index.html
-    tmp_dir = tempfile.mkdtemp()
     index_path = tmp_dir + "/index.html"
     with open(index_path, "w") as file:
         for html in pl_html:
@@ -776,6 +800,7 @@ class ToolTipAndClickInfo(mpld3.plugins.PointHTMLTooltip):
     """
 
     def __init__(self, points, labels=None, targets=None, targets_per_cp=None, hoffset=0, voffset=10, css=None):
+
         targets_ = []
         for x in targets or []:
             x_ = []

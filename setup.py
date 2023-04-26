@@ -7,7 +7,7 @@ setup(
     author ="Lukas Westhofen",
     author_email="lukas.westhofen@dlr.de",
     include_package_data=True,
-    package_data={"pyauto": ["auto"]},
+    package_data={"pyauto": ["auto", "visualizer/files"]},
     install_requires=[
         "owlready2",
         "matplotlib",
