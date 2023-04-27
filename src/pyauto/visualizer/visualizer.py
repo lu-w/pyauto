@@ -12,6 +12,7 @@ import re
 from shapely import wkt
 import matplotlib.pyplot as plt
 import mpld3
+import tqdm
 import screeninfo
 import tempfile
 import webbrowser
@@ -308,8 +309,8 @@ def visualize(model: Scene | Scenario, cps: list = None):
         return "#" + "%06x" % color
 
     # Create HTML for each scene
-    for i, scene in enumerate(model):
-        logger.info("Plotting scene " + str(i + 1) + " / " + str(len(model)))
+    logger.info("Plotting " + str(len(model)) + " scenes")
+    for i, scene in tqdm.tqdm(enumerate(model), total=len(model)):
         scene_cps = [cp for cp in cps if cp.is_representable_in_scene(scene)]
         cp_colors = list(map(get_color, range(len([x for c in scene_cps for x in c.subjects]))))
         cp_color = 0

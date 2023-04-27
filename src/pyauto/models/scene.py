@@ -206,12 +206,13 @@ class Scene(owlready2.World):
             # Only create individuals that are not already there (e.g. exclude colors)
             if ind.iri not in [x.iri for x in new.individuals()]:
                 if len(ind.is_a) > 0:
-                    cls = new.get_ontology(ind.is_a[0].namespace.base_iri)
-                    new_ind = getattr(cls, ind.is_a[0].name)(ind.name)
+                    nsp = new.get_ontology(type(ind).namespace.base_iri)
+                    new_ind = getattr(nsp, type(ind).name)(ind.name)
                     mapping[ind] = new_ind
-                    for cls in ind.is_a[1:]:
+                    for cls in ind.is_a:
                         new_cls = getattr(new.get_ontology(cls.namespace.base_iri), str(cls).split(".")[-1])
-                        new_ind.is_a.append(new_cls)
+                        if new_cls not in new_ind.is_a:
+                            new_ind.is_a.append(new_cls)
                 else:
                     logger.warning("Can not copy over an individual " + str(ind) + " which has no classes.")
 

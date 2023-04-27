@@ -93,11 +93,14 @@ with physics:
                 if distance <= _SPATIAL_PREDICATE_THRESHOLD:
                     return distance
 
-        def intersects_path_with(self, other: physics.Moving_Dynamical_Object) -> tuple[float, float]:
+        def intersects_path_with(self, other: physics.Moving_Dynamical_Object, delta_t: float | int=0.25,
+                                 horizon: float | int=8) -> tuple[float, float]:
             """
             Whether this object has an intersecting path with the given other object. Uses sampling of a simple
             constant velocity, constant yaw rate prediction model based on bounding boxes.
             :param other: The other moving dynamical object.
+            :param delta_t: The time delta for sampling within the prediction model.
+            :param horizon: The prediction horizon in seconds to look for intersecting paths in the prediction model.
             :returns: The times that self and other needs and the intersection point as a triple, or None, None, None if
                 there is no intersection point.
             """
@@ -123,8 +126,8 @@ with physics:
                 p_self = sympy.Point(p_1.x, p_1.y)
                 p_other = sympy.Point(p_2.x, p_2.y)
                 if p_self != p_other:
-                    pred_1 = self.prediction()
-                    pred_2 = other.prediction()
+                    pred_1 = self.prediction(delta_t=delta_t, horizon=horizon)
+                    pred_2 = other.prediction(delta_t=delta_t, horizon=horizon)
                     candidates = []
                     for g_1, t_p_1 in pred_1:
                         for g_2, t_p_2 in pred_2:
@@ -147,7 +150,7 @@ with physics:
             return t_1, t_2, soonest_intersection
 
         @cache
-        def prediction(self, delta_t: float | int = 0.2, horizon: float | int = 4):
+        def prediction(self, delta_t: float | int = 0.1, horizon: float | int = 8):
             """
             Implementation of a sampling-based, simple constant velocity, constant yaw rate prediction model based on
             bounding boxes.
@@ -185,7 +188,7 @@ with physics:
                 geo = affinity.rotate(geo, angle=yaw - prev_yaw, origin=center)
                 geo = affinity.translate(geo, xoff=xoff, yoff=yoff)
                 geos.append((geo, i))
-                yaw_rate *= 1 - (0.5 * delta_t)  # linear reduction of yaw rate (50% reduction / s) in prediction
+                yaw_rate *= 1 - (0.6 * delta_t)  # linear reduction of yaw rate (60% reduction / s) in prediction
             print("Predictions for " + str(self))
             print(geometry.MultiPolygon([x[0] for x in geos]))
             return geos
