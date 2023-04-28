@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 world = owlready2.default_world
 
 # Imported modules of extras (in order to be able to reload them in case of more than one world)
-_extras = set()
+_extras = dict()
 
 
 class Ontology(Enum):
@@ -101,15 +101,20 @@ def _add_extras(more_extras: list[str] = None):
         imports *all* Python files located in the package's (sub)folder(s).
     """
     global _extras
+
+    importlib.invalidate_caches()
+
     # Reload all already loaded modules
-    for mod in _extras:
-        importlib.reload(mod)
+    importlib.invalidate_caches()
+    for mod in sorted(_extras.keys(), reverse=True):
+        importlib.reload(_extras[mod])
 
     # Load all modules that are not already loaded (handled by importlib)
     if more_extras is None:
         extra_mods = []
     else:
         extra_mods = more_extras
+    # Everything in pyauto.extra module is loaded by default
     for root, dirs, files in os.walk(os.path.dirname(os.path.realpath(__file__)) + "/extras"):
         for file in files:
             if file.endswith(".py") and not file.startswith("_"):
@@ -119,25 +124,26 @@ def _add_extras(more_extras: list[str] = None):
     succ_mods = []
     fail_mods = []
     for extra_mod in extra_mods:
-        try:
-            mod = extra_mod
-            while mod.endswith(".*"):
-                mod = extra_mod[:-2]
-            imp = importlib.import_module(mod)
-            if extra_mod.endswith(".*"):
-                for root, dirs, files in os.walk("/".join(imp.__file__.split("/")[:-1])):
-                    for file in files:
-                        if file.endswith(".py") and not file.startswith("_"):
-                            wc_mod = mod + "." + file.replace(".py", "")
-                            wc_imp = importlib.import_module(wc_mod)
-                            succ_mods.append(wc_mod)
-                            _extras.add(wc_imp)
-            else:
-                succ_mods.append(mod)
-                _extras.add(imp)
-
-        except ModuleNotFoundError:
-            fail_mods.append(extra_mod)
+            try:
+                mod = extra_mod
+                while mod.endswith(".*"):
+                    mod = extra_mod[:-2]
+                imp = importlib.import_module(mod)
+                if extra_mod.endswith(".*"):
+                    for root, dirs, files in os.walk("/".join(imp.__file__.split("/")[:-1])):
+                        for file in files:
+                            if file.endswith(".py") and not file.startswith("_"):
+                                wc_mod = mod + "." + file.replace(".py", "")
+                                if wc_mod not in _extras.keys():
+                                    wc_imp = importlib.import_module(wc_mod)
+                                    succ_mods.append(wc_mod)
+                                    _extras[wc_mod] = wc_imp
+                else:
+                    if mod not in _extras.keys():
+                        succ_mods.append(mod)
+                        _extras[mod] = imp
+            except ModuleNotFoundError:
+                fail_mods.append(extra_mod)
     logger.info("Loaded extra modules " + ", ".join(succ_mods) + " into A.U.T.O.")
     if len(fail_mods) > 0:
         logger.warning("Extra modules " + ", ".join(fail_mods) + " not installed, not loaded into A.U.T.O.")
