@@ -311,7 +311,7 @@ with physics:
                 ends.
             """
             def get_incremental_closest_point_from_yaw(line, p, angle, init_field_of_relevance=60,
-                                                       max_field_over_relevance=110, step_size=10):
+                                                       max_field_over_relevance=100, step_size=10):
                 i = 0
                 p_c = None
                 while p_c is None and init_field_of_relevance + i <= max_field_over_relevance:

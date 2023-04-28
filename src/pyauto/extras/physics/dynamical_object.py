@@ -170,7 +170,7 @@ with physics:
                 prev_yaw = yaw
                 yaw = prev_yaw + yaw_rate * delta_t
                 # if speed is 0, we assume object speeds up to some rather low speed
-                speed = max(Dynamical_Object._RELEVANT_LOWEST_SPEED * 4, self.has_speed)
+                speed = max(Dynamical_Object._RELEVANT_LOWEST_SPEED * 6, self.has_speed)
                 xoff = math.cos(math.radians(yaw)) * speed * delta_t
                 yoff = math.sin(math.radians(yaw)) * speed * delta_t
                 if isinstance(geo, geometry.Polygon):
