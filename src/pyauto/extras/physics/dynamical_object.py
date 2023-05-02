@@ -94,7 +94,7 @@ with physics:
                     return distance
 
         def intersects_path_with(self, other: physics.Moving_Dynamical_Object, delta_t: float | int=0.25,
-                                 horizon: float | int=8) -> tuple[float, float]:
+                                 horizon: float | int=10) -> tuple[float, float]:
             """
             Whether this object has an intersecting path with the given other object. Uses sampling of a simple
             constant velocity, constant yaw rate prediction model based on bounding boxes.

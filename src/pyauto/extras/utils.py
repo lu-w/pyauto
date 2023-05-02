@@ -24,8 +24,11 @@ def split_polygon_into_boundaries(p: Polygon, splitting_points: tuple[Point, Poi
     """
     # TODO: implement splitting points
     coords = p.boundary.coords[:-1]  # last point is the first for a closed polygon - ignore it
-    assert(len(coords) >= 4 and len(coords) % 2 == 0)
-    half = int(len(coords) / 2)
+    assert(len(coords) >= 4)
+    if len(coords) % 2 == 0:
+        half = int(len(coords) / 2)
+    else:
+        half = int((len(coords) + 1) / 2)
     right_coords = coords[:half]
     front_coords = [coords[half - 1], coords[half]]
     left_coords = reversed(coords[half:len(coords)])
