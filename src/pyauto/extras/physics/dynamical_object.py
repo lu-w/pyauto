@@ -246,8 +246,36 @@ with physics:
                 x = res.x
                 y = res.y
             else:
-                logger.warning("Using target in front of object instead of polygon following computation since no "
-                               "closest point on polygon could be determined")
+                logger.warning(str(self) + ": Using target in front of object instead of polygon following computation "
+                                           "since no closest point on polygon could be determined")
                 x = target_distance * math.cos(math.radians(self.has_yaw)) + g.x
                 y = target_distance * math.sin(math.radians(self.has_yaw)) + g.y
             return round(x, 2), round(y, 2)
+
+        def is_intersection_possible(self, other, max_distance: int | float=10):
+            if hasattr(self, "drives") and len(self.drives) > 0:
+                dist = other.get_distance(self.drives[0])
+            else:
+                dist = other.get_distance(self)
+            # Excludes drivers (we handle their vehicles instead)
+            return other != self and other not in self.drives and \
+                (not hasattr(other, "drives") or len(other.drives) == 0) and \
+                (other.has_speed and self.has_speed and (dist / self.has_speed + dist / other.has_speed)
+                 <= max_distance) or \
+                (not other.has_speed and self.has_speed and (dist / self.has_speed) <= max_distance) or \
+                (not self.has_speed and other.has_speed and (dist / other.has_speed) <= max_distance)
+
+        @cache
+        def get_intersecting_objects(self, horizon=10, delta_t=0.25):
+            res = []
+            for obj in self.namespace.world.search(
+                    type=self.namespace.world.get_ontology(auto.Ontology.Physics.value).Dynamical_Object):
+                if self.is_intersection_possible(obj, max_distance=horizon):
+                    if hasattr(self, "drives") and len(self.drives) > 0:
+                        self_obj = self.drives[0]
+                    else:
+                        self_obj = self
+                    int_path = self_obj.intersects_path_with(obj, delta_t=delta_t, horizon=horizon)
+                    if None not in int_path:
+                        res.append(tuple([obj]) + int_path)
+            return res
