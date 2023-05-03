@@ -174,7 +174,7 @@ with physics:
                 prev_yaw = yaw
                 yaw = prev_yaw + yaw_rate * delta_t
                 # if speed is 0, we assume object speeds up to some rather low speed
-                speed = max(Dynamical_Object._RELEVANT_LOWEST_SPEED * 6, self.has_speed)
+                speed = max(Dynamical_Object._RELEVANT_LOWEST_SPEED * 10, self.has_speed)
                 xoff = math.cos(math.radians(yaw)) * speed * delta_t
                 yoff = math.sin(math.radians(yaw)) * speed * delta_t
                 if isinstance(geo, geometry.Polygon):
@@ -192,7 +192,7 @@ with physics:
                 geo = affinity.rotate(geo, angle=yaw - prev_yaw, origin=center)
                 geo = affinity.translate(geo, xoff=xoff, yoff=yoff)
                 geos.append((geo, i))
-                yaw_rate *= 1 - (0.6 * delta_t)  # linear reduction of yaw rate (60% reduction / s) in prediction
+                yaw_rate *= 1 - (0.4 * delta_t)  # linear reduction of yaw rate (40% reduction / s) in prediction
             print("Predictions for " + str(self))
             print(geometry.MultiPolygon([x[0] for x in geos]))
             return geos
@@ -260,10 +260,10 @@ with physics:
             # Excludes drivers (we handle their vehicles instead)
             return other != self and other not in self.drives and \
                 (not hasattr(other, "drives") or len(other.drives) == 0) and \
-                (other.has_speed and self.has_speed and (dist / self.has_speed + dist / other.has_speed)
-                 <= max_distance) or \
-                (not other.has_speed and self.has_speed and (dist / self.has_speed) <= max_distance) or \
-                (not self.has_speed and other.has_speed and (dist / other.has_speed) <= max_distance)
+                ((other.has_speed and self.has_speed and (dist / self.has_speed + dist / other.has_speed)
+                  <= max_distance) or
+                 (not other.has_speed and self.has_speed and (dist / self.has_speed) <= max_distance) or
+                 (not self.has_speed and other.has_speed and (dist / other.has_speed) <= max_distance))
 
         @cache
         def get_intersecting_objects(self, horizon=10, delta_t=0.25):
