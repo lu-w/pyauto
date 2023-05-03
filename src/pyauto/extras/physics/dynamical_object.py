@@ -1,4 +1,6 @@
 import math
+import logging
+
 import numpy
 import sympy
 import owlready2
@@ -11,6 +13,8 @@ from ... import auto
 from ...extras import utils
 from .spatial_object import _SPATIAL_PREDICATE_THRESHOLD
 from .moving_dynamical_object import _INTERSECTING_PATH_MAX_PET
+
+logger = logging.Logger(__name__)
 
 physics = auto.world.get_ontology(auto.Ontology.Physics.value)
 geosparql = auto.world.get_ontology(auto.Ontology.GeoSPARQL.value)
@@ -192,3 +196,58 @@ with physics:
             print("Predictions for " + str(self))
             print(geometry.MultiPolygon([x[0] for x in geos]))
             return geos
+
+        def get_target_following_polygon(self, polygon: geometry.Polygon, target_distance: float | int=5) -> \
+                tuple[float, float]:
+            """
+            Computes a target on the given polygon, such that this object can follow the shape of the polygon (by means
+            of its dynamics). The target will be the given `target_distance` away from this object.
+            :param polygon: A polygon that this object shall follow
+            :param target_distance: The distance of the target from this object on the polygon
+            :returns: A tuple of floats representing the point of the computed target
+            """
+            assert(self.has_yaw is not None)
+            g = self.get_geometry().centroid
+            left, right, _, _ = utils.split_polygon_into_boundaries(polygon)
+            # Choose vehicle front to determine where to look for new targets (if available)
+            if len(self.drives) > 0:
+                x, y = self.drives[0].get_geometry().minimum_rotated_rectangle.exterior.coords.xy
+                edge_length = (geometry.Point(x[0], y[0]).distance(geometry.Point(x[1], y[1])),
+                               geometry.Point(x[1], y[1]).distance(geometry.Point(x[2], y[2])))
+                length = max(edge_length) / 2
+            else:
+                length = 1
+            g_front = geometry.Point(g.x + math.cos(math.radians(self.has_yaw)) * length,
+                                     g.y + math.sin(math.radians(self.has_yaw)) * length)
+            # Extracts the closest points
+            p_l_f = utils.get_closest_point_from_yaw(left, g_front, self.has_yaw)
+            p_r_f = utils.get_closest_point_from_yaw(right, g_front, self.has_yaw)
+            if p_l_f is not None and p_r_f is not None:
+                circ = g.buffer(target_distance)
+                intersection = circ.intersection(polygon.exterior)
+                if hasattr(intersection, "geoms"):
+                    intersection = [p for g in intersection.geoms for p in g.coords]
+                else:
+                    intersection = list(intersection.coords)
+                m_l, m_dist_l = None, None
+                for int_p in intersection:
+                    c_dist_l = p_l_f.distance(geometry.Point(int_p))
+                    if m_dist_l is None or c_dist_l < m_dist_l:
+                        m_dist_l = c_dist_l
+                        m_l = int_p
+                intersection.remove(m_l)
+                m_r, m_dist_r = None, None
+                for int_p in intersection:
+                    c_dist_r = p_r_f.distance(geometry.Point(int_p))
+                    if m_dist_r is None or c_dist_r < m_dist_r:
+                        m_dist_r = c_dist_r
+                        m_r = int_p
+                res = geometry.LineString([m_l, m_r]).centroid
+                x = res.x
+                y = res.y
+            else:
+                logger.warning("Using target in front of object instead of polygon following computation since no "
+                               "closest point on polygon could be determined")
+                x = target_distance * math.cos(math.radians(self.has_yaw)) + g.x
+                y = target_distance * math.sin(math.radians(self.has_yaw)) + g.y
+            return round(x, 2), round(y, 2)

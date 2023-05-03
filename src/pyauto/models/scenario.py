@@ -1,4 +1,5 @@
 import logging
+import time
 import numpy
 
 from . import scene, scenery
@@ -136,12 +137,16 @@ class Scenario(list):
         :param prioritize: A list of OWL classes or attributes of those individuals who are to prioritize in simulation.
         """
         if len(self) > 0:
+            t = time.time()
             start_t = self[-1]._timestamp
             for i in numpy.linspace(start_t + delta_t, start_t + duration, int(duration / delta_t)):
                 if "." in str(delta_t):
                     i = numpy.round(i, len(str(delta_t).split(".")[1]))
                 logger.info("Simulating scene " + str(i) + " / " + str(start_t + duration))
                 self.add_scene(self[-1].simulate(delta_t=delta_t, to_keep=to_keep, prioritize=prioritize))
+            total_time = time.time() - t
+            time_per_scene = total_time / (duration / delta_t - 1)
+            logger.info("Simulation took %.2f seconds (%.2f per scene)." % (total_time, time_per_scene))
         else:
             logger.warning("Can not simulate without an initial scene.")
 
