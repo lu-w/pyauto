@@ -58,6 +58,9 @@ def get_most_specific_classes(list_of_individuals, caching=True):
         if len(individual_clss) == 0:
             # Retry finding something outside of domain ontologies, e.g. physics
             individual_clss = list(filter(lambda x: x in relevant_additional_classes, individual.INDIRECT_is_a))
+        if len(individual_clss) == 0:
+            # If all fails, just use the asserted classes
+            individual_clss = individual.INDIRECT_is_a
         individual_id = _get_individual_id(individual)
         most_specific_individual_clss = [str(individual_cls) for individual_cls in individual_clss if
                                          hasattr(individual_cls, "__subclasses__") and len(
