@@ -640,7 +640,7 @@ def _describe_entity(entity):
     """
     cls = utils.get_most_specific_classes([entity])
     label = "<table class=\"m-2\"><thead><tr><th>Individual</th><th>" + str(entity)
-    if len(cls) > 0:
+    if len(cls) > 0 and len(cls[0][1]) > 0:
         label += " (" + ", ".join(cls[0][1]) + ")"
     label += "</th></tr></thead><tbody><tr><td>is_a</td><td>"
     label += ", ".join([str(x) for x in entity.is_a])
