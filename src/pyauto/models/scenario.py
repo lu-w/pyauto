@@ -155,7 +155,7 @@ class Scenario(list):
                     break
             total_time = time.time() - t
             time_per_scene = total_time / (duration / delta_t - 1)
-            logger.info("Simulation took %.2f seconds (%.2f per scene)." % (total_time, time_per_scene))
+            logger.info("Simulation took %.2f seconds (%.2f seconds per scene)." % (total_time, time_per_scene))
         else:
             logger.warning("Can not simulate without an initial scene.")
         return accident_happened
