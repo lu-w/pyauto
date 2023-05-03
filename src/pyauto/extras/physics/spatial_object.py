@@ -334,3 +334,13 @@ with physics:
             else:
                 logger.warning("No end found for object " + str(self) + " from " + str(p) + " angled " + str(angle))
                 return g
+
+        def has_accident_with(self, other: physics.Spatial_Object):
+            """
+            :returns: True iff. this object has an accident with another object, i.e., their geometries have an
+            intersection and both objects are of non-zero height.
+            """
+            return self.has_height and other.has_height and self.has_geometry() and other.has_geometry() and \
+                other.get_geometry().intersects(self.get_geometry()) and \
+                ((not hasattr(self, "drives") or other not in self.drives) and
+                 (not hasattr(other, "drives") or self not in other.drives))

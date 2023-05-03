@@ -268,3 +268,16 @@ class Scene(owlready2.World):
         """
         owlready2_augmentator.reset()
         owlready2_augmentator.do_augmentation(*self.ontologies.values())
+
+    def has_accident(self):
+        """
+        Checks whether there is an accident in this scene, i.e., some non-zero height spatial objects intersect.
+        :returns: True iff. an accident was detected in this scene.
+        """
+        objs = list(self.search(type=self.get_ontology(auto.Ontology.Physics.value).Spatial_Object))
+        for i, obj1 in enumerate(objs):
+            for obj2 in objs[:i]:
+                if obj1.has_accident_with(obj2):
+                    print(str(obj1) + " has acc. with " + str(obj2))
+                    return True
+        return False

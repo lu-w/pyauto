@@ -126,7 +126,8 @@ class Scenario(list):
         for sc in self:
             sc.set_scenery(scenery)
 
-    def simulate(self, duration: float | int, delta_t: int | float, to_keep: set = None, prioritize: list[str] = None):
+    def simulate(self, duration: float | int, delta_t: int | float, to_keep: set = None, prioritize: list[str] = None,
+                 stop_at_accidents=True) -> bool:
         """
         Simulates the future of this scenario, starting from its last scene up to the given duration. Discretizes with
         the given Hertz. Only works if this scenario has at least one scene.
@@ -135,7 +136,10 @@ class Scenario(list):
         :param delta_t: The time period between each simulated scene (in seconds).
         :param to_keep: The properties of individuals to copy over when creating new scenes.
         :param prioritize: A list of OWL classes or attributes of those individuals who are to prioritize in simulation.
+        :param stop_at_accidents: If true, stops the simulation if an accident happened.
+        :returns: True iff. an accident happened in the simulated scenario.
         """
+        accident_happened = False
         if len(self) > 0:
             t = time.time()
             start_t = self[-1]._timestamp
@@ -143,12 +147,18 @@ class Scenario(list):
                 if "." in str(delta_t):
                     i = numpy.round(i, len(str(delta_t).split(".")[1]))
                 logger.info("Simulating scene " + str(i) + " / " + str(start_t + duration))
-                self.add_scene(self[-1].simulate(delta_t=delta_t, to_keep=to_keep, prioritize=prioritize))
+                new_scene = self[-1].simulate(delta_t=delta_t, to_keep=to_keep, prioritize=prioritize)
+                self.add_scene(new_scene)
+                accident_happened |= new_scene.has_accident()
+                if stop_at_accidents and accident_happened:
+                    logger.info("Detected accident during simulation, aborting.")
+                    break
             total_time = time.time() - t
             time_per_scene = total_time / (duration / delta_t - 1)
             logger.info("Simulation took %.2f seconds (%.2f per scene)." % (total_time, time_per_scene))
         else:
             logger.warning("Can not simulate without an initial scene.")
+        return accident_happened
 
     def augment(self):
         """
