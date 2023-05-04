@@ -154,8 +154,10 @@ class Scenario(list):
                     logger.info("Detected accident during simulation, aborting.")
                     break
             total_time = time.time() - t
-            time_per_scene = total_time / (duration / delta_t - 1)
-            logger.info("Simulation took %.2f seconds (%.2f seconds per scene)." % (total_time, time_per_scene))
+            time_per_scene = total_time / (duration / delta_t)
+            time_per_simulated_second = total_time / duration
+            logger.info("Simulation took %.2f seconds (%.2f seconds per scene and %.2f seconds per simulated second)." %
+                        (total_time, time_per_scene, time_per_simulated_second))
         else:
             logger.warning("Can not simulate without an initial scene.")
         return accident_happened
