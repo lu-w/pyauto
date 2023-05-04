@@ -133,11 +133,21 @@ with physics:
                     pred_1 = self.prediction(delta_t=delta_t, horizon=horizon)
                     pred_2 = other.prediction(delta_t=delta_t, horizon=horizon)
                     candidates = []
-                    for g_1, t_p_1 in pred_1:
-                        for g_2, t_p_2 in pred_2:
-                            intersection = g_1.intersection(g_2)
-                            if intersection.area > 0:
-                                candidates.append((intersection.centroid, t_p_1, t_p_2))
+                    pred_1_union = pred_1[0][0]
+                    for g_1, _ in pred_1:
+                        pred_1_union = pred_1_union.union(g_1)
+                    pred_2_union = pred_2[0][0]
+                    for g_2, _ in pred_2:
+                        pred_2_union = pred_2_union.union(g_2)
+                    if pred_1_union.intersects(pred_2_union):
+                        for g_1, t_p_1 in pred_1:
+                            if g_1.intersects(pred_2_union):
+                                for g_2, t_p_2 in pred_2:
+                                    if t_p_1 + t_p_2 <= horizon and g_2.intersects(pred_1_union):
+                                        intersection = g_1.intersection(g_2)
+                                        if intersection.area > 0:
+                                            candidates.append((intersection.centroid, t_p_1, t_p_2))
+
                     if len(candidates) > 0:
                         candidates = sorted(candidates, key=lambda x: x[1] + x[2])
                         soonest_intersection = candidates[0][0]
@@ -193,8 +203,6 @@ with physics:
                 geo = affinity.translate(geo, xoff=xoff, yoff=yoff)
                 geos.append((geo, i))
                 yaw_rate *= 1 - (0.4 * delta_t)  # linear reduction of yaw rate (40% reduction / s) in prediction
-            print("Predictions for " + str(self))
-            print(geometry.MultiPolygon([x[0] for x in geos]))
             return geos
 
         def get_target_following_polygon(self, polygon: geometry.Polygon, target_distance: float | int=5) -> \
