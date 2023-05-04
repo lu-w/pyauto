@@ -33,6 +33,7 @@ with l1_core:
             road_width = front.length
             offset = 0
             for i, ele in enumerate(cross_section):
+                prev_offset = offset
                 entity = ele[0]()
                 geom_e = geo.Geometry()
                 entity.hasGeometry = [geom_e]
@@ -43,6 +44,8 @@ with l1_core:
                 offset += ele[1] * road_width
                 lane_right = reversed(left.parallel_offset(offset).coords)
                 geom_e.asWKT = [Polygon(list(lane_right) + list(lane_left)).wkt]
+                entity.has_length = self.has_length
+                entity.has_width = offset - prev_offset
                 cs.append(entity)
             for c in cs:
                 c.has_road = self
