@@ -205,8 +205,12 @@ class Scene(owlready2.World):
         for ind in self.individuals():
             # Only create individuals that are not already there (e.g. exclude colors)
             if ind.iri not in [x.iri for x in new.individuals()]:
-                nsp = new.get_ontology(type(ind).namespace.base_iri)
-                new_ind = getattr(nsp, type(ind).name)(ind.name)
+                if not isinstance(type(ind), owlready2.FusionClass):
+                    nsp = new.get_ontology(type(ind).namespace.base_iri)
+                    new_ind = getattr(nsp, type(ind).name)(ind.name)
+                else:
+                    nsp = new.get_ontology(type(ind).is_a[0].namespace.base_iri)
+                    new_ind = getattr(nsp, type(ind).is_a[0].name)(ind.name)
                 mapping[ind] = new_ind
                 for cls in ind.is_a:
                     new_cls = getattr(new.get_ontology(cls.namespace.base_iri), str(cls).split(".")[-1])
