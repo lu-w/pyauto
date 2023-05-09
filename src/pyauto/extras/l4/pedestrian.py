@@ -1,10 +1,14 @@
 import math
+import random
+
+import sympy
 import owlready2
 
 from shapely.geometry import Polygon
 from owlready2_augmentator import augment, augment_class, AugmentationType
 
 from ... import auto
+from ... import extras
 from ..l4.utils import _MAX_TIME_SMALL_DISTANCE
 
 physics = auto.world.get_ontology(auto.Ontology.Physics.value)
@@ -13,6 +17,9 @@ l4_core = auto.world.get_ontology(auto.Ontology.L4_Core.value)
 with l4_core:
     @augment_class
     class Pedestrian(owlready2.Thing):
+
+        _RELEVANT_LOWEST_SPEED = 0.05
+
         @augment(AugmentationType.OBJECT_PROPERTY, "CP_150")
         def has_small_distance(self, other: physics.Spatial_Object):
             if self != other and self.has_geometry() and other.has_geometry() and self.has_speed is not None and \
@@ -30,3 +37,62 @@ with l4_core:
                 return a.centroid.buffer(_MAX_TIME_SMALL_DISTANCE * self.has_speed + math.sqrt(a.area))
             else:
                 return a
+
+        def _get_relevant_walkways(self):
+            """
+            :returns: A list of walkways in which the pedestrian can be validly be located upon.
+            """
+            return [x for x in
+                    self.namespace.world.get_ontology(auto.Ontology.L1_DE.value).search(
+                        type=self.namespace.world.get_ontology(auto.Ontology.L1_DE.value).Walkway)
+                    if x.get_geometry().area > 6]
+        
+        def spawn(self, width=0.4, length=0.4, height=1.75, speed=1, walkway=None, max_number_of_tries=25, offset=None)\
+                -> bool:
+            """
+            Spawns the pedestrian on some random walkway with the given geometry parameters. Avoid conflicts with other
+            pedestrians. Yaw is chosen randomly either facing upwards or downwards of the chosen walkway.
+            :returns: False iff. the pedestrian could not be spawned
+            """
+            if walkway is None:
+                walkways = self._get_relevant_walkways()
+            pos_taken = True
+            number_of_unsuccessful_tries = 0
+            while pos_taken and number_of_unsuccessful_tries <= max_number_of_tries:
+                if walkway is None:
+                    walkway = random.choice(walkways)
+                left, right, front, back = extras.utils.split_polygon_into_boundaries(walkway.get_geometry())
+                medium = sympy.Segment(*front.centroid.coords, *back.centroid.coords)
+                x = sympy.Symbol("x")
+                if offset is None:
+                    rel_offset = 0.2
+                else:
+                    rel_offset = offset / walkway.has_length
+                pos = random.uniform(0 + rel_offset, 1 - rel_offset)
+                spawn_point = medium.arbitrary_point(x).subs({x: pos})
+                null_line = sympy.Ray((0, 0), (1, 0))
+                yaw = (360 - math.degrees(
+                    null_line.closing_angle(sympy.Ray(*front.centroid.coords, *back.centroid.coords)))) % 360
+                if random.random() < 0.5:
+                    yaw = (yaw + 180) % 360
+                self.set_geometry(spawn_point.x, spawn_point.y, length=length, width=width, rotate=yaw)
+                pos_taken = False
+                others = list(
+                    self.namespace.world.search(
+                        type=self.namespace.world.get_ontology(auto.Ontology.L4_Core.value).Pedestrian)
+                    ) + list(
+                        self.namespace.world.search(
+                            type=self.namespace.world.get_ontology(auto.Ontology.L4_Core.value).Vehicle)
+                    )
+                for other in others:
+                    if other != self and other.get_geometry().intersects(self.get_geometry().buffer(2)):
+                        pos_taken = True
+                        number_of_unsuccessful_tries += 1
+                        break
+            if number_of_unsuccessful_tries <= max_number_of_tries:
+                self.has_speed = speed
+                self.has_yaw = yaw
+                self.has_height = height
+                return True
+            else:
+                return False
