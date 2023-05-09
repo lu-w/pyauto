@@ -1,11 +1,15 @@
 import math
+import random
+
 import numpy
 import owlready2
+import sympy
 
 from shapely.geometry import Polygon
 from owlready2_augmentator import augment, augment_class, AugmentationType
 
 from ... import auto
+from ... import extras
 from ..l4.utils import _MAX_TIME_SMALL_DISTANCE
 
 physics = auto.world.get_ontology(auto.Ontology.Physics.value)
@@ -86,3 +90,57 @@ with l4_core:
                         t_pos)) % 360
             return speed_pos * t_pos * math.cos(math.radians(theta)) + a_pos[0], \
                        speed_pos * t_pos * math.sin(math.radians(theta)) + a_pos[1]
+
+        def _get_relevant_lanes(self):
+            """
+            :returns: A list of lanes in which the vehicle can be validly be located upon.
+            """
+            return self.namespace.world.get_ontology(auto.Ontology.L1_Core.value).\
+                search(type=self.namespace.world.get_ontology(auto.Ontology.L1_Core.value).Driveable_Lane)
+
+        def spawn(self, length=4.3, width=1.8, height=1.7, speed=5, driver=l4_core.Driver, lane=None,
+                  max_number_of_tries=25, offset=None) -> l4_core.Driver:
+            """
+            Spawns the vehicle on some random lane with the given geometry parameters. Avoid conflicts with other
+            vehicles.
+            :returns: the spawned driver (or self, if no driver shall be added) or None if vehicle could not be spawned
+            """
+            if lane is None:
+                lanes = self._get_relevant_lanes()
+            pos_taken = True
+            number_of_unsuccessful_tries = 0
+            while pos_taken and number_of_unsuccessful_tries <= max_number_of_tries:
+                if lane is None:
+                    lane = random.choice(lanes)
+                left, right, front, back = extras.utils.split_polygon_into_boundaries(lane.get_geometry())
+                medium = sympy.Segment(*front.centroid.coords, *back.centroid.coords)
+                x = sympy.Symbol("x")
+                if offset is None:
+                    rel_offset = 0.2
+                else:
+                    rel_offset = offset / lane.has_length
+                pos = random.uniform(0 + rel_offset, 1 - rel_offset)
+                spawn_point = medium.arbitrary_point(x).subs({x: pos})
+                null_line = sympy.Ray((0, 0), (1, 0))
+                yaw = (360 - math.degrees(
+                    null_line.closing_angle(sympy.Ray(*front.centroid.coords, *back.centroid.coords)))) % 360
+                if len(lane.has_successor_lane) == 0:
+                    yaw = (yaw + 180) % 360
+                self.set_geometry(spawn_point.x, spawn_point.y, width=width, length=length, rotate=(yaw))
+                pos_taken = False
+                for other in self.namespace.world.search(
+                        type=self.namespace.world.get_ontology(auto.Ontology.L4_Core.value).Vehicle):
+                    if other != self and other.get_geometry().intersects(self.get_geometry().buffer(1)):
+                        pos_taken = True
+                        number_of_unsuccessful_tries += 1
+                        break
+            if number_of_unsuccessful_tries <= max_number_of_tries:
+                self.has_speed = speed
+                self.has_yaw = yaw
+                self.has_height = height
+                if driver is not None:
+                    return self.add_driver(driver)
+                else:
+                    return self
+            else:
+                return None
