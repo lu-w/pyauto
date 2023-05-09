@@ -25,7 +25,7 @@ def split_polygon_into_boundaries(p: Polygon) -> tuple[LineString, LineString, L
         half = int((len(coords) + 1) / 2)
     right_coords = coords[:half]
     front_coords = [coords[half - 1], coords[half]]
-    left_coords = reversed(coords[half:len(coords)])
+    left_coords = list(reversed(coords[half:len(coords)]))
     back_coords = [coords[0], coords[len(coords) - 1]]
     right = LineString(right_coords)
     front = LineString(front_coords)
@@ -101,9 +101,29 @@ def get_closest_point_from_yaw(ls: LineString, p: Point, yaw: float | int, angle
         rel_points_2 = rel_points_1
     p_closest = None
     closest = None
-    for rp in set(rel_points_1).intersection(set(rel_points_2)):
+    if angle < 180:
+        rps = set(rel_points_1).intersection(set(rel_points_2))
+    else:
+        rps = set(rel_points_1).union(set(rel_points_2))
+    for rp in rps:
         dist = p.distance(Point(rp))
         if p_closest is None or dist < closest:
             p_closest = Point(rp)
             closest = dist
     return p_closest
+
+def in_front_of(p_1: Point, p_2: Point, yaw: int | float, restrict_viewing_angle_by: int | float = 0) -> bool:
+    """
+    :param p_1: Point to check whether it is in front.
+    :param p_2: The viewing point.
+    :param yaw: The viewing angle (in °).
+    :param restrict_viewing_angle_by: A total restriction of the default 180° viewing angle (e.g. 100° for a total
+        80° field of view).
+    :returns: True iff. p_1 is in front of p_2 when viewn from the given yaw angle.
+    """
+    assert(restrict_viewing_angle_by < 180)
+    offset_angle = restrict_viewing_angle_by / 2
+    p_yaw = [math.cos(math.radians(yaw)), math.sin(math.radians(yaw))]
+    p_self = [p_1.x - p_2.x, p_1.y - p_2.y]
+    angle = math.degrees(math.atan2(*p_yaw) - math.atan2(*p_self)) % 360
+    return angle < 90 - offset_angle or angle > 270 + offset_angle
