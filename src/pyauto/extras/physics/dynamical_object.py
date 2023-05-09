@@ -24,6 +24,8 @@ with physics:
     @augment_class
     class Dynamical_Object(owlready2.Thing):
 
+        _RELEVANT_LOWEST_SPEED = 0.15  # m/s
+
         def set_velocity(self, x: float, y: float, z: float = 0):
             """
             Sets the velocity vector of this object. Does not perform further computations.
@@ -180,11 +182,14 @@ with physics:
             else:
                 geo = self.get_geometry()
             geos = [(geo, 0)]
+            # if speed is 0, we assume object speeds up to some rather low speed
+            if "l4_de.Parking_Vehicle" not in [str(x) for x in self.is_a]:
+                speed = max(self._RELEVANT_LOWEST_SPEED * 10, self.has_speed)
+            else:
+                speed = self.has_speed
             for i in numpy.arange(delta_t, horizon + delta_t, delta_t):
                 prev_yaw = yaw
                 yaw = prev_yaw + yaw_rate * delta_t
-                # if speed is 0, we assume object speeds up to some rather low speed
-                speed = max(Dynamical_Object._RELEVANT_LOWEST_SPEED * 10, self.has_speed)
                 xoff = math.cos(math.radians(yaw)) * speed * delta_t
                 yoff = math.sin(math.radians(yaw)) * speed * delta_t
                 if isinstance(geo, geometry.Polygon):
@@ -227,9 +232,15 @@ with physics:
                 length = 1
             g_front = geometry.Point(g.x + math.cos(math.radians(self.has_yaw)) * length,
                                      g.y + math.sin(math.radians(self.has_yaw)) * length)
+            p_l_f = None
+            p_r_f = None
+            angle = 180
+            max_angle = 220
             # Extracts the closest points
-            p_l_f = utils.get_closest_point_from_yaw(left, g_front, self.has_yaw)
-            p_r_f = utils.get_closest_point_from_yaw(right, g_front, self.has_yaw)
+            while (p_l_f is None or p_r_f is None) and angle < max_angle:
+                p_l_f = utils.get_closest_point_from_yaw(left, g_front, self.has_yaw, angle)
+                p_r_f = utils.get_closest_point_from_yaw(right, g_front, self.has_yaw, angle)
+                angle += 10
             if p_l_f is not None and p_r_f is not None:
                 circ = g.buffer(target_distance)
                 intersection = circ.intersection(polygon.exterior)
@@ -266,7 +277,7 @@ with physics:
             else:
                 dist = other.get_distance(self)
             # Excludes drivers (we handle their vehicles instead)
-            return other != self and other not in self.drives and \
+            return other != self and other not in self.drives and other.has_height and \
                 (not hasattr(other, "drives") or len(other.drives) == 0) and \
                 ((other.has_speed and self.has_speed and (dist / self.has_speed + dist / other.has_speed)
                   <= max_distance) or
@@ -277,7 +288,7 @@ with physics:
         def get_intersecting_objects(self, horizon=10, delta_t=0.25):
             res = []
             for obj in self.namespace.world.search(
-                    type=self.namespace.world.get_ontology(auto.Ontology.Physics.value).Dynamical_Object):
+                    type=self.namespace.world.get_ontology(auto.Ontology.Physics.value).Spatial_Object):
                 if self.is_intersection_possible(obj, max_distance=horizon):
                     if hasattr(self, "drives") and len(self.drives) > 0:
                         self_obj = self.drives[0]
