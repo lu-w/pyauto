@@ -282,6 +282,5 @@ class Scene(owlready2.World):
         for i, obj1 in enumerate(objs):
             for obj2 in objs[:i]:
                 if obj1.has_accident_with(obj2):
-                    print(str(obj1) + " has acc. with " + str(obj2))
                     return True
         return False
