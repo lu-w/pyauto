@@ -75,6 +75,7 @@ with physics:
             except TypeError:
                 return False
 
+        @cache
         def get_geometry(self) -> geometry.base.BaseGeometry:
             """
             Returns the geometry as a shapely BaseGeometry of this object, only if this object has a geometry.
@@ -293,10 +294,7 @@ with physics:
                 p_2 = wkt.loads(other.hasGeometry[0].asWKT[0]).centroid
                 if float(p_1.distance(p_2)) <= _SPATIAL_PREDICATE_THRESHOLD and not (math.isclose(p_1.x, p_2.x) and
                                                                                      math.isclose(p_1.y, p_2.y)):
-                    p_yaw = [math.cos(math.radians(other.has_yaw)), math.sin(math.radians(other.has_yaw))]
-                    p_self = [p_1.x - p_2.x, p_1.y - p_2.y]
-                    angle = math.degrees(math.atan2(*p_yaw) - math.atan2(*p_self)) % 360
-                    return angle < 90 or angle > 270
+                    return utils.in_front_of(p_1, p_2, other.has_yaw)
 
         @cache
         def get_end(self, angle: float, p: tuple, length: float=1) -> geometry.Polygon:
