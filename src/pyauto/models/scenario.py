@@ -151,11 +151,15 @@ class Scenario(list):
                 self.add_scene(new_scene)
                 accident_happened |= new_scene.has_accident()
                 if stop_at_accidents and accident_happened:
-                    logger.info("Detected accident during simulation, aborting.")
+                    logger.info("Detected accident during simulation, aborting at " + str(i) + ".")
                     break
             total_time = time.time() - t
-            time_per_scene = total_time / (duration / delta_t)
-            time_per_simulated_second = total_time / duration
+            if duration > 0:
+                time_per_scene = total_time / (duration / delta_t)
+                time_per_simulated_second = total_time / duration
+            else:
+                time_per_scene = 0.0
+                time_per_simulated_second = 0.0
             logger.info("Simulation took %.2f seconds (%.2f seconds per scene and %.2f seconds per simulated second)." %
                         (total_time, time_per_scene, time_per_simulated_second))
         else:
