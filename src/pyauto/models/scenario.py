@@ -1,6 +1,9 @@
 import logging
 import time
+import os
+
 import numpy
+import tqdm
 
 from . import scene, scenery
 
@@ -75,7 +78,7 @@ class Scenario(list):
         self._max_time = self[-1]._timestamp
 
     def save_abox(self, file: str = None, format: str = "rdfxml",  save_scenery: bool = True,
-                  to_ignore: set[str] = None, **kargs):
+                  to_ignore: set[str] = None, create_kbs_file = True, **kargs):
         """
         Saves the ABoxes auf this A.U.T.O. scenario (without saving the TBox).
         Note that right now, only the "rdfxml" format is supported. If some other format is given, the plain save()
@@ -89,22 +92,41 @@ class Scenario(list):
         :param format: The format to save in (one of: rdfxml, ntriples, nquads). Recommended: rdfxml.
         :param to_ignore: If given, individuals (also indirectly) belonging to this set of classes are not saved.
             Classes are given as their string representation including their namespace (e.g. geosparql.Geometry).
+        :param create_kbs_file: Will additionally create a .kbs file stored along the single scene ABoxes files named
+            "file_base_name.kbs".
         """
+        def inject_in_filename(filename: str, appendix: str, new_ending: str=None):
+            if "." in filename:
+                s = filename.split(".")
+                s[-2] = s[-2] + appendix
+                if new_ending is not None:
+                    s[-1] = new_ending
+                appended_filename = ".".join(s)
+            else:
+                appended_filename = filename + appendix + (new_ending or "")
+            return appended_filename
+
         logger.info("Saving ABox of " + str(self) + " to " + file)
+
         # Saves scenery
         scenery_file = None
         if save_scenery:
-            if "." in file:
-                s = file.split(".")
-                s[len(s) - 2] = s[len(s) - 2] + "_scenery"
-                scenery_file = ".".join(s)
-            else:
-                scenery_file = file + "_scenery"
+            scenery_file = inject_in_filename(file, "_scenery")
 
         if self._scenery is not None:
             self._scenery.save_abox(file=scenery_file, format=format, to_ignore=to_ignore, **kargs)
 
+        # Create IRI to use for all scenes
+        file_name = os.path.basename(file)
+        if "." in file_name:
+            file_name = file_name.split(".")[0]
+        iri = "http://purl.org/auto/" + file_name
+
+        if create_kbs_file:
+            kbs_file = inject_in_filename(file, "", new_ending="kbs")
+
         # Saves all scenes
+        scene_files = []
         for i, _scene in enumerate(self):
             scene_file = None
             if file is not None:
@@ -114,7 +136,15 @@ class Scenario(list):
                     scene_file = ".".join(s)
                 else:
                     scene_file = file + "_" + str(i)
-            _scene.save_abox(format=format, scenery_file=scenery_file, file=scene_file, to_ignore=to_ignore, **kargs)
+                if create_kbs_file:
+                    scene_files.append(scene_file)
+            _scene.save_abox(format=format, scenery_file=scenery_file, save_scenery=False, file=scene_file,
+                                   to_ignore=to_ignore, iri=iri, **kargs)
+
+        # Creates .kbs file
+        if create_kbs_file:
+            with open(kbs_file, "w") as f:
+                f.write("\n".join(scene_files))
 
     def set_scenery(self, scenery: scenery.Scenery):
         """
@@ -174,6 +204,6 @@ class Scenario(list):
         that are decorated with @augment_class and loaded by a Python import.
         """
         logger.info("Augmenting scenario " + str(self))
-        for _scene in self:
+        for _scene in tqdm.tqdm(self):
             _scene.augment()
 

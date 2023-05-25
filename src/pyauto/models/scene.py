@@ -67,7 +67,7 @@ class Scene(owlready2.World):
             return self.get_ontology("http://anonymous#").get_namespace(iri)
 
     def save_abox(self, file: str = None, format: str = "rdfxml", save_scenery=False, scenery_file: str = None,
-                  to_ignore: set[str] = None, **kargs) -> str:
+                  to_ignore: set[str] = None, iri=None, **kargs) -> str:
         """
         Works analogously to the save() method of owlready2.World, but saves the ABox auf A.U.T.O. only.
         Note that right now, only the "rdfxml" format is supported. If some other format is given, the plain save()
@@ -84,11 +84,12 @@ class Scene(owlready2.World):
             was already saved somewhere else, and we want to avoid saving it again. If set, save_scenery is ignored.
         :param to_ignore: If given, individuals (also indirectly) belonging to this set of classes are not saved.
             Classes are given as their string representation including their namespace (e.g. geosparql.Geometry).
+        :param uri: The IRI of the ontology. If none, it is "http://purl.org/auto/{file_base_name}"
         :returns: The IRI that was assigned to the ABox as str.
         """
         # First, we remove all individuals from the scenery, if an import is given (as these will be imported later)
         undos_scenery = []
-        if save_scenery and scenery_file is not None:
+        if save_scenery or scenery_file is not None:
             for i in self.individuals():
                 if Scene._SCENERY_COMMENT in i.comment:
                     undos_scenery.append(owlready2.destroy_entity(i, undoable=True))
@@ -141,10 +142,12 @@ class Scene(owlready2.World):
 
             # Adds owl prefix
             root.set("xmlns:owl", "http://www.w3.org/2002/07/owl#")
+            root.set("xml:base", "file:" + str(file))
 
             # Set ontology name and add AUTO as import (since all other ontologies and imports were removed)
             onto = ElementTree.Element("owl:Ontology")
-            iri = "http://purl.org/auto/" + file_name
+            if not iri:
+                iri = "http://purl.org/auto/" + file_name
             onto.set("rdf:about", iri)
             ElementTree.SubElement(onto, "owl:imports", {"rdf:resource": "http://purl.org/auto/"})
             # If scenery needs to be imported, do so
