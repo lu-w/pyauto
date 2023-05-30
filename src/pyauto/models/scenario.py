@@ -15,7 +15,7 @@ class Scenario(list):
     def __init__(self, scene_number: int = None, scenes: list[scene.Scene] = None, scenery: scenery.Scenery = None,
                  name: str = "Unnamed Scenario", add_extras: bool = True, more_extras: list[str] = None,
                  load_cp: bool = False):
-        """
+        """Ideally you would create loggers and set them based on the proper naming/configurations instead of accepting the default configuration.
         Creates a new scenario, i.e., a list of scenes, which is iterable and supports indexing.
         :param scene_number: Optional number of empty scenes to create.
         :param scenes: Optional list of scenes that make up this scenario. scene_number is ignored if a scene list is
@@ -30,7 +30,7 @@ class Scenario(list):
         """
         self._name = name
         self._scenery = scenery
-        logger.info("Creating scenario " + str(self))
+        logger.debug("Creating scenario " + str(self))
         if scenes is not None and len(scenes) > 0:
             super().__init__(scenes)
             for s in scenes:
@@ -103,6 +103,8 @@ class Scenario(list):
                     s[-1] = new_ending
                 appended_filename = ".".join(s)
             else:
+                if new_ending:
+                    new_ending = "." + new_ending
                 appended_filename = filename + appendix + (new_ending or "")
             return appended_filename
 
@@ -170,13 +172,20 @@ class Scenario(list):
         :returns: True iff. an accident happened in the simulated scenario.
         """
         accident_happened = False
+
         if len(self) > 0:
             t = time.time()
             start_t = self[-1]._timestamp
-            for i in numpy.linspace(start_t + delta_t, start_t + duration, int(duration / delta_t)):
+            timestamps = numpy.linspace(start_t + delta_t, start_t + duration, int(duration / delta_t))
+            logger.info(str(self) + ": Simulating " + str(len(timestamps)) + " scenes (" + str(duration) + "s @ " +
+                        str(int(1 / delta_t)) + "Hz)")
+            if (logger.level >= logging.INFO) or \
+                    (logger.level == logging.NOTSET and logging.root.level >= logging.INFO):
+                timestamps = tqdm.tqdm(timestamps)
+            for i in timestamps:
                 if "." in str(delta_t):
                     i = numpy.round(i, len(str(delta_t).split(".")[1]))
-                logger.info("Simulating scene " + str(i) + " / " + str(start_t + duration))
+                logger.debug("Simulating scene " + str(i) + " / " + str(start_t + duration))
                 new_scene = self[-1].simulate(delta_t=delta_t, to_keep=to_keep, prioritize=prioritize)
                 self.add_scene(new_scene)
                 accident_happened |= new_scene.has_accident()

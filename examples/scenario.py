@@ -4,7 +4,7 @@ from pyauto import auto
 from pyauto.models.scenario import Scenario
 from pyauto.visualizer import visualizer
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s: %(message)s")
 
 # creates a scenario with two empty scenes (and loads A.U.T.O.)
 sc = Scenario(2, name="Example Scenario", load_cp=True)

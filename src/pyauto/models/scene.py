@@ -40,7 +40,7 @@ class Scene(owlready2.World):
         self._loaded_cp = load_cp
         self._scenery = scenery
         self._name = name
-        logger.info("Creating scene " + str(self))
+        logger.debug("Creating scene " + str(self))
         auto.load(load_into_world=self, add_extras=add_extras, more_extras=more_extras, load_cp=load_cp)
 
     def __str__(self):
@@ -202,7 +202,7 @@ class Scene(owlready2.World):
                     add_extras=self._added_extras, more_extras=self._more_extras, load_cp=self._loaded_cp)
         mapping = {}
 
-        logger.info("Copying individuals and relations")
+        logger.debug("Copying individuals and relations")
 
         # Creates all new individuals
         for ind in self.individuals():

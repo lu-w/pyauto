@@ -72,7 +72,7 @@ def load(folder: str = None, load_into_world: owlready2.World = None, add_extras
     if folder is None:
         folder = os.path.dirname(os.path.realpath(__file__)) + "/auto"
     if os.path.isdir(folder):
-        logger.info("Loading A.U.T.O. from " + str(folder))
+        logger.debug("Loading A.U.T.O. from " + str(folder))
         # Setting correct path for owlready2
         for i, j, k in os.walk(folder + "/"):
             owlready2.onto_path.append(i)
@@ -83,9 +83,9 @@ def load(folder: str = None, load_into_world: owlready2.World = None, add_extras
             world.get_ontology(folder + "/criticality_phenomena_formalization.owl").load()
         # Importing extras only required for non-default worlds as otherwise this is handled via owlready2 already.
         if add_extras and world is not owlready2.default_world:
-            logger.info("Loading extra modules into A.U.T.O.")
+            logger.debug("Loading extra modules into A.U.T.O.")
             _add_extras(more_extras)
-        logger.info("Done loading A.U.T.O.")
+        logger.debug("Done loading A.U.T.O.")
     else:
         logger.error("A.U.T.O. not found")
         raise FileNotFoundError(folder)
@@ -144,6 +144,6 @@ def _add_extras(more_extras: list[str] = None):
                         _extras[mod] = imp
             except ModuleNotFoundError:
                 fail_mods.append(extra_mod)
-    logger.info("Loaded extra modules " + ", ".join(succ_mods) + " into A.U.T.O.")
+    logger.debug("Loaded extra modules " + ", ".join(succ_mods) + " into A.U.T.O.")
     if len(fail_mods) > 0:
         logger.warning("Extra modules " + ", ".join(fail_mods) + " not installed, not loaded into A.U.T.O.")

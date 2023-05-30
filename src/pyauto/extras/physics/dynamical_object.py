@@ -14,7 +14,7 @@ from ...extras import utils
 from .spatial_object import _SPATIAL_PREDICATE_THRESHOLD
 from .moving_dynamical_object import _INTERSECTING_PATH_MAX_PET
 
-logger = logging.Logger(__name__)
+logger = logging.getLogger(__name__)
 
 physics = auto.world.get_ontology(auto.Ontology.Physics.value)
 geosparql = auto.world.get_ontology(auto.Ontology.GeoSPARQL.value)
@@ -265,7 +265,7 @@ with physics:
                 x = res.x
                 y = res.y
             else:
-                logger.warning(str(self) + ": Using target in front of object instead of polygon following computation "
+                logger.debug(str(self) + ": Using target in front of object instead of polygon following computation "
                                            "since no closest point on polygon could be determined")
                 x = target_distance * math.cos(math.radians(self.has_yaw)) + g.x
                 y = target_distance * math.sin(math.radians(self.has_yaw)) + g.y
