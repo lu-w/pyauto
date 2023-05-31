@@ -4,20 +4,19 @@ import shutil
 import math
 import random
 import threading
-import http.server
 import socketserver
 import os
 import re
+import tempfile
+import webbrowser
 
-from shapely import wkt
-import matplotlib.pyplot as plt
 import mpld3
 import tqdm
 import screeninfo
-import tempfile
-import webbrowser
-from shapely import geometry
+import matplotlib.pyplot as plt
 import numpy as np
+from shapely import wkt, geometry
+from http.server import SimpleHTTPRequestHandler, HTTPServer
 
 from .. import utils
 from ..models.scene import Scene
@@ -57,6 +56,10 @@ logging.getLogger("PIL").setLevel(logging.WARNING)
 def _natural_sort_key(s, _nsre=re.compile("([0-9]+)")):
     return [int(text) if text.isdigit() else text.lower() for text in _nsre.split(str(s))]
 
+# Redirect logging of HTTP server for visualizing to logger (debug)
+class VisualizerHTTPHandler(SimpleHTTPRequestHandler):
+    def log_message(self, format, *args):
+        logger.debug(args)
 
 #######
 # CSS #
@@ -622,8 +625,7 @@ def visualize(model: Scene | Scenario, cps: list = None):
     port = 8000
     while not_running and port < 65536:
         try:
-            threading.Thread(target=socketserver.TCPServer(("", port),
-                                                           http.server.SimpleHTTPRequestHandler).serve_forever).start()
+            threading.Thread(target=HTTPServer(("", port), VisualizerHTTPHandler).serve_forever).start()
             not_running = False
         except OSError:
             port += 1
@@ -631,7 +633,7 @@ def visualize(model: Scene | Scenario, cps: list = None):
         logger.info("Visualization is available at: http://localhost:" + str(port))
         webbrowser.open("http://localhost:" + str(port))
     else:
-        logger.info("Unable to create local web server")
+        logger.warning("Unable to create local web server")
     return tmp_dir
 
 
