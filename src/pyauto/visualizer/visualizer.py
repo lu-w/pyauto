@@ -315,7 +315,7 @@ def visualize(model: Scene | Scenario, cps: list = None):
         return "#" + "%06x" % color
 
     # Create HTML for each scene
-    logger.info("Plotting " + str(len(model)) + " scenes")
+    logger.info("Plotting " + str(len(model)) + (" scenes" if len(model) > 1 else " scene"))
     for i, scene in tqdm.tqdm(enumerate(model), total=len(model)):
         scene_cps = [cp for cp in cps if cp.is_representable_in_scene(scene)]
         cp_colors = list(map(get_color(rand), range(len([x for c in scene_cps for x in c.subjects]))))
@@ -619,6 +619,8 @@ def visualize(model: Scene | Scenario, cps: list = None):
             for html in iframe:
                 file.write(html)
 
+    logger.info("Saved visualization files to " + str(tmp_dir))
+
     # Starts webserver
     os.chdir(tmp_dir)
     not_running = True
@@ -630,7 +632,7 @@ def visualize(model: Scene | Scenario, cps: list = None):
         except OSError:
             port += 1
     if not not_running:
-        logger.info("Visualization is available at: http://localhost:" + str(port))
+        logger.info("Visualization is available at http://localhost:" + str(port))
         webbrowser.open("http://localhost:" + str(port))
     else:
         logger.warning("Unable to create local web server")
