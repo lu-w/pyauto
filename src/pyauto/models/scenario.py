@@ -1,4 +1,5 @@
 import logging
+import random
 import time
 import os
 
@@ -14,7 +15,7 @@ logger = logging.getLogger(__name__)
 class Scenario(list):
     def __init__(self, scene_number: int = None, scenes: list[scene.Scene] = None, scenery: scenery.Scenery = None,
                  name: str = "Unnamed Scenario", add_extras: bool = True, more_extras: list[str] = None,
-                 load_cp: bool = False):
+                 load_cp: bool = False, seed: int = None):
         """Ideally you would create loggers and set them based on the proper naming/configurations instead of accepting the default configuration.
         Creates a new scenario, i.e., a list of scenes, which is iterable and supports indexing.
         :param scene_number: Optional number of empty scenes to create.
@@ -27,13 +28,21 @@ class Scenario(list):
             imported in the given order. Using wildcards at the end is possible, e.g. "a.b.*", which then recursively
             imports *all* Python files located in the package's (sub)folder(s).
         :param load_cp: Whether to load the criticality_phenomena.owl (and formalization) as well.
+        :param seed: An optional seed for consistent random number generation.
         """
+        if seed is not None:
+            self._initialize_seed(seed)
         self._name = name
         self._scenery = scenery
+        if scenery:
+            scenery._random = self._random
+            scenery._np_random = self._np_random
         logger.debug("Creating scenario " + str(self))
         if scenes is not None and len(scenes) > 0:
             super().__init__(scenes)
             for s in scenes:
+                s._random = self._random
+                s._np_random = self._np_random
                 s.set_scenery(scenery)
         else:
             super().__init__()
@@ -43,6 +52,15 @@ class Scenario(list):
                 self.new_scene(add_extras=add_extras, more_extras=more_extras, load_cp=load_cp, scenery=scenery)
         self._duration = self[-1]._timestamp - self[0]._timestamp
         self._max_time = self[-1]._timestamp
+
+    def _initialize_seed(self, seed: int):
+        """
+        Creates all required employed pseudo-random number generators with the given seed and stores it.
+        :param seed: The seed to initialize with.
+        """
+        self._seed = seed
+        self._random = random.Random(seed)
+        self._np_random = numpy.random.RandomState(self._seed)
 
     def __str__(self):
         return str(self._name)
@@ -67,7 +85,7 @@ class Scenario(list):
 
     def add_scene(self, new_scene: scene.Scene, position: int = -1):
         """
-        Adds the given scene to the scenario.
+        Adds the given scene to the scenario. Also propagates the pseudo random number generators of self to the scene.
         :param new_scene: The new scene to add.
         :param position: Optional position at which to insert. If -1, the new scene is added at the end.
         """
@@ -76,6 +94,9 @@ class Scenario(list):
         self.insert(position, new_scene)
         self._duration = self[-1]._timestamp - self[0]._timestamp
         self._max_time = self[-1]._timestamp
+        # Propagates RNGs
+        new_scene._random = self._random
+        new_scene._np_random = self._np_random
 
     def save_abox(self, file: str = None, format: str = "rdfxml",  save_scenery: bool = True,
                   to_ignore: set[str] = None, create_kbs_file = True, **kargs):
@@ -159,7 +180,7 @@ class Scenario(list):
             sc.set_scenery(scenery)
 
     def simulate(self, duration: float | int, delta_t: int | float, to_keep: set = None, prioritize: list[str] = None,
-                 stop_at_accidents=True) -> bool:
+                 stop_at_accidents=True, seed: int = None) -> bool:
         """
         Simulates the future of this scenario, starting from its last scene up to the given duration. Discretizes with
         the given Hertz. Only works if this scenario has at least one scene.

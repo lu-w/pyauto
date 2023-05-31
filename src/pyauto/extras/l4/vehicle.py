@@ -111,7 +111,7 @@ with l4_core:
             number_of_unsuccessful_tries = 0
             while pos_taken and number_of_unsuccessful_tries <= max_number_of_tries:
                 if lane is None:
-                    lane = random.choice(lanes)
+                    lane = self.namespace.world._random.choice(lanes)
                 left, right, front, back = extras.utils.split_polygon_into_boundaries(lane.get_geometry())
                 medium = sympy.Segment(*front.centroid.coords, *back.centroid.coords)
                 x = sympy.Symbol("x")
@@ -119,7 +119,7 @@ with l4_core:
                     rel_offset = 0.2
                 else:
                     rel_offset = offset / lane.has_length
-                pos = random.uniform(0 + rel_offset, 1 - rel_offset)
+                pos = self.namespace.world._random.uniform(0 + rel_offset, 1 - rel_offset)
                 spawn_point = medium.arbitrary_point(x).subs({x: pos})
                 null_line = sympy.Ray((0, 0), (1, 0))
                 yaw = (360 - math.degrees(

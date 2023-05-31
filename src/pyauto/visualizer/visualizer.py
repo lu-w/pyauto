@@ -50,8 +50,8 @@ _AVOID_LABEL_COLLISIONS = False
 # Logging
 logger = logging.getLogger(__name__)
 # Suppresses unnecessary logging in debug mode by imported libraries for plotting.
-logging.getLogger("matplotlib.font_manager").setLevel(logging.ERROR)
-
+logging.getLogger("matplotlib").setLevel(logging.ERROR)
+logging.getLogger("PIL").setLevel(logging.WARNING)
 
 # Helper function for sorting CPs & individuals
 def _natural_sort_key(s, _nsre=re.compile("([0-9]+)")):
@@ -143,6 +143,9 @@ def visualize(model: Scene | Scenario, cps: list = None):
         cps = []
     if isinstance(model, Scene):
         model = Scenario(scenes=[model])
+
+    # Random numbers for coloring - just be consistent here
+    rand = random.Random(1)
 
     # Assemble scenario title
     title = str(model)
@@ -298,13 +301,13 @@ def visualize(model: Scene | Scenario, cps: list = None):
     pl_html.append(html_body)
     iframes = []
 
-    def get_color(p):
+    def get_color(rand):
         # Fetches a different color each time, but ensures that it has a readable contrast.
         _LUMA_LIMIT = 170
         color = 0
         luma = _LUMA_LIMIT
         while luma >= _LUMA_LIMIT:
-            color = random.randrange(0, 0xFFFFFF, 0xF)
+            color = rand.randrange(0, 0xFFFFFF, 0xF)
             luma = 0.2126 * ((color >> 16) & 0xff) + 0.7152 * ((color >> 8) & 0xff) + 0.0722 * ((color >> 0) & 0xff)
         return "#" + "%06x" % color
 
@@ -312,7 +315,7 @@ def visualize(model: Scene | Scenario, cps: list = None):
     logger.info("Plotting " + str(len(model)) + " scenes")
     for i, scene in tqdm.tqdm(enumerate(model), total=len(model)):
         scene_cps = [cp for cp in cps if cp.is_representable_in_scene(scene)]
-        cp_colors = list(map(get_color, range(len([x for c in scene_cps for x in c.subjects]))))
+        cp_colors = list(map(get_color(rand), range(len([x for c in scene_cps for x in c.subjects]))))
         cp_color = 0
         no_geo_entities = []
         width = 24.5

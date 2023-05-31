@@ -162,7 +162,7 @@ class Scene(owlready2.World):
 
     def set_scenery(self, scenery):
         """
-        Sets the scenery for the given scene.
+        Sets the scenery for the given scene. Also propagates psuedo random number generators to the scenery.
         :param scenery: The scenery to set.
         """
         self._scenery = scenery
@@ -179,6 +179,10 @@ class Scene(owlready2.World):
         # Propagates scenario to scenery, if needed.
         if self._scenery is not None and self._scenery._scenario is None:
             self._scenery._scenario = self._scenario
+        if not hasattr(scenery, "_random") and hasattr(self, "_random"):
+            scenery._random = self._random
+        if not hasattr(scenery, "_np_random") and hasattr(self, "_np_random"):
+            scenery._np_random = self._np_random
 
     def copy(self, delta_t: float | int = 0, to_keep: set = None) -> \
             tuple[dict[owlready2.NamedIndividual, owlready2.NamedIndividual], Scene]:
