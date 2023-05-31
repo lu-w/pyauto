@@ -52,8 +52,8 @@ with physics:
                 geom.asWKT = [g.wkt]
                 self.has_length = length
                 self.has_width = width
-
             self.hasGeometry = [geom]
+            self.get_geometry.cache_clear()
 
         def set_shapely_geometry(self, geometry: geometry.base.BaseGeometry):
             """

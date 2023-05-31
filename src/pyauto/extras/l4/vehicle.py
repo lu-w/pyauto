@@ -1,5 +1,4 @@
 import math
-import random
 
 import numpy
 import owlready2
@@ -98,20 +97,22 @@ with l4_core:
             return self.namespace.world.get_ontology(auto.Ontology.L1_Core.value).\
                 search(type=self.namespace.world.get_ontology(auto.Ontology.L1_Core.value).Driveable_Lane)
 
-        def spawn(self, length=4.3, width=1.8, height=1.7, speed=5, driver=l4_core.Driver, lane=None,
+        def spawn(self, length=4.3, width=1.8, height=1.7, speed=5, driver=l4_core.Driver, spawn_lane=None,
                   max_number_of_tries=25, offset=None) -> l4_core.Driver:
             """
             Spawns the vehicle on some random lane with the given geometry parameters. Avoid conflicts with other
             vehicles.
             :returns: the spawned driver (or self, if no driver shall be added) or None if vehicle could not be spawned
             """
-            if lane is None:
+            if spawn_lane is None:
                 lanes = self._get_relevant_lanes()
             pos_taken = True
             number_of_unsuccessful_tries = 0
             while pos_taken and number_of_unsuccessful_tries <= max_number_of_tries:
-                if lane is None:
-                    lane = self.namespace.world._random.choice(lanes)
+                if spawn_lane is None:
+                    lane = self.namespace.world._random.choice(sorted(lanes, key=str))
+                else:
+                    lane = spawn_lane
                 left, right, front, back = extras.utils.split_polygon_into_boundaries(lane.get_geometry())
                 medium = sympy.Segment(*front.centroid.coords, *back.centroid.coords)
                 x = sympy.Symbol("x")

@@ -129,8 +129,6 @@ class Scenario(list):
                 appended_filename = filename + appendix + (new_ending or "")
             return appended_filename
 
-        logger.info("Saving ABox of " + str(self) + " to " + inject_in_filename(file, "_*"))
-
         # Saves scenery
         scenery_file = None
         if save_scenery:
@@ -164,10 +162,15 @@ class Scenario(list):
             _scene.save_abox(format=format, scenery_file=scenery_file, save_scenery=False, file=scene_file,
                                    to_ignore=to_ignore, iri=iri, **kargs)
 
+        info_msg = "Saved ABox of " + str(self) + " to " + inject_in_filename(file, "_*")
+
         # Creates .kbs file
         if create_kbs_file:
             with open(kbs_file, "w") as f:
                 f.write("\n".join(scene_files))
+            info_msg += " and " + kbs_file
+
+        logger.info(info_msg)
 
     def set_scenery(self, scenery: scenery.Scenery):
         """
@@ -198,8 +201,8 @@ class Scenario(list):
             t = time.time()
             start_t = self[-1]._timestamp
             timestamps = numpy.linspace(start_t + delta_t, start_t + duration, int(duration / delta_t))
-            logger.info(str(self) + ": Simulating " + str(len(timestamps)) + " scenes (" + str(duration) + "s @ " +
-                        str(int(1 / delta_t)) + "Hz)")
+            logger.info("Simulating " + str(len(timestamps)) + " scenes (" + str(duration) + "s @ " +
+                        str(int(1 / delta_t)) + "Hz) of " + str(self))
             if (logger.level >= logging.INFO) or \
                     (logger.level == logging.NOTSET and logging.root.level >= logging.INFO):
                 timestamps = tqdm.tqdm(timestamps)
