@@ -129,7 +129,7 @@ class Scenario(list):
                 appended_filename = filename + appendix + (new_ending or "")
             return appended_filename
 
-        logger.info("Saving ABox of " + str(self) + " to " + file)
+        logger.info("Saving ABox of " + str(self) + " to " + inject_in_filename(file, "_*"))
 
         # Saves scenery
         scenery_file = None
@@ -194,7 +194,7 @@ class Scenario(list):
         """
         accident_happened = False
 
-        if len(self) > 0:
+        if len(self) > 0 and duration > 0:
             t = time.time()
             start_t = self[-1]._timestamp
             timestamps = numpy.linspace(start_t + delta_t, start_t + duration, int(duration / delta_t))
@@ -222,8 +222,9 @@ class Scenario(list):
                 time_per_simulated_second = 0.0
             logger.info("Simulation took %.2f seconds (%.2f seconds per scene and %.2f seconds per simulated second)." %
                         (total_time, time_per_scene, time_per_simulated_second))
-        else:
+        elif len(self) == 0:
             logger.warning("Can not simulate without an initial scene.")
+
         return accident_happened
 
     def augment(self):
