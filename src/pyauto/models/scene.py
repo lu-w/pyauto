@@ -142,7 +142,7 @@ class Scene(owlready2.World):
 
             # Adds owl prefix
             root.set("xmlns:owl", "http://www.w3.org/2002/07/owl#")
-            root.set("xml:base", "file:" + str(file))
+            root.set("xml:base", "file:" + str(file_name))
 
             # Set ontology name and add AUTO as import (since all other ontologies and imports were removed)
             onto = ElementTree.Element("owl:Ontology")
@@ -152,7 +152,7 @@ class Scene(owlready2.World):
             ElementTree.SubElement(onto, "owl:imports", {"rdf:resource": "http://purl.org/auto/"})
             # If scenery needs to be imported, do so
             if scenery_file:
-                ElementTree.SubElement(onto, "owl:imports", {"rdf:resource": scenery_file})
+                ElementTree.SubElement(onto, "owl:imports", {"rdf:resource": "file:" + os.path.basename(scenery_file)})
             root.insert(0, onto)
 
             # Save file again

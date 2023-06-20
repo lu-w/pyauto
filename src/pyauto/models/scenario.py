@@ -99,7 +99,8 @@ class Scenario(list):
         new_scene._np_random = self._np_random
 
     def save_abox(self, file: str = None, format: str = "rdfxml",  save_scenery: bool = True,
-                  to_ignore: set[str] = None, create_kbs_file = True, **kargs):
+                  scenery_file_name: str = None, to_ignore: set[str] = None, create_kbs_file: bool = True,
+                  kbs_file_name: str = None, **kargs):
         """
         Saves the ABoxes auf this A.U.T.O. scenario (without saving the TBox).
         Note that right now, only the "rdfxml" format is supported. If some other format is given, the plain save()
@@ -109,12 +110,16 @@ class Scenario(list):
         Note: This method overwrites existing files.
         :param save_scenery: Whether to save the scenery as well (otherwise, it will not be present in the saved
             ABoxes). If no file is given, the scenery is not saved to a file as well.
+        :param scenery_file_name: A string to file location to save the scenery file to. Overwrites the automatically
+            chosen file name if save_scenery is set.
         :param file: A string to a file location to save the ABox to. Scenes are appended by _i, where i is their index.
         :param format: The format to save in (one of: rdfxml, ntriples, nquads). Recommended: rdfxml.
         :param to_ignore: If given, individuals (also indirectly) belonging to this set of classes are not saved.
             Classes are given as their string representation including their namespace (e.g. geosparql.Geometry).
         :param create_kbs_file: Will additionally create a .kbs file stored along the single scene ABoxes files named
             "file_base_name.kbs".
+        :param kbs_file_name: A string to file location to save the .kbs file to. Overwrites the automatically chosen
+            file name if create_kbs_file is set.
         """
         def inject_in_filename(filename: str, appendix: str, new_ending: str=None):
             if "." in filename:
@@ -129,13 +134,14 @@ class Scenario(list):
                 appended_filename = filename + appendix + (new_ending or "")
             return appended_filename
 
+        logger.info("Saving ABox...")
+
         # Saves scenery
-        scenery_file = None
-        if save_scenery:
-            scenery_file = inject_in_filename(file, "_scenery")
+        if save_scenery and not scenery_file_name:
+            scenery_file_name = inject_in_filename(file, "_scenery")
 
         if self._scenery is not None:
-            self._scenery.save_abox(file=scenery_file, format=format, to_ignore=to_ignore, **kargs)
+            self._scenery.save_abox(file=scenery_file_name, format=format, to_ignore=to_ignore, **kargs)
 
         # Create IRI to use for all scenes
         file_name = os.path.basename(file)
@@ -143,8 +149,8 @@ class Scenario(list):
             file_name = file_name.split(".")[0]
         iri = "http://purl.org/auto/" + file_name
 
-        if create_kbs_file:
-            kbs_file = inject_in_filename(file, "", new_ending="kbs")
+        if create_kbs_file and not kbs_file_name:
+            kbs_file_name = inject_in_filename(file, "", new_ending="kbs")
 
         # Saves all scenes
         scene_files = []
@@ -158,17 +164,17 @@ class Scenario(list):
                 else:
                     scene_file = file + "_" + str(i)
                 if create_kbs_file:
-                    scene_files.append(scene_file)
-            _scene.save_abox(format=format, scenery_file=scenery_file, save_scenery=False, file=scene_file,
+                    scene_files.append(os.path.basename(scene_file))
+            _scene.save_abox(format=format, scenery_file=scenery_file_name, save_scenery=False, file=scene_file,
                                    to_ignore=to_ignore, iri=iri, **kargs)
 
         info_msg = "Saved ABox of " + str(self) + " to " + inject_in_filename(file, "_*")
 
         # Creates .kbs file
         if create_kbs_file:
-            with open(kbs_file, "w") as f:
+            with open(kbs_file_name, "w") as f:
                 f.write("\n".join(scene_files))
-            info_msg += " and " + kbs_file
+            info_msg += " and " + kbs_file_name
 
         logger.info(info_msg)
 
@@ -214,7 +220,6 @@ class Scenario(list):
                 self.add_scene(new_scene)
                 accident_happened |= new_scene.has_accident()
                 if stop_at_accidents and accident_happened:
-                    logger.info("Detected accident during simulation, aborting at " + str(i) + ".")
                     break
             total_time = time.time() - t
             if duration > 0:

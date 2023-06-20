@@ -8,7 +8,7 @@ from owlready2_augmentator import augment, augment_class, AugmentationType
 from ... import auto
 from .. import utils
 
-_SPATIAL_PREDICATE_THRESHOLD = 50  # m, the distance in which spatial predicates are augmented
+_SPATIAL_PREDICATE_THRESHOLD = 30  # m, the distance in which spatial predicates are augmented
 _IS_NEAR_DISTANCE = 4              # m, the distance for which spatial objects are close to each other
 _IS_IN_PROXIMITY_DISTANCE = 15     # m, the distance for which spatial objects are in proximity to each other
 
