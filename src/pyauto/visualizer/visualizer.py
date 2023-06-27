@@ -45,6 +45,7 @@ _NO_PRINTING_PROPERTIES = {"perceptional_property", "traffic_related_concept_pro
 # If one hides long property lists, this is the number after which the list is cut off
 _MAX_PROPS_DISPLAY = 4
 _AVOID_LABEL_COLLISIONS = False
+_CREATE_SVG_FILES = False
 
 # Logging
 logger = logging.getLogger(__name__)
@@ -332,6 +333,8 @@ def visualize(model: Scene | Scenario, cps: list = None):
             logger.info("No screens found, using default plot size of " + str(width) + " in x " + str(height) + " in")
         fig = plt.figure(figsize=(width, height))
         plt.axis("equal")
+        if _CREATE_SVG_FILES:
+            plt.axis('off')
         entity_labels = []
         entity_relations = []
         relations_per_cp_class = dict()
@@ -359,16 +362,44 @@ def visualize(model: Scene | Scenario, cps: list = None):
                                 .any():
                             x = shape.centroid.x + 0.0
                             y = shape.centroid.y + 0.8
-                            plt.plot((shape.centroid.x, x), (shape.centroid.y, y), "k-")
+                            if not _CREATE_SVG_FILES:
+                                plt.plot((shape.centroid.x, x), (shape.centroid.y, y), "k-")
                         else:
                             x = shape.centroid.x
                             y = shape.centroid.y
                         entity_points[entity] = (x, y)
                         centroids_x.append(x)
                         centroids_y.append(y)
-                        plt.plot(*points, alpha=.6)
-                        if len([x for x in entity.INDIRECT_is_a if "Dynamical_Object" in str(x)]) > 0:
-                            plt.fill(*points, alpha=.3)
+                        color = None
+                        if len([x for x in entity.INDIRECT_is_a if "l1" in str(x) or "l2" in str(x)]):
+                            color = "black"
+                        elif len([x for x in entity.INDIRECT_is_a if "Bicycle" in str(x)]):
+                            color = "darkblue"
+                        elif len([x for x in entity.INDIRECT_is_a if "Passenger_Car" in str(x)]):
+                            color = "cornflowerblue"
+                        elif len([x for x in entity.INDIRECT_is_a if "Pedestrian" in str(x)]):
+                            color = "firebrick"
+                        elif len([x for x in entity.INDIRECT_is_a if "Parking_Vehicle" in str(x)]):
+                            color = "darkgoldenrod"
+                        plt.plot(*points, alpha=.6, color=color)
+                        if len([x for x in entity.INDIRECT_is_a if "Bikeway_Lane" in str(x)]):
+                            plt.fill(*points, alpha=.25, color="red")
+                        elif len([x for x in entity.INDIRECT_is_a if "Pedestrian_Crossing" in str(x)]):
+                            # assumes pedestrian crossings always pointing in y-direction
+                            strip_width = 0.6
+                            p_min_x = min(points[0])
+                            p_max_x = max(points[0])
+                            p_min_y = min(points[1])
+                            p_max_y = max(points[1])
+                            even = 0
+                            for off_p_y in np.arange(p_min_y + strip_width / 2, p_max_y - strip_width / 2, strip_width):
+                                even += 1
+                                if even % 2 == 0:
+                                    plt.fill([p_min_x, p_min_x, p_max_x, p_max_x],
+                                             [off_p_y, off_p_y + strip_width, off_p_y + strip_width, off_p_y],
+                                             color="black", alpha=.4)
+                        elif len([x for x in entity.INDIRECT_is_a if "Dynamical_Object" in str(x)]) > 0:
+                            plt.fill(*points, alpha=.5, color=color)
                             if entity.has_yaw is not None:
                                 x_dir = (0.9 * math.cos(math.radians(entity.has_yaw)))
                                 y_dir = (0.9 * math.sin(math.radians(entity.has_yaw)))
@@ -383,7 +414,7 @@ def visualize(model: Scene | Scenario, cps: list = None):
                         else:
                             ent_color = "black"
                         if len({"l4_core.L4_Entity", "l4_core.Traffic_Object", "l4_core.Traffic_Subject"}.intersection(
-                                [str(c) for c in entity.INDIRECT_is_a])) > 0:
+                                [str(c) for c in entity.INDIRECT_is_a])) > 0 and not _CREATE_SVG_FILES:
                             plt.annotate(entity.name, (x+0.2, y+0.2), color=ent_color)
                         already_drawn_cps = []
                         # init dict
@@ -464,11 +495,14 @@ def visualize(model: Scene | Scenario, cps: list = None):
                         entity_relations.append(entity_cp_relations)
             elif len(set([str(y) for y in entity.INDIRECT_is_a]).intersection(_NO_PRINTING_CLASSES)) == 0:
                 no_geo_entities.append(_describe_entity(entity))
-        pl2 = plt.plot(centroids_x, centroids_y, "o", color="b", mec="k", markersize=6, mew=1, alpha=.2)
-        tooltip_individuals = ToolTipAndClickInfo(pl2[0], labels=entity_labels, targets=entity_relations,
-                                                  targets_per_cp=relations_per_cp_class)
+        if not _CREATE_SVG_FILES:
+            pl2 = plt.plot(centroids_x, centroids_y, "o", color="b", mec="k", markersize=6, mew=1, alpha=.2)
+            tooltip_individuals = ToolTipAndClickInfo(pl2[0], labels=entity_labels, targets=entity_relations,
+                                                      targets_per_cp=relations_per_cp_class)
+            mpld3.plugins.connect(fig, tooltip_individuals)
         fig.tight_layout()
-        mpld3.plugins.connect(fig, tooltip_individuals)
+        if _CREATE_SVG_FILES:
+            plt.savefig(tmp_dir + "/plot_" + str(i + 1) + ".svg", format="svg")
         for h, cp_text in enumerate(cps_relations):
             tooltip_cp = CPTooltip(cp_text, cps_for_tooltips[h])
             mpld3.plugins.connect(fig, tooltip_cp)
