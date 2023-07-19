@@ -1,9 +1,13 @@
 import owlready2
 import os
+import argparse
 import importlib
 import logging
 
 from enum import Enum
+
+from .models import scenario
+from .visualizer import visualizer
 
 """
 Loads A.U.T.O. globally into owlready2. Also provides an easier enum interface to access the sub-ontologies of A.U.T.O.
@@ -147,3 +151,28 @@ def _add_extras(more_extras: list[str] = None):
     logger.debug("Loaded extra modules " + ", ".join(succ_mods) + " into A.U.T.O.")
     if len(fail_mods) > 0:
         logger.warning("Extra modules " + ", ".join(fail_mods) + " not installed, not loaded into A.U.T.O.")
+
+def main():
+    parser = argparse.ArgumentParser(
+        prog='auto.py',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        description="An interface (read & visualize) to traffic scenarios specified as ABoxes in A.U.T.O.")
+    parser.add_argument("file", type=str, help="Path to a .kbs file containing a list of ABoxes to read")
+    parser.add_argument("--read", "-r", action='store_true', help="Only reading, no visualization")
+    parser.add_argument("--hertz", "-s", type=int, default=20, help="The sampling rate (Hertz) of the scenario")
+    parser.add_argument("--verbose", "-v", action='store_true', help="If set, gives verbose output")
+    args = parser.parse_args()
+
+    if args.verbose:
+        loglevel = logging.DEBUG
+    else:
+        loglevel = logging.INFO
+    logging.basicConfig(level=loglevel, format="%(asctime)s %(levelname)s: %(message)s")
+
+    loaded_scenario = scenario.Scenario(file=args.file, hertz=args.hertz, seed=0)
+
+    if not args.read:
+        visualizer.visualize(loaded_scenario)
+
+if __name__ == "__main__":
+    main()

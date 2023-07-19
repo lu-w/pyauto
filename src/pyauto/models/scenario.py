@@ -1,6 +1,7 @@
 import logging
 import random
 import time
+import fileinput
 import os
 
 import numpy
@@ -15,7 +16,7 @@ logger = logging.getLogger(__name__)
 class Scenario(list):
     def __init__(self, scene_number: int = None, scenes: list[scene.Scene] = None, scenery: scenery.Scenery = None,
                  name: str = "Unnamed Scenario", add_extras: bool = True, more_extras: list[str] = None,
-                 load_cp: bool = False, seed: int = None):
+                 load_cp: bool = False, seed: int = None, file: str = None, hertz: int = None):
         """Ideally you would create loggers and set them based on the proper naming/configurations instead of accepting the default configuration.
         Creates a new scenario, i.e., a list of scenes, which is iterable and supports indexing.
         :param scene_number: Optional number of empty scenes to create.
@@ -29,29 +30,74 @@ class Scenario(list):
             imports *all* Python files located in the package's (sub)folder(s).
         :param load_cp: Whether to load the criticality_phenomena.owl (and formalization) as well.
         :param seed: An optional seed for consistent random number generation.
+        :param file: A file name of a .kbs file to load the scenario from. All other parameters except hertz are then
+            ignored.
+        :param hertz: The sampling rate of the scenario to be loaded from file (if file is None, it is ignored).
         """
         if seed is not None:
             self._initialize_seed(seed)
-        self._name = name
-        self._scenery = scenery
-        if scenery:
-            scenery._random = self._random
-            scenery._np_random = self._np_random
-        logger.debug("Creating scenario " + str(self))
-        if scenes is not None and len(scenes) > 0:
-            super().__init__(scenes)
-            for s in scenes:
-                s._random = self._random
-                s._np_random = self._np_random
-                s.set_scenery(scenery)
+        if not file:
+            self._name = name
+            self._scenery = scenery
+            if scenery:
+                scenery._random = self._random
+                scenery._np_random = self._np_random
+            logger.debug("Creating scenario " + str(self))
+            if scenes is not None and len(scenes) > 0:
+                super().__init__(scenes)
+                for s in scenes:
+                    s._random = self._random
+                    s._np_random = self._np_random
+                    s.set_scenery(scenery)
+            else:
+                super().__init__()
+                if scene_number is None:
+                    scene_number = 0
+                for _ in range(scene_number):
+                    self.new_scene(add_extras=add_extras, more_extras=more_extras, load_cp=load_cp, scenery=scenery)
+            self._duration = self[-1]._timestamp - self[0]._timestamp
+            self._max_time = self[-1]._timestamp
         else:
-            super().__init__()
-            if scene_number is None:
-                scene_number = 0
-            for _ in range(scene_number):
-                self.new_scene(add_extras=add_extras, more_extras=more_extras, load_cp=load_cp, scenery=scenery)
-        self._duration = self[-1]._timestamp - self[0]._timestamp
-        self._max_time = self[-1]._timestamp
+            self._load_from_file(file, hertz)
+
+    def _load_from_file(self, kbs_file: str, hertz=20):
+        """
+        Loads this scenario from a given path of a .kbs file.
+        :param kbs_file: Path to a .kbs file
+        :param hertz: The sampling rate of the .kbs file
+        """
+        logger.info("Loading scenario from " + kbs_file)
+        self._name = os.path.basename(kbs_file)
+        self._scenery = None
+        kbs_dir = os.path.dirname(kbs_file)
+        os.chdir(kbs_dir)
+        t = 0
+        with open(kbs_file) as file:
+            for line in file:
+                abox_file = os.path.join(kbs_dir, line.replace("\n", ""))
+                # Minor modification of file content required s.t. owlready2 can read the OWL file
+                for abox_line in fileinput.input(abox_file, inplace=True):
+                    if '<owl:imports rdf:resource="file:' in abox_line:
+                        abox_line = abox_line.replace('<owl:imports rdf:resource="file:',
+                                                      '<owl:imports rdf:resource="')
+                    print(abox_line, end='')
+                logger.debug("Loading from " + abox_file)
+                world = scene.Scene(timestamp=t, name=abox_file, parent_scenario=self)
+                onto = world.get_ontology("file://" + abox_file)
+                onto = onto.load()
+                if hasattr(self, "_random"):
+                    world._random = self._random
+                if hasattr(self, "_np_random"):
+                    world._np_random = self._np_random
+                self.append(world)
+                t = round(t + 1 / hertz, 2)
+                # Revert the minor modification
+                for abox_line in fileinput.input(abox_file, inplace=True):
+                    if '<owl:imports rdf:resource="' in abox_line:
+                        abox_line = abox_line.replace('<owl:imports rdf:resource="',
+                                                      '<owl:imports rdf:resource="file:')
+                    print(abox_line, end='')
+        self._max_time = round(t - 1 / hertz, 2)
 
     def _initialize_seed(self, seed: int):
         """
