@@ -18,5 +18,10 @@ setup(
         "screeninfo",
         "tqdm",
         "owlready2_augmentator"
-    ]
+    ],
+    entry_points={
+        'console_scripts': [
+            'pyauto = pyauto.auto:main',
+        ],
+    }
 )
