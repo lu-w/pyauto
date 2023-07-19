@@ -159,7 +159,7 @@ def main():
         description="An interface (read & visualize) to traffic scenarios specified as ABoxes in A.U.T.O.")
     parser.add_argument("file", type=str, help="Path to a .kbs file containing a list of ABoxes to read")
     parser.add_argument("--read", "-r", action='store_true', help="Only reading, no visualization")
-    parser.add_argument("--hertz", "-s", type=int, default=20, help="The sampling rate (Hertz) of the scenario")
+    parser.add_argument("--hertz", "-hz", type=int, default=20, help="The sampling rate (Hertz) of the scenario")
     parser.add_argument("--verbose", "-v", action='store_true', help="If set, gives verbose output")
     args = parser.parse_args()
 

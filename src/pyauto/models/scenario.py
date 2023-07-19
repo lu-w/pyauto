@@ -212,7 +212,7 @@ class Scenario(list):
                 if create_kbs_file:
                     scene_files.append(os.path.basename(scene_file))
             _scene.save_abox(format=format, scenery_file=scenery_file_name, save_scenery=False, file=scene_file,
-                                   to_ignore=to_ignore, iri=iri, **kargs)
+                             to_ignore=to_ignore, iri=iri, **kargs)
 
         info_msg = "Saved ABox of " + str(self) + " to " + inject_in_filename(file, "_*")
 
