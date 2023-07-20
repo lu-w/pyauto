@@ -70,11 +70,18 @@ class Scenario(list):
         self._name = os.path.basename(kbs_file)
         self._scenery = None
         kbs_dir = os.path.dirname(kbs_file)
-        os.chdir(kbs_dir)
+        if len(kbs_dir) > 0:
+            kbs_final_dir = ""
+            os.chdir(kbs_dir)
+        else:
+            # Little hack because file URIs don't work if file is in current directory
+            kbs_final_dir = os.path.basename(os.path.normpath(os.getcwd()))
+            os.chdir("..")
+            kbs_dir = os.getcwd()
         t = 0
-        with open(kbs_file) as file:
+        with open(os.path.join(kbs_final_dir, kbs_file)) as file:
             for line in file:
-                abox_file = os.path.join(kbs_dir, line.replace("\n", ""))
+                abox_file = os.path.join(os.path.join(kbs_dir, kbs_final_dir), line.replace("\n", ""))
                 # Minor modification of file content required s.t. owlready2 can read the OWL file
                 for abox_line in fileinput.input(abox_file, inplace=True):
                     if '<owl:imports rdf:resource="file:' in abox_line:
