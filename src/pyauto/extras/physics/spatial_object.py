@@ -176,9 +176,9 @@ with physics:
             If this object does not have a yaw, returns None.
             :param v: A list of scalars
             """
-            if self.has_yaw is not None:
-                vx = math.cos(math.radians(self.has_yaw)) * v[0] - math.sin(math.radians(self.has_yaw)) * v[1]
-                vy = math.sin(math.radians(self.has_yaw)) * v[0] + math.cos(math.radians(self.has_yaw)) * v[1]
+            if self.get_yaw() is not None:
+                vx = math.cos(math.radians(self.get_yaw())) * v[0] - math.sin(math.radians(self.get_yaw())) * v[1]
+                vy = math.sin(math.radians(self.get_yaw())) * v[0] + math.cos(math.radians(self.get_yaw())) * v[1]
                 return vx, vy
 
         @augment(AugmentationType.OBJECT_PROPERTY, "is_in_proximity")
@@ -260,18 +260,59 @@ with physics:
                     angle = math.degrees(math.atan2(*p_yaw) - math.atan2(*p_self)) % 360
                     return 90 < angle < 270
 
+        @staticmethod
+        def left(p_1, p_2, yaw):
+            if not (math.isclose(p_1.x, p_2.x) and math.isclose(p_1.y, p_2.y)):
+                p_yaw = [math.cos(math.radians(yaw)), math.sin(math.radians(yaw))]
+                p_self = [p_1.x - p_2.x, p_1.y - p_2.y]
+                angle = math.degrees(math.atan2(*p_yaw) - math.atan2(*p_self)) % 360
+                return 0 < angle < 180
+            else:
+                return False
+
         @augment(AugmentationType.OBJECT_PROPERTY, "is_left_of")
         def left_of(self, other: physics.Dynamical_Object):
             if other is not None and self != other and self.has_geometry() and other.has_geometry() and \
                     other.has_yaw is not None:
                 p_1 = wkt.loads(self.hasGeometry[0].asWKT[0]).centroid
                 p_2 = wkt.loads(other.hasGeometry[0].asWKT[0]).centroid
-                if float(p_1.distance(p_2)) <= _SPATIAL_PREDICATE_THRESHOLD and not (math.isclose(p_1.x, p_2.x) and
-                                                                                     math.isclose(p_1.y, p_2.y)):
-                    p_yaw = [math.cos(math.radians(other.has_yaw)), math.sin(math.radians(other.has_yaw))]
-                    p_self = [p_1.x - p_2.x, p_1.y - p_2.y]
-                    angle = math.degrees(math.atan2(*p_yaw) - math.atan2(*p_self)) % 360
-                    return 0 < angle < 180
+                if float(p_1.distance(p_2)) <= _SPATIAL_PREDICATE_THRESHOLD:
+                    return self.left(p_1, p_2, other.has_yaw)
+
+        @augment(AugmentationType.OBJECT_PROPERTY, "is_properly_left_of")
+        def left_properly_of(self, other: physics.Dynamical_Object):
+            if other is not None and self != other and self.has_geometry() and other.has_geometry() and \
+                    other.has_yaw is not None:
+                g_1 = self.get_geometry()
+                g_2 = other.get_geometry()
+                if isinstance(g_1, geometry.Point):
+                    p_1s = [g_1]
+                else:
+                    p_1s = [geometry.Point(p) for p in g_1.exterior.coords]
+                if isinstance(g_2, geometry.Point):
+                    p_2s = [g_2]
+                else:
+                    p_2s = [geometry.Point(p) for p in g_2.exterior.coords]
+                is_left = True
+                for p_1 in p_1s:
+                    for p_2 in p_2s:
+                        if float(p_1.distance(p_2)) <= _SPATIAL_PREDICATE_THRESHOLD:
+                            is_left &= self.left(p_1, p_2, other.has_yaw)
+                        else:
+                            is_left = False
+                        if not is_left:
+                            break
+                return is_left
+
+        @staticmethod
+        def right(p_1, p_2, yaw):
+            if not (math.isclose(p_1.x, p_2.x) and math.isclose(p_1.y, p_2.y)):
+                p_yaw = [math.cos(math.radians(yaw)), math.sin(math.radians(yaw))]
+                p_self = [p_1.x - p_2.x, p_1.y - p_2.y]
+                angle = math.degrees(math.atan2(*p_yaw) - math.atan2(*p_self)) % 360
+                return 180 < angle < 360
+            else:
+                return False
 
         @augment(AugmentationType.OBJECT_PROPERTY, "is_right_of")
         def right_of(self, other: physics.Dynamical_Object):
@@ -279,12 +320,33 @@ with physics:
                     other.has_yaw is not None:
                 p_1 = wkt.loads(self.hasGeometry[0].asWKT[0]).centroid
                 p_2 = wkt.loads(other.hasGeometry[0].asWKT[0]).centroid
-                if float(p_1.distance(p_2)) <= _SPATIAL_PREDICATE_THRESHOLD and not (math.isclose(p_1.x, p_2.x) and
-                                                                                     math.isclose(p_1.y, p_2.y)):
-                    p_yaw = [math.cos(math.radians(other.has_yaw)), math.sin(math.radians(other.has_yaw))]
-                    p_self = [p_1.x - p_2.x, p_1.y - p_2.y]
-                    angle = math.degrees(math.atan2(*p_yaw) - math.atan2(*p_self)) % 360
-                    return 180 < angle < 360
+                if float(p_1.distance(p_2)) <= _SPATIAL_PREDICATE_THRESHOLD:
+                    return self.right(p_1, p_2, other.has_yaw)
+
+        @augment(AugmentationType.OBJECT_PROPERTY, "is_properly_right_of")
+        def right_properly_of(self, other: physics.Dynamical_Object):
+            if other is not None and self != other and self.has_geometry() and other.has_geometry() and \
+                    other.has_yaw is not None:
+                g_1 = self.get_geometry()
+                g_2 = other.get_geometry()
+                if isinstance(g_1, geometry.Point):
+                    p_1s = [g_1]
+                else:
+                    p_1s = [geometry.Point(p) for p in g_1.exterior.coords]
+                if isinstance(g_2, geometry.Point):
+                    p_2s = [g_2]
+                else:
+                    p_2s = [geometry.Point(p) for p in g_2.exterior.coords]
+                is_right = True
+                for p_1 in p_1s:
+                    for p_2 in p_2s:
+                        if float(p_1.distance(p_2)) <= _SPATIAL_PREDICATE_THRESHOLD:
+                            is_right &= self.right(p_1, p_2, other.has_yaw)
+                        else:
+                            is_right = False
+                        if not is_right:
+                            break
+                return is_right
 
         @augment(AugmentationType.OBJECT_PROPERTY, "is_in_front_of")
         def in_front_of(self, other: physics.Dynamical_Object):

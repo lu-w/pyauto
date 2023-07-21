@@ -12,7 +12,6 @@ from owlready2_augmentator import augment, augment_class, AugmentationType
 from ... import auto
 from ...extras import utils
 from .spatial_object import _SPATIAL_PREDICATE_THRESHOLD
-from .moving_dynamical_object import _INTERSECTING_PATH_MAX_PET
 
 logger = logging.getLogger(__name__)
 
@@ -25,6 +24,11 @@ with physics:
     class Dynamical_Object(owlready2.Thing):
 
         _RELEVANT_LOWEST_SPEED = 0.15  # m/s
+        _INTERSECTING_PATH_THRESHOLD = 8  # s, the time interval in which future intersecting paths shall be detected
+        _INTERSECTING_PATH_MAX_PET = 3  # s, the time interval of PET that classifies intersecting paths as critical
+        _HIGH_REL_SPEED_THRESHOLD = 0.25  # rel., the rel. difference in total speed in which CP150 will be augmented
+        _DEFAULT_SPEED_LIMIT = 50  # km/h, the default speed limit that is assumed
+        _DEFAULT_MAX_SPEED = 50  # km/h, the default speed maximum speed that is assumed
 
         def set_velocity(self, x: float, y: float, z: float = 0):
             """
@@ -53,36 +57,45 @@ with physics:
             """
             Gets the speed (scalar) from this object's velocity vector. Returns None if not enough information is given.
             """
-            v = [x for x in [self.has_velocity_x, self.has_velocity_y, self.has_velocity_z] if x is not None]
-            if len(v) > 1:
-                angle = math.degrees(math.atan2(v[1], v[0])) % 360
-                sign = 1
-                if 90 < angle < 270:
-                    sign = -1
-                return float(sign * numpy.linalg.norm(v))
+            if self.has_speed is not None:
+                return self.has_speed
+            else:
+                v = [x for x in [self.has_velocity_x, self.has_velocity_y, self.has_velocity_z] if x is not None]
+                if len(v) > 1:
+                    angle = math.degrees(math.atan2(v[1], v[0])) % 360
+                    sign = 1
+                    if 90 < angle < 270:
+                        sign = -1
+                    return float(sign * numpy.linalg.norm(v))
 
         @augment(AugmentationType.DATA_PROPERTY, "has_yaw")
         def get_yaw(self) -> float:
             """
             Gets the yaw (degrees) from this object's velocity vector. Returns None if not enough information is given.
             """
-            v = [x for x in [self.has_velocity_x, self.has_velocity_y, self.has_velocity_z] if x is not None]
-            if len(v) > 1:
-                return math.degrees(math.atan2(v[1], v[0])) % 360
+            if self.has_yaw is not None:
+                return self.has_yaw
+            else:
+                v = [x for x in [self.has_velocity_x, self.has_velocity_y, self.has_velocity_z] if x is not None]
+                if len(v) > 1:
+                    return math.degrees(math.atan2(v[1], v[0])) % 360
 
         @augment(AugmentationType.DATA_PROPERTY, "has_acceleration")
         def get_acceleration(self) -> float:
             """
             Gets the acceleration (scalar) from this object's acceleration vector.
             """
-            a = [x for x in [self.has_acceleration_x, self.has_acceleration_y, self.has_acceleration_z]
-                 if x is not None]
-            if len(a) > 1:
-                angle = math.degrees(math.atan2(a[1], a[0])) % 360
-                sign = 1
-                if 90 < angle < 270:
-                    sign = -1
-                return float(sign * numpy.linalg.norm(a))
+            if self.has_acceleration is not None:
+                return self.has_acceleration
+            else:
+                a = [x for x in [self.has_acceleration_x, self.has_acceleration_y, self.has_acceleration_z]
+                     if x is not None]
+                if len(a) > 1:
+                    angle = math.degrees(math.atan2(a[1], a[0])) % 360
+                    sign = 1
+                    if 90 < angle < 270:
+                        sign = -1
+                    return float(sign * numpy.linalg.norm(a))
 
         @augment(AugmentationType.REIFIED_DATA_PROPERTY, physics.Has_Distance_To, "distance_from", "distance_to",
                  "has_distance")
@@ -99,7 +112,52 @@ with physics:
                 if distance <= _SPATIAL_PREDICATE_THRESHOLD:
                     return distance
 
-        def intersects_path_with(self, other: physics.Moving_Dynamical_Object, delta_t: float | int=0.25,
+        @augment(AugmentationType.OBJECT_PROPERTY, "has_intersecting_path")
+        def augment_intersecting_paths(self, other: physics.Dynamical_Object):
+            """
+            Whether this object has an intersecting path with the given other object.
+            :param other: The other moving dynamical object.
+            :returns: True iff. the intersecting path condition is satisfied.
+            """
+            if self != other and self.has_geometry() and other.has_geometry() and self.get_speed() or 0 > 0 and \
+                    other.get_speed() or 0 > 0:
+                t_self, t_other, _ = self.intersects_path_with(other)
+                if t_self is None or t_other is None:
+                    return False
+                else:
+                    return t_self + t_other < self._INTERSECTING_PATH_THRESHOLD and \
+                        abs(t_self - t_other) < self._INTERSECTING_PATH_MAX_PET
+
+        #@augment(AugmentationType.OBJECT_PROPERTY, "CP_163")
+        def has_high_relative_speed_to(self, other: physics.Dynamical_Object):
+            """
+            Computes whether this object has a high relative speed w.r.t. the given other object.
+            :param other: The other moving dynamical object.
+            :returns: True iff. the high relative speed condition is satisfied.
+            """
+            if self != other and self.has_geometry() and other.has_geometry() and self.get_speed() or 0 > 0 and \
+                    other.get_speed() or 0 > 0 and self.has_yaw is not None and other.has_yaw is not None and \
+                    self.has_velocity_x is not None and self.has_velocity_y is not None and \
+                    other.has_velocity_x is not None and other.has_velocity_x is not None:
+                # TODO this crashes in combination with tobm
+                v_self = numpy.array(
+                    self.convert_local_to_global_vector([self.has_velocity_x, self.has_velocity_y]))
+                v_othe = numpy.array(
+                    other.convert_local_to_global_vector([other.has_velocity_x, other.has_velocity_y]))
+                s_rel = numpy.linalg.norm(v_self - v_othe)
+                s_self_max = max([x for y in self.is_a for x in y.has_maximum_speed])
+                if s_self_max is not None:
+                    s_self_max = self._DEFAULT_MAX_SPEED
+                if self.has_speed_limit is not None:
+                    s_rule_max = self.has_speed_limit
+                elif len(self.in_traffic_model) > 0 and self.in_traffic_model[0].has_speed_limit is not None:
+                    s_rule_max = self.in_traffic_model[0].has_speed_limit
+                else:
+                    s_rule_max = self._DEFAULT_SPEED_LIMIT
+                s_rel_normed = s_rel / (min(s_self_max, s_rule_max))
+                return s_rel_normed >= self._HIGH_REL_SPEED_THRESHOLD
+
+        def intersects_path_with(self, other: physics.Dynamical_Object, delta_t: float | int=0.25,
                                  horizon: float | int=10) -> tuple[float, float]:
             """
             Whether this object has an intersecting path with the given other object. Uses sampling of a simple
