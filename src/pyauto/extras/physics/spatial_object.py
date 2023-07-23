@@ -263,10 +263,10 @@ with physics:
         @staticmethod
         def left(p_1, p_2, yaw):
             if not (math.isclose(p_1.x, p_2.x) and math.isclose(p_1.y, p_2.y)):
-                p_yaw = [math.cos(math.radians(yaw)), math.sin(math.radians(yaw))]
-                p_self = [p_1.x - p_2.x, p_1.y - p_2.y]
+                p_yaw = [math.sin(math.radians(yaw)), math.cos(math.radians(yaw))]
+                p_self = [p_1.y - p_2.y, p_1.x - p_2.x]
                 angle = math.degrees(math.atan2(*p_yaw) - math.atan2(*p_self)) % 360
-                return 0 < angle < 180
+                return 180 < angle < 360
             else:
                 return False
 
@@ -307,10 +307,10 @@ with physics:
         @staticmethod
         def right(p_1, p_2, yaw):
             if not (math.isclose(p_1.x, p_2.x) and math.isclose(p_1.y, p_2.y)):
-                p_yaw = [math.cos(math.radians(yaw)), math.sin(math.radians(yaw))]
-                p_self = [p_1.x - p_2.x, p_1.y - p_2.y]
+                p_yaw = [math.sin(math.radians(yaw)), math.cos(math.radians(yaw))]
+                p_self = [p_1.y - p_2.y, p_1.x - p_2.x]
                 angle = math.degrees(math.atan2(*p_yaw) - math.atan2(*p_self)) % 360
-                return 180 < angle < 360
+                return 0 < angle < 180
             else:
                 return False
 

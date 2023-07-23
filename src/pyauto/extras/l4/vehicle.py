@@ -41,7 +41,7 @@ with l4_core:
             """
             Gets the relevant area of a vehicle as a Polygon. Can be used to determine small distances.
             """
-            max_yaw_rates = [x for y in self.is_a for x in y.has_maximum_yaw_rate]
+            max_yaw_rates = [x for y in self.is_a if hasattr(y, "has_maximum_yaw_rate") for x in y.has_maximum_yaw_rate]
             if len(max_yaw_rates) > 0:
                 max_yaw_rate = max(max_yaw_rates)
             else:
@@ -76,7 +76,7 @@ with l4_core:
                 a_pos = self.compute_left_front_point()
             else:
                 a_pos = self.compute_right_front_point()
-            max_yaws = [x for y in self.is_a for x in y.has_maximum_yaw]
+            max_yaws = [x for y in self.is_a if hasattr(y, "has_maximum_yaw") for x in y.has_maximum_yaw]
             if len(max_yaws) > 0:
                 max_yaw_pos = max(max_yaws)
             else:
