@@ -9,7 +9,7 @@ setup(
     include_package_data=True,
     package_data={"pyauto": ["auto", "visualizer/files"]},
     install_requires=[
-        "owlready2",
+        "owlready2==0.40",
         "matplotlib",
         "mpld3",
         "shapely==1.8.0",

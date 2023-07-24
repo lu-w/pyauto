@@ -1,4 +1,4 @@
-owlready
+owlready==0.40
 matplotlib
 mpld3
 shapely==1.8.0
