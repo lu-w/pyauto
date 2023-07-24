@@ -79,11 +79,12 @@ class Scenario(list):
             os.chdir("..")
             kbs_dir = os.getcwd()
         t = 0
+        backup_suffix = ".bak"
         with open(os.path.join(kbs_final_dir, kbs_file)) as file:
             for line in file:
                 abox_file = os.path.join(os.path.join(kbs_dir, kbs_final_dir), line.replace("\n", ""))
                 # Minor modification of file content required s.t. owlready2 can read the OWL file
-                for abox_line in fileinput.input(abox_file, inplace=True):
+                for abox_line in fileinput.input(abox_file, inplace=True, backup=backup_suffix):
                     if '<owl:imports rdf:resource="file:' in abox_line:
                         abox_line = abox_line.replace('<owl:imports rdf:resource="file:',
                                                       '<owl:imports rdf:resource="')
@@ -99,11 +100,7 @@ class Scenario(list):
                 self.append(world)
                 t = round(t + 1 / hertz, 2)
                 # Revert the minor modification
-                for abox_line in fileinput.input(abox_file, inplace=True):
-                    if '<owl:imports rdf:resource="' in abox_line:
-                        abox_line = abox_line.replace('<owl:imports rdf:resource="',
-                                                      '<owl:imports rdf:resource="file:')
-                    print(abox_line, end='')
+                os.replace(abox_file + backup_suffix, abox_file)
         self._max_time = round(t - 1 / hertz, 2)
 
     def _initialize_seed(self, seed: int):
