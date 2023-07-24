@@ -12,7 +12,7 @@ setup(
         "owlready2",
         "matplotlib",
         "mpld3",
-        "shapely",
+        "shapely==1.8.0",
         "sympy",
         "numpy",
         "screeninfo",
