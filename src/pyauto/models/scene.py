@@ -90,6 +90,7 @@ class Scene(owlready2.World):
         # First, we remove all individuals from the scenery, if an import is given (as these will be imported later).
         # However, we keep them 'bare' in this scene, as to also keep their relations to individuals in this scene.
         undos_scenery = {}
+        scenery_inds = []
         if save_scenery or scenery_file is not None:
             for i in self.individuals():
                 if Scene._SCENERY_COMMENT in i.comment:
@@ -108,7 +109,10 @@ class Scene(owlready2.World):
                     undos_scenery[i]["is_a"] = []
                     undos_scenery[i]["is_a"].extend(i.is_a)
                     i.is_a = []
-                    i.comment = []
+                    scenery_inds.append(i)
+
+        for i in scenery_inds:
+            i.comment = []
 
         # Then, we will remove all individuals belonging to some class in to_ignore.
         undos_ignore = []
