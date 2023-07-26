@@ -24,8 +24,8 @@ with physics:
     class Dynamical_Object(owlready2.Thing):
 
         _RELEVANT_LOWEST_SPEED = 0.15  # m/s
-        _INTERSECTING_PATH_THRESHOLD = 8  # s, the time interval in which future intersecting paths shall be detected
-        _INTERSECTING_PATH_MAX_PET = 3  # s, the time interval of PET that classifies intersecting paths as critical
+        _INTERSECTING_PATH_THRESHOLD = 10  # s, the time interval in which future intersecting paths shall be detected
+        _INTERSECTING_PATH_MAX_PET = 5  # s, the time interval of PET that classifies intersecting paths as critical
         _HIGH_REL_SPEED_THRESHOLD = 0.25  # rel., the rel. difference in total speed in which CP150 will be augmented
         _DEFAULT_SPEED_LIMIT = 50  # km/h, the default speed limit that is assumed
         _DEFAULT_MAX_SPEED = 50  # km/h, the default speed maximum speed that is assumed

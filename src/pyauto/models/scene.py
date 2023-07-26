@@ -87,12 +87,28 @@ class Scene(owlready2.World):
         :param uri: The IRI of the ontology. If none, it is "http://purl.org/auto/{file_base_name}"
         :returns: The IRI that was assigned to the ABox as str.
         """
-        # First, we remove all individuals from the scenery, if an import is given (as these will be imported later)
-        undos_scenery = []
+        # First, we remove all individuals from the scenery, if an import is given (as these will be imported later).
+        # However, we keep them 'bare' in this scene, as to also keep their relations to individuals in this scene.
+        undos_scenery = {}
         if save_scenery or scenery_file is not None:
             for i in self.individuals():
                 if Scene._SCENERY_COMMENT in i.comment:
-                    undos_scenery.append(owlready2.destroy_entity(i, undoable=True))
+                    undos_scenery[i] = {"comment": Scene._SCENERY_COMMENT}
+                    for prop in i.get_properties():
+                        if prop.python_name != "comment":
+                            to_keep = []
+                            undos_scenery[i][prop.python_name] = []
+                            for i2 in prop[i]:
+                                if not isinstance(i2, owlready2.Thing) or \
+                                        (hasattr(i2, "comment") and Scene._SCENERY_COMMENT in i2.comment):
+                                    undos_scenery[i][prop.python_name].append(i2)
+                                else:
+                                    to_keep.append(i2)
+                            prop[i] = to_keep
+                    undos_scenery[i]["is_a"] = []
+                    undos_scenery[i]["is_a"].extend(i.is_a)
+                    i.is_a = []
+                    i.comment = []
 
         # Then, we will remove all individuals belonging to some class in to_ignore.
         undos_ignore = []
@@ -105,8 +121,16 @@ class Scene(owlready2.World):
         self.save(file, format, **kargs)
 
         # Undo deletion of individuals - in case we want to work further with the scene
-        for undo in list(reversed(undos_ignore)) + list(reversed(undos_scenery)):
+        for undo in list(reversed(undos_ignore)):
             undo()
+
+        for i in list(reversed(undos_scenery.keys())):
+            for prop in list(reversed(undos_scenery[i].keys())):
+                if len(undos_scenery[i][prop]) > 0:
+                    if isinstance(getattr(i, prop), list):
+                        getattr(i, prop).extend(undos_scenery[i][prop])
+                    else:
+                        setattr(i, prop, undos_scenery[i][prop][0])
 
         # Post-processing
         if file is not None and format == "rdfxml":
@@ -128,7 +152,7 @@ class Scene(owlready2.World):
             tree = ElementTree.parse(file)
 
             # Remove all unwanted elements
-            _TO_DELETE = {"Class", "Datatype", "AllDisjointClasses", "Description", "DatatypeProperty",
+            _TO_DELETE = {"Class", "Datatype", "AllDisjointClasses", "DatatypeProperty",
                           "ObjectProperty", "Ontology", "AnnotationProperty"}
             _COLORS_DELETE = {"Blue", "Green", "Red", "White", "Yellow"}
 
@@ -220,7 +244,24 @@ class Scene(owlready2.World):
                     new_ind = getattr(nsp, type(ind).is_a[0].name)(ind.name)
                 mapping[ind] = new_ind
                 for cls in ind.is_a:
-                    new_cls = getattr(new.get_ontology(cls.namespace.base_iri), str(cls).split(".")[-1])
+                    # Right now, we only support is_a entries that are either direct classes or a role restriction with
+                    # a direct class as its value.
+                    if not hasattr(cls, "namespace") or not hasattr(cls, "name"):
+                        if isinstance(cls, owlready2.Restriction) and \
+                                isinstance(cls.value, owlready2.entity.ThingClass):
+                            prop = cls.property
+                            new_onto = new.get_ontology(prop.namespace.base_iri)
+                            restriction = getattr(getattr(new_onto, prop.python_name),
+                                                  owlready2.class_construct._restriction_type_2_label[cls.type])
+                            if hasattr(cls, "cardinality"):
+                                new_cls = restriction(cls.cardinality, getattr(new_onto, cls.value.name))
+                            else:
+                                new_cls = restriction(getattr(new_onto, cls.value.name))
+                        else:
+                            raise NotImplementedError("Copying for is_a entry " + str(cls) + " (type: "
+                                                      + str(type(cls)) + ") not yet supported")
+                    else:
+                        new_cls = getattr(new.get_ontology(cls.namespace.base_iri), cls.name)
                     if new_cls not in new_ind.is_a:
                         new_ind.is_a.append(new_cls)
 
