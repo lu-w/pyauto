@@ -43,7 +43,7 @@ _NO_PRINTING_PROPERTIES = {"perceptional_property", "traffic_related_concept_pro
                            "criticality_phenomenon_as_object_property", "has_positional_relation",
                            "has_spatial_relation", "has_dynamical_relation", "SF_spatial_relation",
                            "performance_spatial_relation", "EH_spatial_relation", "RCC8_spatial_relation", "rcc8dc",
-                           "ehDisjoint"}
+                           "ehDisjoint", "comment"}
 # If one hides long property lists, this is the number after which the list is cut off
 _MAX_PROPS_DISPLAY = 4
 _AVOID_LABEL_COLLISIONS = False
