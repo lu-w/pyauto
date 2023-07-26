@@ -24,7 +24,7 @@ with physics:
     class Dynamical_Object(owlready2.Thing):
 
         _RELEVANT_LOWEST_SPEED = 0.15  # m/s
-        _INTERSECTING_PATH_THRESHOLD = 10  # s, the time interval in which future intersecting paths shall be detected
+        _INTERSECTING_PATH_THRESHOLD = 8  # s, the time interval in which future intersecting paths shall be detected
         _INTERSECTING_PATH_MAX_PET = 5  # s, the time interval of PET that classifies intersecting paths as critical
         _HIGH_REL_SPEED_THRESHOLD = 0.25  # rel., the rel. difference in total speed in which CP150 will be augmented
         _DEFAULT_SPEED_LIMIT = 50  # km/h, the default speed limit that is assumed
@@ -119,7 +119,10 @@ with physics:
             :param other: The other moving dynamical object.
             :returns: True iff. the intersecting path condition is satisfied.
             """
-            if self != other and self.has_geometry() and other.has_geometry() and self.get_speed() or 0 > 0 and \
+            if self != other and ((len(self.drives) == 0 and len(other.drives) == 0) or
+                                  (len(self.drives) > 0 and other not in self.drives) or
+                                  (len(other.drives) > 0 and self not in other.drives)) \
+                    and self.has_geometry() and other.has_geometry() and self.get_speed() or 0 > 0 and \
                     other.get_speed() or 0 > 0:
                 t_self, t_other, _ = self.intersects_path_with(other)
                 if t_self is None or t_other is None:

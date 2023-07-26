@@ -82,25 +82,26 @@ class Scenario(list):
         backup_suffix = ".bak"
         with open(os.path.join(kbs_final_dir, kbs_file)) as file:
             for line in file:
-                abox_file = os.path.join(os.path.join(kbs_dir, kbs_final_dir), line.replace("\n", ""))
-                # Minor modification of file content required s.t. owlready2 can read the OWL file
-                for abox_line in fileinput.input(abox_file, inplace=True, backup=backup_suffix):
-                    if '<owl:imports rdf:resource="file:' in abox_line:
-                        abox_line = abox_line.replace('<owl:imports rdf:resource="file:',
-                                                      '<owl:imports rdf:resource="')
-                    print(abox_line, end='')
-                logger.debug("Loading from " + abox_file)
-                world = scene.Scene(timestamp=t, name=abox_file, parent_scenario=self)
-                onto = world.get_ontology("file://" + abox_file)
-                onto = onto.load()
-                if hasattr(self, "_random"):
-                    world._random = self._random
-                if hasattr(self, "_np_random"):
-                    world._np_random = self._np_random
-                self.append(world)
-                t = round(t + 1 / hertz, 2)
-                # Revert the minor modification
-                os.replace(abox_file + backup_suffix, abox_file)
+                if not line.startswith("#"):
+                    abox_file = os.path.join(os.path.join(kbs_dir, kbs_final_dir), line.replace("\n", ""))
+                    # Minor modification of file content required s.t. owlready2 can read the OWL file
+                    for abox_line in fileinput.input(abox_file, inplace=True, backup=backup_suffix):
+                        if '<owl:imports rdf:resource="file:' in abox_line:
+                            abox_line = abox_line.replace('<owl:imports rdf:resource="file:',
+                                                          '<owl:imports rdf:resource="')
+                        print(abox_line, end='')
+                    logger.debug("Loading from " + abox_file)
+                    world = scene.Scene(timestamp=t, name=abox_file, parent_scenario=self)
+                    onto = world.get_ontology("file://" + abox_file)
+                    onto = onto.load()
+                    if hasattr(self, "_random"):
+                        world._random = self._random
+                    if hasattr(self, "_np_random"):
+                        world._np_random = self._np_random
+                    self.append(world)
+                    t = round(t + 1 / hertz, 2)
+                    # Revert the minor modification
+                    os.replace(abox_file + backup_suffix, abox_file)
         self._max_time = round(t - 1 / hertz, 2)
 
     def _initialize_seed(self, seed: int):
