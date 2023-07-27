@@ -37,7 +37,8 @@ class Scenario(list):
         if seed is not None:
             self._initialize_seed(seed)
         if not file:
-            self._name = name
+            if not self._name:
+                self._name = name
             self._scenery = scenery
             if scenery:
                 scenery._random = self._random
