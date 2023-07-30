@@ -87,7 +87,14 @@ class Scene(owlready2.World):
         :param uri: The IRI of the ontology. If none, it is "http://purl.org/auto/{file_base_name}"
         :returns: The IRI that was assigned to the ABox as str.
         """
-        # First, we remove all individuals from the scenery, if an import is given (as these will be imported later).
+        # First, we remove all individuals belonging to some class in to_ignore.
+        undos_ignore = []
+        if to_ignore is not None:
+            for i in self.individuals():
+                if not set([str(x) for x in i.INDIRECT_is_a]).isdisjoint(to_ignore):
+                    undos_ignore.append(owlready2.destroy_entity(i, undoable=True))
+
+        # Then, we remove all individuals from the scenery, if an import is given (as these will be imported later).
         # However, we keep them 'bare' in this scene, as to also keep their relations to individuals in this scene.
         undos_scenery = {}
         scenery_inds = []
@@ -113,13 +120,6 @@ class Scene(owlready2.World):
 
         for i in scenery_inds:
             i.comment = []
-
-        # Then, we will remove all individuals belonging to some class in to_ignore.
-        undos_ignore = []
-        if to_ignore is not None:
-            for i in self.individuals():
-                if not set([str(x) for x in i.INDIRECT_is_a]).isdisjoint(to_ignore):
-                    undos_ignore.append(owlready2.destroy_entity(i, undoable=True))
 
         # Saves ABox - we will parse it and remove irrelevant stuff later
         self.save(file, format, **kargs)
