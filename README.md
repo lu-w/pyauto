@@ -42,20 +42,8 @@ visualizer.visualize(scene)
 
 For examples, have a look at the `examples` folder in this repository.
 
-# TODO for convenience functions in extras
+## Visualization
 
-- setting geometries
-  - 3d rectangles (and set height automatically)
-  - circles
-  - add_geometry_from_polygon
-  - create line from point list (not a polygon) (with and without height)
-    - with and without width (buffer by geometry)
-- Environment class
-  - add_precipitation(mmh: float) that automatically stores the amount and assigns the correct classification
-  - same for wind
-  - same for cloudiness
-  - same for daytime
-  - same for air (temp, rel humd, visibility, pressure)
-- add_marker() for selected objects e.g. Pedestrian_Ford, Bicycle_Ford, etc. (see lateral_marking.py)
-- applies_to relation when adding marker's geometry automatically by checking which previously created lanes and their roads it intersects
-- integrate this package in omega2auto
+`pyauto` can be used to visualize saved A.U.T.O. ABoxes in form `.kbs` files.
+For this, call `pyauto aboxes.kbs` after installing this package.
+More information are available in `pyauto -h`.
