@@ -295,6 +295,6 @@ class Scenario(list):
         that are decorated with @augment_class and loaded by a Python import.
         """
         logger.info("Augmenting scenario " + str(self))
-        for _scene in tqdm.tqdm(self):
+        for _scene in tqdm.tqdm([self._scenery] + self):
             _scene.augment()
 

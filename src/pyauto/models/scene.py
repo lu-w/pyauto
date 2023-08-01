@@ -136,6 +136,9 @@ class Scene(owlready2.World):
                     else:
                         setattr(i, prop, undos_scenery[i][prop][0])
 
+        for i in scenery_inds:
+            i.comment = [Scene._SCENERY_COMMENT]
+
         # Post-processing
         if file is not None and format == "rdfxml":
             # First, create the file name of the scene
@@ -296,7 +299,8 @@ class Scene(owlready2.World):
         """
         ge = self.ontology(auto.Ontology.GeoSPARQL)
         ph = self.ontology(auto.Ontology.Physics)
-        ke = {ge.hasGeometry, ge.asWKT, ph.has_height}
+        rdfs = self.get_ontology("http://www.w3.org/2000/01/rdf-schema")
+        ke = {ge.hasGeometry, ge.asWKT, ph.has_height, rdfs.comment}
         if to_keep is not None:
             ke = ke.union(to_keep)
         mapping, new = self.copy(delta_t, ke)
