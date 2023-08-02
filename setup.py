@@ -5,7 +5,7 @@ setup(
     version="0.1",
     python_requires='>=3.10',
     package_dir={"": "src"},
-    packages=["pyauto", "pyauto.models", "pyauto.visualizer"],
+    packages=find_packages(where="src"),
     description="Python module for accessing A.U.T.O. based on owlready2",
     author ="Lukas Westhofen",
     author_email="lukas.westhofen@dlr.de",
