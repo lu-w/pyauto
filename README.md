@@ -11,6 +11,7 @@ It basically provides an easier access to
 
 ## Install
 
+`pyauto` requires Python >= 3.10.
 First, initialize submodules: `git submodule update --init --recursive`.
 Install the requirements using `pip install -r requirements.txt`, and then this package via `pip install .`.
 

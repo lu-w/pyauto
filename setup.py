@@ -1,8 +1,10 @@
-from distutils.core import setup
+from setuptools import setup, find_packages
 
 setup(
     name="pyauto",
     version="0.1",
+    python_requires='>=3.10',
+    packages=["src/pyauto"],
     description="Python module for accessing A.U.T.O. based on owlready2",
     author ="Lukas Westhofen",
     author_email="lukas.westhofen@dlr.de",
