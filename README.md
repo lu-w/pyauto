@@ -48,8 +48,6 @@ sc.save_abox("/tmp/scenario.owl")
 visualizer.visualize(sc)
 ```
 
-For examples, have a look at the `examples` folder in this repository.
-
 ## Visualization
 
 `pyauto` can be used to visualize saved A.U.T.O. ABoxes in form `.kbs` files.
