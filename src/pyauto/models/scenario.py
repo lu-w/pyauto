@@ -188,7 +188,7 @@ class Scenario(list):
         logger.info("Saving ABox...")
 
         # Saves scenery
-        if save_scenery and not scenery_file_name:
+        if save_scenery and self._scenery is not None and not scenery_file_name:
             scenery_file_name = inject_in_filename(file, "_scenery")
 
         if self._scenery is not None:

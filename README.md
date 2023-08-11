@@ -20,25 +20,32 @@ Install the requirements using `pip install -r requirements.txt`, and then this 
 This small example loads A.U.T.O., creates a vehicle in the ABox, saves, and visualizes it.
 
 ```python
+import logging
+
 from pyauto import auto
-from pyauto.models.scene import Scene
+from pyauto.models.scenario import Scenario
 from pyauto.visualizer import visualizer
 
-# creates a scene and loads A.U.T.O. into it
-scene = Scene()
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s: %(message)s")
 
-# accesses the relevant sub-ontologies easily
-l4_de = scene.ontology(auto.Ontology.L4_DE)
+# creates a scenario with two empty scenes (and loads A.U.T.O.)
+sc = Scenario(1, name="Example Scenario")
 
-# creates one vehicle
-ego = l4_de.Passenger_Car()
-ego.set_geometry(5, 10, 5.1, 2.2)
+# scene: creates ego vehicle & pedestrian
+l4_de_1 = sc[0].ontology(auto.Ontology.L4_DE)
+l4_co_1 = sc[0].ontology(auto.Ontology.L4_Core)
+ego_1 = l4_de_1.Passenger_Car()
+ego_1.set_geometry(5, 10, 5.1, 2.2)
+ego_1.set_velocity(6, 0)
+ped_1 = l4_co_1.Pedestrian()
+ped_1.set_geometry(9, 1, 0.6, 0.3)
+ped_1.set_velocity(0, 3)
 
-# saves the ABox
-scene.save_abox("/tmp/scene.owl")
+# saves the ABoxes - also creates /tmp/scenario.kbs
+sc.save_abox("/tmp/scenario.owl")
 
 # visualizes the ABox
-visualizer.visualize(scene)
+visualizer.visualize(sc)
 ```
 
 For examples, have a look at the `examples` folder in this repository.
@@ -46,5 +53,5 @@ For examples, have a look at the `examples` folder in this repository.
 ## Visualization
 
 `pyauto` can be used to visualize saved A.U.T.O. ABoxes in form `.kbs` files.
-For this, call `pyauto aboxes.kbs` after installing this package.
+For this, call `pyauto /tmp/scenario.kbs` after installing `pyauto` (for the .kbs file created by the example above).
 More information are available in `pyauto -h`.
