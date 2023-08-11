@@ -1,7 +1,7 @@
 # pyauto
 
 A python package for accessing the [Automotive Urban Traffic Ontology](https://github.com/lu-w/auto/) using owlready2.
-It basically provides an easier access to
+It basically provides access to
 - loading A.U.T.O. into owlready2
 - A.U.T.O.'s set of IRIs
 - retrieving a single ontology of A.U.T.O. based on a given IRI
