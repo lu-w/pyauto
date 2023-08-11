@@ -34,8 +34,7 @@ class Scenario(list):
             ignored.
         :param hertz: The sampling rate of the scenario to be loaded from file (if file is None, it is ignored).
         """
-        if seed is not None:
-            self._initialize_seed(seed)
+        self._initialize_seed(seed)
         if not file:
             if not hasattr(self, "_name") or self._name is None:
                 self._name = name
@@ -111,8 +110,8 @@ class Scenario(list):
         :param seed: The seed to initialize with.
         """
         self._seed = seed
-        self._random = random.Random(seed)
-        self._np_random = numpy.random.RandomState(self._seed)
+        self._random = random.Random(seed or 0)
+        self._np_random = numpy.random.RandomState(self._seed or 0)
 
     def __str__(self):
         return str(self._name)
