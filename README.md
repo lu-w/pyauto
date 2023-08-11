@@ -55,3 +55,7 @@ For examples, have a look at the `examples` folder in this repository.
 `pyauto` can be used to visualize saved A.U.T.O. ABoxes in form `.kbs` files.
 For this, call `pyauto /tmp/scenario.kbs` after installing `pyauto` (for the .kbs file created by the example above).
 More information are available in `pyauto -h`.
+
+## More examples
+
+For more examples on API usage, have a look at the files in the `examples` folder.
