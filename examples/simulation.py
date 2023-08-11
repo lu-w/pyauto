@@ -18,7 +18,7 @@ road.set_geometry(10, 10, 20, 5)
 road.cross_section((l1_core.Lane, 0.4), (l1_core.Lane, 0.6))
 
 # creates a scenario with one empty scene, adds the scenery to it, and tells pyauto about the local sim. model
-sc = Scenario(1, scenery=statics, name="Simulation Example", more_extras=["simulation_model"])
+sc = Scenario(1, scenery=statics, name="Simulation Example", more_extras=["simulation_model"], load_cp=True)
 sc.set_scenery(statics)
 l4_co = sc[0].ontology(auto.Ontology.L4_Core)
 l4_de = sc[0].ontology(auto.Ontology.L4_DE)
@@ -41,8 +41,7 @@ ego.is_in_front_of = [ped]
 sc.simulate(duration=3, delta_t=1)
 
 # augment - will infer e.g. speed and yaw from set velocity in all ABoxes
-# TODO fix bug CP_150
-#sc.augment()
+sc.augment()
 
 # saves the ABoxes (scenery and single scenes) - "scenario_full.owl" serves as a template
 sc.save_abox("/tmp/scenario_full.owl")
