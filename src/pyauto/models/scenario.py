@@ -295,5 +295,5 @@ class Scenario(list):
         """
         logger.info("Augmenting scenario " + str(self))
         for _scene in tqdm.tqdm([self._scenery] + self):
-            _scene.augment()
-
+            if _scene is not None:
+                _scene.augment()
