@@ -16,7 +16,12 @@ logger = logging.getLogger(__name__)
 
 
 class Scene(owlready2.World):
-    _SCENERY_COMMENT = "_auto_scenery"
+    """
+    A scene represent a single measurement sample in a scenario and is modeled as an owlready2.World, spearated from all
+    other scenes (i.e., worlds).
+    """
+
+    _SCENERY_COMMENT = "_auto_scenery"  # enables unique identification of scenery elements in OWL files.
 
     def __init__(self, timestamp: float | int = 0, parent_scenario=None, scenery=None, add_extras: bool = True,
                  more_extras: list[str] = None, load_cp: bool = False, name: str = None):

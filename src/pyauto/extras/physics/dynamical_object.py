@@ -142,7 +142,7 @@ with physics:
                     other.get_speed() or 0 > 0 and self.has_yaw is not None and other.has_yaw is not None and \
                     self.has_velocity_x is not None and self.has_velocity_y is not None and \
                     other.has_velocity_x is not None and other.has_velocity_x is not None:
-                # TODO this crashes in combination with tobm
+                # TODO this crashes in combination with TOBM
                 v_self = numpy.array(
                     self.convert_local_to_global_vector([self.has_velocity_x, self.has_velocity_y]))
                 v_othe = numpy.array(
@@ -333,6 +333,10 @@ with physics:
             return round(x, 2), round(y, 2)
 
         def is_intersection_possible(self, other, max_distance: int | float=10):
+            """
+            Checks whether an intersection is possible with the given other individual, i.e., an over-approximation
+            to prevent computations later on.
+            """
             if hasattr(self, "drives") and len(self.drives) > 0:
                 dist = other.get_distance(self.drives[0])
             else:
@@ -346,7 +350,10 @@ with physics:
                  (not self.has_speed and other.has_speed and (dist / other.has_speed) <= max_distance))
 
         @cache
-        def get_intersecting_objects(self, horizon=10, delta_t=0.25):
+        def get_intersecting_objects(self, horizon=10, delta_t=0.25) -> list:
+            """
+            :returns: a list of tuples of intersecting, spatial objects and their intersecting paths.
+            """
             res = []
             for obj in self.namespace.world.search(
                     type=self.namespace.world.get_ontology(auto.Ontology.Physics.value).Spatial_Object):

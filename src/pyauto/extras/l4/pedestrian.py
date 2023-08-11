@@ -22,6 +22,12 @@ with l4_core:
 
         @augment(AugmentationType.OBJECT_PROPERTY, "CP_150")
         def has_small_distance(self, other: physics.Spatial_Object):
+            """
+            Checks if this object has a small distance w.r.t. another object.
+            This method determines if the current object and another object are close to each other based on their
+            geometries, speeds, yaws, heights, and relevant areas.
+            :return: True if the objects have a small distance, i.e. their relevant areas intersect, False otherwise.
+            """
             if self != other and self.has_geometry() and other.has_geometry() and self.has_speed is not None and \
                     other.has_height is not None and other.has_height > 0:
                 occ1 = self.get_relevant_area()
@@ -30,7 +36,9 @@ with l4_core:
 
         def get_relevant_area(self) -> Polygon:
             """
-            Gets the relevant area of a pedestrian as a Polygon. Can be used to determine small distances.
+            Gets the relevant area of a pedestrian as a Polygon. Can be used to determine small distances. It is based
+            on simply examining the reachable area of the pedestrian interpreted as a circle around it.
+            :return: The relevant area as a Polygon.
             """
             a = self.get_geometry()
             if self.has_speed > 0:

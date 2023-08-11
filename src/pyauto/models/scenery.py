@@ -2,6 +2,11 @@ from . import scene
 
 
 class Scenery(scene.Scene):
+    """
+    The scenery contains all 'static' (i.e., temporally not changing) individuals.
+    Individuals within the scenery are annotated with the _SCENERY_COMMENT of scene.Scene for unique identification in
+    OWL files later on.
+    """
     def __init__(self, add_extras: bool = True, more_extras: list[str] = None, load_cp: bool = False, name: str = None):
         super().__init__(add_extras=add_extras, more_extras=more_extras, load_cp=load_cp, name=name)
 

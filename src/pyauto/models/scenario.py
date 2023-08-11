@@ -14,10 +14,17 @@ logger = logging.getLogger(__name__)
 
 
 class Scenario(list):
+    """
+    A scenario is a list of scenes, with some extra functionality added on top for convenience.
+    For example, it enables simulation, augmentation, and file saving.
+    Scenarios can also be read from file again using a so-called .kbs file. It is just a list of .owl files of the
+    single scenes it represents.
+    """
+
     def __init__(self, scene_number: int = None, scenes: list[scene.Scene] = None, scenery: scenery.Scenery = None,
                  name: str = "Unnamed Scenario", add_extras: bool = True, more_extras: list[str] = None,
                  load_cp: bool = False, seed: int = None, file: str = None, hertz: int = None):
-        """Ideally you would create loggers and set them based on the proper naming/configurations instead of accepting the default configuration.
+        """
         Creates a new scenario, i.e., a list of scenes, which is iterable and supports indexing.
         :param scene_number: Optional number of empty scenes to create.
         :param scenes: Optional list of scenes that make up this scenario. scene_number is ignored if a scene list is

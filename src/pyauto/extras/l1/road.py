@@ -15,7 +15,9 @@ with l1_core:
 
         def cross_section(self, *cross_section: tuple[owlready2.ThingClass, float]) -> list:
             """
-            TODO
+            Automatically creates a road layout from a given cross section, which is formatted as a tuple of classes
+            (the type of the cross section element) and a float (the relative width that the element shall taken from
+            the road).
             :param cross_section: A list of tuples representing the cross section.
             :returns: A list of the newly created lanes
             """
@@ -53,5 +55,9 @@ with l1_core:
             return cs
 
         def add_lane(self, lane: l1_core.Lane):
+            """
+            Adds the given lane to the road and informs the lane about this road being its parent road.
+            :param lane: The lane to add.
+            """
             lane.has_road = self
             self.has_lane.append(lane)

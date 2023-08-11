@@ -18,6 +18,10 @@ with l4_core:
     @augment_class
     class Vehicle(owlready2.Thing):
         def add_driver(self, cls: owlready2.ThingClass):
+            """
+            Adds a driver from the given class to this vehicle, i.e., it creates a new individual in owlready2.
+            :param cls: The class of the driver to add.
+            """
             driver = cls(self.name + "_driver")
             driver.is_a.append(l4_core.Driver)
             if self.has_geometry():
@@ -30,6 +34,12 @@ with l4_core:
 
         @augment(AugmentationType.OBJECT_PROPERTY, "CP_150")
         def has_small_distance(self, other: physics.Spatial_Object):
+            """
+            Checks if this object has a small distance w.r.t. another object.
+            This method determines if the current object and another object are close to each other based on their
+            geometries, speeds, yaws, heights, and relevant areas.
+            :return: True if the objects have a small distance, i.e. their relevant areas intersect, False otherwise.
+            """
             if self != other and self.has_geometry() and other.has_geometry() and self.has_speed is not None and \
                     self.has_yaw is not None and other.has_height is not None and other.has_height > 0 and \
                     hasattr(other, "get_relevant_area"):
@@ -39,7 +49,9 @@ with l4_core:
 
         def get_relevant_area(self) -> Polygon:
             """
-            Gets the relevant area of a vehicle as a Polygon. Can be used to determine small distances.
+            Gets the relevant area of a vehicle as a Polygon. Can be used to determine small distances. It is based on
+            sampling a predicted path model up to _MAX_TIME_SMALL_DISTANCE.
+            :return: The relevant area as a Polygon.
             """
             max_yaw_rates = [x for y in self.is_a if hasattr(y, "has_maximum_yaw_rate") for x in y.has_maximum_yaw_rate]
             if len(max_yaw_rates) > 0:
@@ -63,6 +75,8 @@ with l4_core:
             """
             Simple prediction model. Calculates the 2D-point at which the vehicle will be at time t + t_pos assuming
             the given max yaw rate.
+            :param max_yaw_rate_pos: The maximum yaw rate.
+            :param t_pos: The time at which to determine the position for.
             """
             if self.has_speed is not None:
                 speed_pos = self.has_speed

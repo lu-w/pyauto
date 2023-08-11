@@ -24,8 +24,6 @@ from .. import utils
 from ..models.scene import Scene
 from ..models.scenario import Scenario
 
-# TODO
-# - show has distance to in table for each individual - as ternary relations - instead of omitting it
 
 ####################
 # Config constants #

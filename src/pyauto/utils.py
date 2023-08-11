@@ -25,7 +25,7 @@ def _get_individual_id(individual) -> str:
         return str(individual)
 
 
-def get_most_specific_classes(list_of_individuals, caching=True):
+def get_most_specific_classes(list_of_individuals, caching=True) -> list:
     """
     Helper function that looks up the subsumption hierarchy and returns the most specific classes of a list of
     individuals(i.e. removes all classes that are a parent of some class of the individuals). It looks only at the

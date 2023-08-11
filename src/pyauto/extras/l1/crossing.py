@@ -13,10 +13,18 @@ with l1_de:
         _TOLERANCE_PARALLEL_LANE_DEGREES = 15  # °
 
         def set_roads(self, *roads):
+            """
+            Sets the roads that this crossing shall connect. Automatically updates the directional position of the lanes
+            of the given roads.
+            """
             self.connects = [r for r in roads]
             self._set_lane_positions()
 
         def _set_lane_positions(self):
+            """
+            Connects all lanes on this crossing (i.e., those in self.connects) with each other using the
+            is_lane_parallel_to, is_lane_right_of, and is_lane_left_of roles.
+            """
             if self.has_geometry():
                 p_int = self.get_geometry().centroid
                 lanes = [l for r in self.connects for l in r.has_lane]

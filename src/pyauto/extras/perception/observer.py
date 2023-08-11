@@ -4,7 +4,6 @@ import owlready2
 
 from shapely.geometry import Polygon, Point, LineString, MultiPolygon
 from shapely import wkt
-from matplotlib import pyplot as plt
 
 from owlready2_augmentator import augment, augment_class, AugmentationType
 
@@ -12,10 +11,19 @@ from ... import auto
 
 _DEFAULT_VISIBILITY = 50  # m, the visibility that is assumed if the observer does not have a specific visibility given
 _OCCLUSION_SAMPLING_STEP = 0.25  # °, the step size that is used to sample the circular segment for occluded areas
-_DEBUG_OCCLUSION = False  # shows debug outputs for occlusion (plot, tty)
 
 
 def get_occluded_areas(others: list, fov, visibility=None):
+    """
+    Calculate occluded areas for a list of objects within a given field of view.
+    This function computes the occluded areas of a list of objects based on their geometries and the field of view.
+    The occluded areas are determined by considering the visibility from the field of view centroid to the object
+    boundaries.
+    :param others: A list of individuals for which occluded areas will be calculated.
+    :param fov: The field of view geometry used for occlusion calculations.
+    :param visibility: The optional visibility distance. If not provided, _DEFAULT_VISIBILITY is used.
+    :return: A dictionary containing occluded areas as shapely geometries associated with their corresponding objects.
+    """
     if visibility is None:
         visibility = _DEFAULT_VISIBILITY
     cutoffs = dict()
@@ -58,12 +66,25 @@ def get_occluded_areas(others: list, fov, visibility=None):
             cutoff = Polygon()
         cutoff = cutoff.buffer(0).union(a)
         cutoffs[others[i]] = cutoff
-        if _DEBUG_OCCLUSION and hasattr(cutoff, "exterior"):
-            plt.plot(*cutoff.exterior.xy, color="black")
     return cutoffs
 
 
 def get_occlusions(others: list, cutoffs: dict, fov):
+    """
+    Compute occlusions for the given list of objects.
+
+    This function calculates occlusions for a list of objects based on their geometries, cutoffs, and field of view.
+    The occlusion calculation is performed by determining the intersection of object geometries with the field of view,
+    considering cutoff geometries for occlusion checks.
+
+    :param others: A list of objects to be considered for occlusion calculations.
+    :param cutoffs: A dictionary containing the geometries of occluded areas as determined by get_occluded_areas().
+    :param fov: The field of view geometry used for occlusion calculations.
+    :return: A list of occlusions, where each occlusion is represented as a tuple containing:
+              - A list of occluded geometries.
+              - The occluded object.
+              - The calculated occlusion percentage.
+    """
     occs = []
     geos = [wkt.loads(wkt.dumps(wkt.loads(x.hasGeometry[0].asWKT[0]), output_dimension=2)).buffer(0)
             for x in others]
@@ -76,13 +97,6 @@ def get_occlusions(others: list, cutoffs: dict, fov):
                     intersection = geom.intersection(cutoffs[a])
                     if intersection.area > 0:
                         ints.append((a, intersection))
-                        if _DEBUG_OCCLUSION:
-                            if not intersection.is_empty and not isinstance(intersection, Point):
-                                if hasattr(cutoffs[a], "exterior"):
-                                    plt.fill(*cutoffs[a].exterior.xy, color="coral")
-                                elif isinstance(cutoffs[a], MultiPolygon):
-                                    for pg in cutoffs[a]:
-                                        plt.fill(*pg.exterior.xy, color="coral")
             if len(ints) > 0:
                 union = ints[0][1]
                 for j in ints[1:]:
@@ -100,7 +114,14 @@ with perception:
     @augment_class
     class Observer(owlready2.Thing):
 
-        def is_in_fov(self, self_geom, other: owlready2.Thing, fov, ignore_height=False):
+        def is_in_fov(self, self_geom, other: owlready2.Thing, fov, ignore_height=False) -> bool:
+            """
+            Checks whether a given other object is in the field of view of this observer.
+            :param self_geom: The geometry of this object.
+            :param other: The object to check against.
+            :param fov: A shapely geometry representing the field of view of this object.
+            :param ignore_height: Whether to ignore the height, i.e. ignore things of height 0.
+            """
             if self != other and other.has_geometry() and \
                     ((other.has_height is not None and other.has_height > 0.1) or ignore_height):
                 other_geom = wkt.loads(other.hasGeometry[0].asWKT[0])
@@ -110,6 +131,9 @@ with perception:
 
         @augment(AugmentationType.CLASS_SUBSUMPTION, None)  # This is a bit hacky, but is more performant
         def augment_occlusion(self):
+            """
+            Computes occlusion to all other objects in the field of view and creates occlusion objects accordingly.
+            """
             if self.has_geometry() and (self.has_yaw is not None or (len(self.drives) > 0 and self.drives[0].has_yaw
                                        is not None and self.drives[0].has_geometry())) and \
                     len(self.is_occluded_for_in_occlusion) == 0:
@@ -143,26 +167,3 @@ with perception:
                         ont_occ.is_occluded = [occ[1]]
                         ont_occ.has_occlusion_rate = occ[2]
                         ont_occ.in_traffic_model = self.in_traffic_model
-                if _DEBUG_OCCLUSION:
-                    print("=== Occlusions for " + str(self) + " ===")
-                    print("\n".join([str(x) for x in occlusions]))
-                    print("======")
-                    plt.plot(*head, "o-g")
-                    for x in occluded_others:
-                        a = wkt.loads(wkt.dumps(wkt.loads(x.hasGeometry[0].asWKT[0]), output_dimension=2)).buffer(0)
-                        if not a.is_empty:
-                            if hasattr(a, "exterior"):
-                                plt.plot(*a.exterior.xy, color="black")
-                            else:
-                                try:
-                                    plt.plot(*a.xy, color="black")
-                                except NotImplementedError:
-                                    pass
-                    for x in occluding_others:
-                        a = wkt.loads(wkt.dumps(wkt.loads(x.hasGeometry[0].asWKT[0]), output_dimension=2)).buffer(0)
-                        if hasattr(a, "exterior"):
-                            plt.fill(*a.exterior.xy, color="lightblue")
-                        else:
-                            plt.fill(*a.xy, color="lightblue")
-                    plt.axis('scaled')
-                    plt.show()
