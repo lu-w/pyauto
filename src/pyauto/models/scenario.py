@@ -37,7 +37,7 @@ class Scenario(list):
         if seed is not None:
             self._initialize_seed(seed)
         if not file:
-            if not self._name:
+            if not hasattr(self, "_name") or self._name is None:
                 self._name = name
             self._scenery = scenery
             if scenery:
