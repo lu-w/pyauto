@@ -237,7 +237,7 @@ with physics:
                 at the given point in time.
             """
             yaw = self.has_yaw
-            yaw_rate = self.has_yaw_rate
+            yaw_rate = self.has_yaw_rate or 0
             if len(self.drives) > 0:
                 geo = self.drives[0].get_geometry()
             else:
