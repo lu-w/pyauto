@@ -1,5 +1,6 @@
 import logging
 import random
+import pathlib
 import time
 import fileinput
 import os
@@ -22,8 +23,9 @@ class Scenario(list):
     """
 
     def __init__(self, scene_number: int = None, scenes: list[scene.Scene] = None, scenery: scenery.Scenery = None,
-                 name: str = "Unnamed Scenario", add_extras: bool = True, more_extras: list[str] = None,
-                 load_cp: bool = False, seed: int = None, file: str = None, hertz: int = None):
+                 name: str = "Unnamed Scenario", folder: str = None, add_extras: bool = True,
+                 more_extras: list[str] = None, load_cp: bool = False, seed: int = None, file: str = None,
+                 hertz: int = None):
         """
         Creates a new scenario, i.e., a list of scenes, which is iterable and supports indexing.
         :param scene_number: Optional number of empty scenes to create.
@@ -31,6 +33,8 @@ class Scenario(list):
             given.
         :param scenery: An optional scenery (i.e., static elements) of this scenario.
         :param name: Name of this scenario (for printing), "Unnamed Scenario" if not set.
+        :param folder: The folder to look for, should contain the `automotive_urban_traffic_ontology.owl`. Can be None,
+            in this case, it takes the ontology located in the pyauto repository.
         :param add_extras: Whether to import the extra functionality that is added the classes from owlready2.
         :param more_extras: A name of an importable module that contains more extra functionality to load from. Will be
             imported in the given order. Using wildcards at the end is possible, e.g. "a.b.*", which then recursively
@@ -55,15 +59,18 @@ class Scenario(list):
                 for s in scenes:
                     s._random = self._random
                     s._np_random = self._np_random
-                    s.set_scenery(scenery)
+                    if s._scenery is None:
+                        s.set_scenery(scenery)
             else:
                 super().__init__()
                 if scene_number is None:
                     scene_number = 0
                 for _ in range(scene_number):
-                    self.new_scene(add_extras=add_extras, more_extras=more_extras, load_cp=load_cp, scenery=scenery)
-            self._duration = self[-1]._timestamp - self[0]._timestamp
-            self._max_time = self[-1]._timestamp
+                    self.new_scene(folder=folder, add_extras=add_extras, more_extras=more_extras, load_cp=load_cp,
+                                   scenery=scenery)
+            if len(self) > 0:
+                self._duration = self[-1]._timestamp - self[0]._timestamp
+                self._max_time = self[-1]._timestamp
         else:
             self._load_from_file(file, hertz)
 
@@ -123,12 +130,14 @@ class Scenario(list):
     def __str__(self):
         return str(self._name)
 
-    def new_scene(self, position: int = -1, timestamp: float | int = None, add_extras: bool = True,
+    def new_scene(self, position: int = -1, timestamp: float | int = None, folder: str = None, add_extras: bool = True,
                   more_extras: list[str] = None, load_cp: bool = False, scenery=None):
         """
         Adds a new scene to the scenario.
         :param position: Optional position at which to insert. If -1, the new scene is added at the end.
         :param timestamp: Optional timestamp of the scene. If None, the position is used.
+        :param folder: The folder to look for, should contain the `automotive_urban_traffic_ontology.owl`. Can be None,
+            in this case, it takes the ontology located in the pyauto repository.
         :param add_extras: Whether to import the extra functionality that is added the classes from owlready2.
         :param more_extras: A name of an importable module that contains more extra functionality to load from. Will be
             imported in the given order. Using wildcards at the end is possible, e.g. "a.b.*", which then recursively
@@ -138,8 +147,8 @@ class Scenario(list):
         """
         if timestamp is None:
             timestamp = position if position >= 0 else len(self)
-        self.add_scene(scene.Scene(timestamp=timestamp, parent_scenario=self, scenery=scenery, add_extras=add_extras,
-                                   more_extras=more_extras, load_cp=load_cp), position)
+        self.add_scene(scene.Scene(folder=folder, timestamp=timestamp, parent_scenario=self, scenery=scenery,
+                                   add_extras=add_extras, more_extras=more_extras, load_cp=load_cp), position)
 
     def add_scene(self, new_scene: scene.Scene, position: int = -1):
         """
@@ -193,6 +202,9 @@ class Scenario(list):
             return appended_filename
 
         logger.info("Saving ABox...")
+
+        # Creates folder in case it does not yet exist
+        pathlib.Path(os.path.dirname(file)).mkdir(parents=True, exist_ok=True)
 
         # Saves scenery
         if save_scenery and self._scenery is not None and not scenery_file_name:
