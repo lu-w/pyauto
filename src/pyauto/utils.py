@@ -18,9 +18,10 @@ def _get_individual_id(individual) -> str:
     """
     if hasattr(individual, "identifier") and (isinstance(individual.identifier, list) and
                                               len(individual.identifier) > 0 and
-                                              type(individual.identifier[0]) in [int, str]) or (
-            type(individual.identifier) in [int, str]):
+                                              type(individual.identifier[0]) in (int, str)):
         return str(individual.identifier[0])
+    elif type(individual.identifier) in (int, str):
+        return str(individual.identifier)
     else:
         return str(individual)
 

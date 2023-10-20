@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import os
+import pathlib
 import tempfile
 
 import numpy
@@ -23,13 +24,15 @@ class Scene(owlready2.World):
 
     _SCENERY_COMMENT = "_auto_scenery"  # enables unique identification of scenery elements in OWL files.
 
-    def __init__(self, timestamp: float | int = 0, parent_scenario=None, scenery=None, add_extras: bool = True,
-                 more_extras: list[str] = None, load_cp: bool = False, name: str = None):
+    def __init__(self, timestamp: float | int = 0, parent_scenario=None, scenery=None, folder: str = None,
+                 add_extras: bool = True, more_extras: list[str] = None, load_cp: bool = False, name: str = None):
         """
         Creates a new scene and loads A.U.T.O. into this scene (this may take some time).
         :param timestamp: Optional point in time of this scene.
         :param parent_scenario: If the scene belongs to a list of scenes, this points to the parent scenario of type
             pyauto.models.scenario.Scenario.
+        :param folder: The folder to look for, should contain the `automotive_urban_traffic_ontology.owl`. Can be None,
+            in this case, it takes the ontology located in the pyauto repository.
         :param add_extras: Whether to import the extra functionality that is added the classes from owlready2.
         :param more_extras: A name of an importable module that contains more extra functionality to load from. Will be
             imported in the given order. Using wildcards at the end is possible, e.g. "a.b.*", which then recursively
@@ -43,10 +46,10 @@ class Scene(owlready2.World):
         self._added_extras = add_extras
         self._more_extras = more_extras
         self._loaded_cp = load_cp
-        self._scenery = scenery
         self._name = name
+        self.set_scenery(scenery)
         logger.debug("Creating scene " + str(self))
-        auto.load(load_into_world=self, add_extras=add_extras, more_extras=more_extras, load_cp=load_cp)
+        auto.load(folder=folder, load_into_world=self, add_extras=add_extras, more_extras=more_extras, load_cp=load_cp)
 
     def __str__(self):
         if self._name is not None:
@@ -146,6 +149,9 @@ class Scene(owlready2.World):
 
         # Post-processing
         if file is not None and format == "rdfxml":
+            # Creates folder in case it does not yet exist
+            pathlib.Path(os.path.dirname(file)).mkdir(parents=True, exist_ok=True)
+
             # First, create the file name of the scene
             file_name = os.path.basename(file)
             file_ending = ""
@@ -201,10 +207,10 @@ class Scene(owlready2.World):
         Sets the scenery for the given scene. Also propagates psuedo random number generators to the scenery.
         :param scenery: The scenery to set.
         """
+        self._scenery = scenery
         if scenery is not None:
-            self._scenery = scenery
-            # We load the scenery by saving only its ABox (temporarily) and loading it from the file. This is the easiest
-            # way to prevent double loading of individuals.
+            # We load the scenery by saving only its ABox (temporarily) and loading it from the file.
+            # This is the easiest way to prevent double loading of individuals.
             with tempfile.NamedTemporaryFile(suffix=".owl") as f:
                 file = f.name
                 if self._scenery is not None:
