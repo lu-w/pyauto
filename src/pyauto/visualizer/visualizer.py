@@ -344,9 +344,10 @@ def visualize(model: Scene | Scenario, cps: list = None):
         centroids_y = []
         plotted_labels = []
         entity_points = dict()
-        for entity in sorted(list(scene.individuals()), key=lambda x: str(x.is_a[0]) if len(x.is_a) > 0 else str(x)):
+        inds = list(scene.individuals())
+        for entity in sorted(inds, key=lambda x: str(x.is_a[0]) if len(x.is_a) > 0 else str(x)):
             if len(entity.hasGeometry) > 0:
-                for geo in entity.hasGeometry:
+                for geo in [g for g in entity.hasGeometry if len(g.asWKT) > 0]:
                     shape = wkt.loads(geo.asWKT[0])
                     entity_cp_relations = []
                     points = None
@@ -357,16 +358,17 @@ def visualize(model: Scene | Scenario, cps: list = None):
                         points = shape.coords.xy
                     except NotImplementedError:
                         pass
+                    try:
+                        x = shape.centroid.x
+                        y = shape.centroid.y
+                    except IndexError:
+                        points = None  # if we can not generate a centroid - do not print the object.
                     if points:
-                        if (np.isclose(centroids_x, shape.centroid.x) & np.isclose(centroids_y, shape.centroid.y))\
-                                .any():
+                        if (np.isclose(centroids_x, x) & np.isclose(centroids_y, y)).any():
                             x = shape.centroid.x + 0.0
                             y = shape.centroid.y + 0.8
                             if not _CREATE_SVG_FILES:
                                 plt.plot((shape.centroid.x, x), (shape.centroid.y, y), "k-")
-                        else:
-                            x = shape.centroid.x
-                            y = shape.centroid.y
                         entity_points[entity] = (x, y)
                         centroids_x.append(x)
                         centroids_y.append(y)
