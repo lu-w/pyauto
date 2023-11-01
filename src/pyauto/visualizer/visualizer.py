@@ -387,19 +387,31 @@ def visualize(model: Scene | Scenario, cps: list = None):
                         if len([x for x in entity.INDIRECT_is_a if "Bikeway_Lane" in str(x)]):
                             plt.fill(*points, alpha=.25, color="red")
                         elif len([x for x in entity.INDIRECT_is_a if "Pedestrian_Crossing" in str(x)]):
-                            # assumes pedestrian crossings always pointing in y-direction
+                            bbox_x, bbox_y = shape.minimum_rotated_rectangle.exterior.coords.xy
+                            len_side_1 = geometry.Point(bbox_x[0], bbox_y[0]).distance(geometry.Point(bbox_x[1], bbox_y[1]))
+                            len_side_2 = geometry.Point(bbox_x[1], bbox_y[1]).distance(geometry.Point(bbox_x[2], bbox_y[2]))
+                            if len_side_1 < len_side_2:
+                                start_1 = (bbox_x[0], bbox_y[0])
+                                start_2 = (bbox_x[1], bbox_y[1])
+                                ped_length = len_side_2
+                                m = (bbox_y[1] - bbox_y[2]) / (bbox_x[1] - bbox_x[2])
+                            else:
+                                start_1 = (bbox_x[1], bbox_y[1])
+                                start_2 = (bbox_x[2], bbox_y[2])
+                                ped_length = len_side_1
+                                m = (bbox_y[2] - bbox_y[3]) / (bbox_x[2] - bbox_x[3])
+                            c = 1 / math.sqrt(1+m**2)
+                            s = m / math.sqrt(1+m**2)
                             strip_width = 0.6
-                            p_min_x = min(points[0])
-                            p_max_x = max(points[0])
-                            p_min_y = min(points[1])
-                            p_max_y = max(points[1])
-                            even = 0
-                            for off_p_y in np.arange(p_min_y + strip_width / 2, p_max_y - strip_width / 2, strip_width):
-                                even += 1
-                                if even % 2 == 0:
-                                    plt.fill([p_min_x, p_min_x, p_max_x, p_max_x],
-                                             [off_p_y, off_p_y + strip_width, off_p_y + strip_width, off_p_y],
-                                             color="black", alpha=.4)
+                            strip_x_offset = strip_width * c
+                            strip_y_offset = strip_width * s
+                            strip_number = 0
+                            for _ in range(math.floor(ped_length / strip_width)):
+                                if  strip_number % 2 == 0:
+                                    strip_xs = [start_1[0] + strip_x_offset * strip_number, start_1[0] + strip_x_offset * (strip_number + 1), start_2[0] + strip_x_offset * (strip_number + 1), start_2[0] + strip_x_offset * strip_number]
+                                    strip_ys = [start_1[1] + strip_y_offset * strip_number, start_1[1] + strip_y_offset * (strip_number + 1), start_2[1] + strip_y_offset * (strip_number + 1), start_2[1] + strip_y_offset * strip_number]
+                                    plt.fill(strip_xs, strip_ys, color="black", alpha=.4)
+                                strip_number += 1
                         elif len([x for x in entity.INDIRECT_is_a if "Dynamical_Object" in str(x)]) > 0:
                             plt.fill(*points, alpha=.5, color=color)
                             if entity.has_yaw is not None:
