@@ -32,8 +32,8 @@ with l4_core:
             driver.drives = [self]
             return driver
 
-        @augment(AugmentationType.OBJECT_PROPERTY, "CP_150")
-        def has_small_distance(self, other: physics.Spatial_Object):
+        @augment(AugmentationType.OBJECT_PROPERTY, "has_small_distance")
+        def small_distance(self, other: physics.Spatial_Object):
             """
             Checks if this object has a small distance w.r.t. another object.
             This method determines if the current object and another object are close to each other based on their
