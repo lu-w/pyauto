@@ -352,3 +352,15 @@ class Scene(owlready2.World):
                 if obj1.has_accident_with(obj2):
                     return True
         return False
+
+    def individuals(self):
+        """
+        Returns all individuals within this scene.
+        This function behaves as the overriden owlready2 function if this scene was not loaded from file. Otherwise,
+        it avoids duplicate entries in the individual generation due to a bug in owlready2.
+        """
+        generated = set()
+        for i in super().individuals():
+            if i.storid not in generated:
+                yield i
+                generated.add(i.storid)
