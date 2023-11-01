@@ -287,12 +287,16 @@ with physics:
                 g_2 = other.get_geometry()
                 if isinstance(g_1, geometry.Point):
                     p_1s = [g_1]
-                else:
+                elif hasattr(g_1, "exterior"):
                     p_1s = [geometry.Point(p) for p in g_1.exterior.coords]
+                else:
+                    p_1s = [g_1.centroid]
                 if isinstance(g_2, geometry.Point):
                     p_2s = [g_2]
-                else:
+                elif hasattr(g_2, "exterior"):
                     p_2s = [geometry.Point(p) for p in g_2.exterior.coords]
+                else:
+                    p_2s = [g_2.centroid]
                 is_left = True
                 for p_1 in p_1s:
                     for p_2 in p_2s:
@@ -331,12 +335,16 @@ with physics:
                 g_2 = other.get_geometry()
                 if isinstance(g_1, geometry.Point):
                     p_1s = [g_1]
-                else:
+                elif hasattr(g_1, "exterior"):
                     p_1s = [geometry.Point(p) for p in g_1.exterior.coords]
+                else:
+                    p_1s = [g_1.centroid]
                 if isinstance(g_2, geometry.Point):
                     p_2s = [g_2]
-                else:
+                elif hasattr(g_2, "exterior"):
                     p_2s = [geometry.Point(p) for p in g_2.exterior.coords]
+                else:
+                    p_2s = [g_2.centroid]
                 is_right = True
                 for p_1 in p_1s:
                     for p_2 in p_2s:
