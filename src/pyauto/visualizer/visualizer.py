@@ -399,7 +399,10 @@ def visualize(model: Scene | Scenario, cps: list = None):
                                 start_1 = (bbox_x[1], bbox_y[1])
                                 start_2 = (bbox_x[2], bbox_y[2])
                                 ped_length = len_side_1
-                                m = (bbox_y[2] - bbox_y[3]) / (bbox_x[2] - bbox_x[3])
+                                if bbox_x[2] - bbox_x[3] != 0:
+                                    m = (bbox_y[2] - bbox_y[3]) / (bbox_x[2] - bbox_x[3])
+                                else:
+                                    m = 0
                             c = 1 / math.sqrt(1+m**2)
                             s = m / math.sqrt(1+m**2)
                             strip_width = 0.6
@@ -621,7 +624,7 @@ def visualize(model: Scene | Scenario, cps: list = None):
         <div class="card m-2">
             <div class="card-title d-flex flex-row justify-content-center m-1">
                 <h5>"""
-        time = "<span id=\"sceneTime\">" + str(scene._timestamp) + "</span> / " + str(model._max_time)
+        time = "<span id=\"sceneTime\">%.3f</span> / %.3f" % (scene._timestamp, model._max_time)
         iframe_html += "Scene " + time + "<br />"
         iframe_html += """
                 </h5>
