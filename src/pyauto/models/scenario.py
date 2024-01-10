@@ -96,7 +96,7 @@ class Scenario(list):
             kbs_dir = os.getcwd()
         with open(os.path.join(kbs_final_dir, kbs_file)) as file:
             for line in file:
-                if not line.startswith("#"):
+                if not line.startswith("#") and len(line) > 0:
                     aboxes.append(os.path.join(os.path.join(kbs_dir, kbs_final_dir), line.replace("\n", "")))
         if len(aboxes) > 0:
             # Loads scenery first
@@ -112,7 +112,6 @@ class Scenario(list):
             backup_suffix = ".bak"
             # Loads all scenes from the .kbs file
             for abox_file in aboxes:
-                abox_file = os.path.join(os.path.join(kbs_dir, kbs_final_dir), line.replace("\n", ""))
                 # Minor modification of file content required s.t. owlready2 can read the OWL file
                 for abox_line in fileinput.input(abox_file, inplace=True, backup=backup_suffix):
                     if '<owl:imports rdf:resource="file:' in abox_line:
@@ -121,7 +120,8 @@ class Scenario(list):
                     print(abox_line, end='')
                 logger.debug("Loading from " + abox_file)
                 world = scene.Scene(timestamp=t, name=abox_file, parent_scenario=self)
-                world._scenery = self._scenery
+                if hasattr(self, "_scenery"):
+                    world._scenery = self._scenery
                 onto = world.get_ontology("file://" + abox_file)
                 onto = onto.load()
                 if hasattr(self, "_random"):
