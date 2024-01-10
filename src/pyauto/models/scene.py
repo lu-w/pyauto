@@ -202,23 +202,29 @@ class Scene(owlready2.World):
 
             return iri
 
-    def set_scenery(self, scenery):
+    def set_scenery(self, scenery, scenery_file: str = None):
         """
         Sets the scenery for the given scene. Also propagates psuedo random number generators to the scenery.
-        :param scenery: The scenery to set.
+        :param scenery: The scenery to set as a Scenery object (which is then stored to disk and re-loaded into this
+            scene).
+        :param scenery_file: An optional string representing a file path of the scenery OWL file, to avoid saving
+            an ABox multiple times.
+        :returns: The file name of the scenery which is created on disk during loading of the scenery (for possible
+            later usage, e.g., efficiency), or scenery_file, if given.
         """
-        self._scenery = scenery
         if scenery is not None:
             # We load the scenery by saving only its ABox (temporarily) and loading it from the file.
             # This is the easiest way to prevent double loading of individuals.
-            with tempfile.NamedTemporaryFile(suffix=".owl") as f:
-                file = f.name
-                if self._scenery is not None:
-                    self._scenery.save_abox(file)
-                self.get_ontology("file://" + file).load()
+            self._scenery = scenery
+            if scenery_file is None:
+                with tempfile.NamedTemporaryFile(suffix=".owl", delete=False) as f:
+                    scenery_file = f.name
+                    self._scenery.save_abox(scenery_file)
+            self.get_ontology("file://" + scenery_file).load()
             # We make individuals from the scenery identifiable later on by adding a comment.
-            for i in self.get_ontology("file://" + file + "#").individuals():
-                i.comment.append(Scene._SCENERY_COMMENT)
+            for i in self.get_ontology("file://" + scenery_file + "#").individuals():
+                if Scene._SCENERY_COMMENT not in i.comment:
+                    i.comment.append(Scene._SCENERY_COMMENT)
             # Propagates scenario to scenery, if needed.
             if self._scenery is not None and self._scenery._scenario is None:
                 self._scenery._scenario = self._scenario
@@ -226,6 +232,7 @@ class Scene(owlready2.World):
                 scenery._random = self._random
             if not hasattr(scenery, "_np_random") and hasattr(self, "_np_random"):
                 scenery._np_random = self._np_random
+            return scenery_file
 
     def copy(self, delta_t: float | int = 0, to_keep: set = None) -> \
             tuple[dict[owlready2.NamedIndividual, owlready2.NamedIndividual], Scene]:
