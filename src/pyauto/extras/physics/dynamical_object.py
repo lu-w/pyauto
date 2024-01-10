@@ -1,5 +1,6 @@
 import math
 import logging
+from typing import Tuple, Any
 
 import numpy
 import sympy
@@ -160,8 +161,8 @@ with physics:
                 s_rel_normed = s_rel / (min(s_self_max, s_rule_max))
                 return s_rel_normed >= self._HIGH_REL_SPEED_THRESHOLD
 
-        def intersects_path_with(self, other: physics.Dynamical_Object, delta_t: float | int=0.25,
-                                 horizon: float | int=10) -> tuple[float, float]:
+        def intersects_path_with(self, other: physics.Dynamical_Object, delta_t: float | int = 0.25,
+                                 horizon: float | int = 10) -> tuple[Any | None, Any | None, Any | None]:
             """
             Whether this object has an intersecting path with the given other object. Uses sampling of a simple
             constant velocity, constant yaw rate prediction model based on bounding boxes.
@@ -171,11 +172,6 @@ with physics:
             :returns: The times that self and other needs and the intersection point as a triple, or None, None, None if
                 there is no intersection point.
             """
-            def get_time_obj_is_at(geometry, predictions):
-                for geom_pred, t in predictions:
-                    if geometry.intersects(geom_pred):
-                        return t
-
             soonest_intersection = None
             t_1 = None
             t_2 = None
@@ -186,15 +182,20 @@ with physics:
                 other.intersects_path_with_cached = {}
 
             if other not in self.intersects_path_with_cached.keys() and self != other and self.has_geometry() and \
-                    other.has_geometry() and self.has_yaw is not None and other.has_yaw is not None and \
-                    self.has_speed is not None and other.has_speed is not None:
+                    other.has_geometry():
                 p_1 = wkt.loads(self.hasGeometry[0].asWKT[0]).centroid
                 p_2 = wkt.loads(other.hasGeometry[0].asWKT[0]).centroid
                 p_self = sympy.Point(p_1.x, p_1.y)
                 p_other = sympy.Point(p_2.x, p_2.y)
                 if p_self != p_other:
-                    pred_1 = self.prediction(delta_t=delta_t, horizon=horizon)
-                    pred_2 = other.prediction(delta_t=delta_t, horizon=horizon)
+                    if isinstance(self, Dynamical_Object):
+                        pred_1 = self.prediction(delta_t=delta_t, horizon=horizon)
+                    else:
+                        pred_1 = [(self.get_geometry(), i) for i in numpy.arange(delta_t, horizon + delta_t, delta_t)]
+                    if isinstance(other, Dynamical_Object):
+                        pred_2 = other.prediction(delta_t=delta_t, horizon=horizon)
+                    else:
+                        pred_2 = [(self.get_geometry(), i) for i in numpy.arange(delta_t, horizon + delta_t, delta_t)]
                     candidates = []
                     pred_1_union = pred_1[0][0]
                     for g_1, _ in pred_1:
@@ -236,18 +237,25 @@ with physics:
             :return: A list of tuples of `shapely` geometries and time stamps, where ich geometry represents the object
                 at the given point in time.
             """
-            yaw = self.has_yaw
             yaw_rate = self.has_yaw_rate or 0
             if len(self.drives) > 0:
                 geo = self.drives[0].get_geometry()
             else:
                 geo = self.get_geometry()
             geos = [(geo, 0)]
-            # if speed is 0, we assume object speeds up to some rather low speed
-            if "l4_de.Parking_Vehicle" not in [str(x) for x in self.is_a]:
-                speed = max(self._RELEVANT_LOWEST_SPEED * 10, self.has_speed)
+            if self.has_yaw is None:
+                yaw = 0
+                speed = 0
             else:
-                speed = self.has_speed
+                yaw = self.has_yaw
+                if self.has_speed is not None:
+                    # if speed is 0, we assume object speeds up to some rather low speed
+                    if "l4_de.Parking_Vehicle" not in [str(x) for x in self.is_a]:
+                        speed = max(self._RELEVANT_LOWEST_SPEED * 10, self.has_speed)
+                    else:
+                        speed = self.has_speed
+                else:
+                    speed = 0
             for i in numpy.arange(delta_t, horizon + delta_t, delta_t):
                 prev_yaw = yaw
                 yaw = prev_yaw + yaw_rate * delta_t
@@ -271,7 +279,7 @@ with physics:
                 yaw_rate *= 1 - (0.4 * delta_t)  # linear reduction of yaw rate (40% reduction / s) in prediction
             return geos
 
-        def get_target_following_polygon(self, polygon: geometry.Polygon, target_distance: float | int=5) -> \
+        def get_target_following_polygon(self, polygon: geometry.Polygon, target_distance: float | int = 5) -> \
                 tuple[float, float]:
             """
             Computes a target on the given polygon, such that this object can follow the shape of the polygon (by means
@@ -280,15 +288,16 @@ with physics:
             :param target_distance: The distance of the target from this object on the polygon
             :returns: A tuple of floats representing the point of the computed target
             """
-            assert(self.has_yaw is not None)
+            assert self.has_yaw is not None
             g = self.get_geometry().centroid
             left, right, _, _ = utils.split_polygon_into_boundaries(polygon)
-            # Choose vehicle front to determine where to look for new targets (if available)
+            # We have a driver: Choose vehicle front to determine where to look for new targets (if available)
             if len(self.drives) > 0:
                 x, y = self.drives[0].get_geometry().minimum_rotated_rectangle.exterior.coords.xy
                 edge_length = (geometry.Point(x[0], y[0]).distance(geometry.Point(x[1], y[1])),
                                geometry.Point(x[1], y[1]).distance(geometry.Point(x[2], y[2])))
                 length = max(edge_length) / 2
+            # We have a pedestrian
             else:
                 length = 1
             g_front = geometry.Point(g.x + math.cos(math.radians(self.has_yaw)) * length,
@@ -332,7 +341,7 @@ with physics:
                 y = target_distance * math.sin(math.radians(self.has_yaw)) + g.y
             return round(x, 2), round(y, 2)
 
-        def is_intersection_possible(self, other, max_distance: int | float=10):
+        def is_intersection_possible(self, other, max_distance: int | float = 10):
             """
             Checks whether an intersection is possible with the given other individual, i.e., an over-approximation
             to prevent computations later on.
@@ -342,7 +351,7 @@ with physics:
             else:
                 dist = other.get_distance(self)
             # Excludes drivers (we handle their vehicles instead)
-            return other != self and other not in self.drives and other.has_height and \
+            return other != self and other not in self.drives and other.has_height and other.has_height > 0 and \
                 (not hasattr(other, "drives") or len(other.drives) == 0) and \
                 ((other.has_speed and self.has_speed and (dist / self.has_speed + dist / other.has_speed)
                   <= max_distance) or

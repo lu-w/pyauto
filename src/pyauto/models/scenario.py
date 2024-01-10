@@ -275,7 +275,7 @@ class Scenario(list):
             sc.set_scenery(scenery)
 
     def simulate(self, duration: float | int, delta_t: int | float, to_keep: set = None, prioritize: list[str] = None,
-                 stop_at_accidents=True, seed: int = None) -> bool:
+                 stop_at_accidents=True) -> bool:
         """
         Simulates the future of this scenario, starting from its last scene up to the given duration. Discretizes with
         the given Hertz. Only works if this scenario has at least one scene.

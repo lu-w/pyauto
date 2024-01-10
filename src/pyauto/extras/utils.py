@@ -18,7 +18,7 @@ def split_polygon_into_boundaries(p: Polygon) -> tuple[LineString, LineString, L
     :returns: A tuple of new `LineString`s
     """
     coords = p.boundary.coords[:-1]  # last point is the first for a polygon - ignore it
-    assert(len(coords) >= 4)
+    assert len(coords) >= 4
     if len(coords) % 2 == 0:
         half = int(len(coords) / 2)
     else:
@@ -121,7 +121,7 @@ def in_front_of(p_1: Point, p_2: Point, yaw: int | float, restrict_viewing_angle
         80° field of view).
     :returns: True iff. p_1 is in front of p_2 when viewn from the given yaw angle.
     """
-    assert(restrict_viewing_angle_by < 180)
+    assert restrict_viewing_angle_by < 180
     offset_angle = restrict_viewing_angle_by / 2
     p_yaw = [math.cos(math.radians(yaw)), math.sin(math.radians(yaw))]
     p_self = [p_1.x - p_2.x, p_1.y - p_2.y]

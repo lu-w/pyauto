@@ -1,3 +1,4 @@
+import logging
 import math
 import owlready2
 
@@ -7,6 +8,8 @@ from shapely import geometry, wkt, affinity
 from owlready2_augmentator import augment, augment_class, AugmentationType
 from ... import auto
 from .. import utils
+
+logger = logging.getLogger(__name__)
 
 _SPATIAL_PREDICATE_THRESHOLD = 30  # m, the distance in which spatial predicates are augmented
 _IS_NEAR_DISTANCE = 4              # m, the distance for which spatial objects are close to each other
