@@ -3,11 +3,36 @@ Utils for A.U.T.O.
 """
 
 import logging
+import os
+import shutil
+import tempfile
+
 from . import auto
 
 logger = logging.getLogger(__name__)
 
 _CACHED_CP_CLASSES = dict()
+# Global temporary folder for storing everything in this. This folder is deleted once main() exits.
+_TEMPORARY_FOLDER = ""
+
+
+def delete_temporary_folder():
+    if _TEMPORARY_FOLDER != "":
+        shutil.rmtree(_TEMPORARY_FOLDER)
+
+
+def get_temporary_folder():
+    global _TEMPORARY_FOLDER
+    if not _TEMPORARY_FOLDER:
+        _TEMPORARY_FOLDER = tempfile.mkdtemp()
+    return _TEMPORARY_FOLDER
+
+
+def make_temporary_subfolder(subfolder: str) -> str:
+    path = os.path.join(get_temporary_folder(), subfolder)
+    if not os.path.exists(path):
+        os.makedirs(path)
+    return path
 
 
 def _get_individual_id(individual) -> str:

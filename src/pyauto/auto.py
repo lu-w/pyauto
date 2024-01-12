@@ -1,3 +1,5 @@
+import signal
+
 import owlready2
 import os
 import argparse
@@ -6,6 +8,7 @@ import logging
 
 from enum import Enum
 
+import pyauto.utils
 from .models import scenario
 from .visualizer import visualizer
 
@@ -152,6 +155,7 @@ def _add_extras(more_extras: list[str] = None):
     if len(fail_mods) > 0:
         logger.warning("Extra modules " + ", ".join(fail_mods) + " not installed, not loaded into A.U.T.O.")
 
+
 def main():
     parser = argparse.ArgumentParser(
         prog='auto.py',
@@ -169,10 +173,17 @@ def main():
         loglevel = logging.INFO
     logging.basicConfig(level=loglevel, format="%(asctime)s %(levelname)s: %(message)s")
 
-    loaded_scenario = scenario.Scenario(file=args.file, hertz=args.hertz, seed=0)
+    def int_handler(sig, frame):
+        pyauto.utils.delete_temporary_folder()
+        os._exit(0)
+    signal.signal(signal.SIGINT, int_handler)
 
+    loaded_scenario = scenario.Scenario(file=args.file, hertz=args.hertz, seed=0)
     if not args.read:
         visualizer.visualize(loaded_scenario)
+    else:
+        pyauto.utils.delete_temporary_folder()
+
 
 if __name__ == "__main__":
     main()

@@ -11,6 +11,7 @@ import owlready2_augmentator
 
 from xml.etree import ElementTree
 
+import pyauto.utils
 from .. import auto
 
 logger = logging.getLogger(__name__)
@@ -52,7 +53,8 @@ class Scene(owlready2.World):
         self._loaded_cp = load_cp
         self._name = name
         # Note: We use an sqlite3-file as backend. This uses disk and not memory, but is actually a bit more efficient.
-        with tempfile.NamedTemporaryFile(suffix=".sqlite3", delete=False) as f:
+        backend_dir = pyauto.utils.make_temporary_subfolder("backend")
+        with tempfile.NamedTemporaryFile(dir=backend_dir, suffix=".sqlite3", delete=False) as f:
             logger.debug("Creating scene " + str(self) + " at " + f.name)
             self.set_backend(filename=f.name)
         auto.load(folder=folder, load_into_world=self, add_extras=add_extras, more_extras=more_extras, load_cp=load_cp)
@@ -224,7 +226,8 @@ class Scene(owlready2.World):
             # This is the easiest way to prevent double loading of individuals.
             self._scenery = scenery
             if scenery_file is None:
-                with tempfile.NamedTemporaryFile(suffix=".owl", delete=False) as f:
+                scenery_dir = pyauto.utils.make_temporary_subfolder("scenery_tmp")
+                with tempfile.NamedTemporaryFile(scenery_dir, suffix=".owl", delete=False) as f:
                     scenery_file = f.name
                     logger.debug("Writing scenery to file " + scenery_file)
                     self._scenery.save_abox(scenery_file)
