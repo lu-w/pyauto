@@ -87,19 +87,11 @@ class Scenario(list):
         self._name = os.path.basename(kbs_file)
         aboxes = []
         # Parses .kbs file
-        kbs_dir = os.path.dirname(kbs_file)
-        if len(kbs_dir) > 0:
-            kbs_final_dir = ""
-            os.chdir(kbs_dir)
-        else:
-            # Little hack because file URIs don't work if file is in current directory
-            kbs_final_dir = os.path.basename(os.path.normpath(os.getcwd()))
-            os.chdir("..")
-            kbs_dir = os.getcwd()
-        with open(os.path.join(kbs_final_dir, kbs_file)) as file:
+        kbs_dir = os.path.abspath(os.path.dirname(kbs_file))
+        with open(kbs_file) as file:
             for line in file:
                 if not line.startswith("#") and len(line) > 0:
-                    aboxes.append(os.path.join(os.path.join(kbs_dir, kbs_final_dir), line.replace("\n", "")))
+                    aboxes.append(os.path.join(kbs_dir, line.replace("\n", "")))
         if len(aboxes) > 0:
             # Loads scenery first
             # This assumes only the first file-based import in the first scenario to be the scenery OWL file.
