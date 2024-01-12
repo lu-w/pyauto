@@ -105,7 +105,7 @@ class Scenario(list):
             t = 0
             backup_suffix = ".bak"
             # Loads all scenes from the .kbs file
-            for abox_file in aboxes:
+            for abox_file in tqdm.tqdm(aboxes):
                 # Minor modification of file content required s.t. owlready2 can read the OWL file
                 for abox_line in fileinput.input(abox_file, inplace=True, backup=backup_suffix):
                     if '<owl:imports rdf:resource="file:' in abox_line:
