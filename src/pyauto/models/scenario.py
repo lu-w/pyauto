@@ -88,6 +88,8 @@ class Scenario(list):
         aboxes = []
         # Parses .kbs file
         kbs_dir = os.path.abspath(os.path.dirname(kbs_file))
+        prev_wd = os.getcwd()
+        os.chdir(kbs_dir)
         with open(kbs_file) as file:
             for line in file:
                 if not line.startswith("#") and len(line) > 0:
@@ -127,6 +129,7 @@ class Scenario(list):
                 # Revert the minor modification
                 os.replace(abox_file + backup_suffix, abox_file)
             self._max_time = round(t - 1 / hertz, 2)
+            os.chdir(prev_wd)
 
     def _initialize_seed(self, seed: int):
         """
