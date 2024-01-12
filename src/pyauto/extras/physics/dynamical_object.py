@@ -183,11 +183,9 @@ with physics:
 
             if other not in self.intersects_path_with_cached.keys() and self != other and self.has_geometry() and \
                     other.has_geometry():
-                p_1 = wkt.loads(self.hasGeometry[0].asWKT[0]).centroid
-                p_2 = wkt.loads(other.hasGeometry[0].asWKT[0]).centroid
-                p_self = sympy.Point(p_1.x, p_1.y)
-                p_other = sympy.Point(p_2.x, p_2.y)
-                if p_self != p_other:
+                p_1 = self.get_centroid()
+                p_2 = other.get_centroid()
+                if p_1 != p_2:
                     if isinstance(self, Dynamical_Object):
                         pred_1 = self.prediction(delta_t=delta_t, horizon=horizon)
                     else:
@@ -240,8 +238,10 @@ with physics:
             yaw_rate = self.has_yaw_rate or 0
             if len(self.drives) > 0:
                 geo = self.drives[0].get_geometry()
+                geo_c = self.drives[0].get_centroid()
             else:
                 geo = self.get_geometry()
+                geo_c = self.get_centroid()
             geos = [(geo, 0)]
             if self.has_yaw is None:
                 yaw = 0
@@ -269,10 +269,9 @@ with physics:
                         length = 0
                     length *= 0.4
                     inv_yaw = math.radians(self.has_yaw + 180) % 360
-                    center = geometry.Point(geo.centroid.x + length * math.cos(inv_yaw),
-                                            geo.centroid.y + length * math.sin(inv_yaw))
+                    center = geometry.Point(geo_c.x + length * math.cos(inv_yaw), geo_c.y + length * math.sin(inv_yaw))
                 else:
-                    center = geo.centroid
+                    center = geo_c
                 geo = affinity.rotate(geo, angle=yaw - prev_yaw, origin=center)
                 geo = affinity.translate(geo, xoff=xoff, yoff=yoff)
                 geos.append((geo, i))
@@ -289,14 +288,14 @@ with physics:
             :returns: A tuple of floats representing the point of the computed target
             """
             assert self.has_yaw is not None
-            g = self.get_geometry().centroid
+            g = self.get_centroid()
             left, right, _, _ = utils.split_polygon_into_boundaries(polygon)
             # We have a driver: Choose vehicle front to determine where to look for new targets (if available)
             if len(self.drives) > 0:
                 x, y = self.drives[0].get_geometry().minimum_rotated_rectangle.exterior.coords.xy
                 edge_length = (geometry.Point(x[0], y[0]).distance(geometry.Point(x[1], y[1])),
                                geometry.Point(x[1], y[1]).distance(geometry.Point(x[2], y[2])))
-                length = max(edge_length) / 2
+                length = max(edge_length) * 0.75
             # We have a pedestrian
             else:
                 length = 1
@@ -305,12 +304,14 @@ with physics:
             p_l_f = None
             p_r_f = None
             angle = 180
-            max_angle = 220
+            max_angle = 290
             # Extracts the closest points
             while (p_l_f is None or p_r_f is None) and angle < max_angle:
                 p_l_f = utils.get_closest_point_from_yaw(left, g_front, self.has_yaw, angle)
                 p_r_f = utils.get_closest_point_from_yaw(right, g_front, self.has_yaw, angle)
                 angle += 10
+            x = None
+            y = None
             if p_l_f is not None and p_r_f is not None:
                 circ = g.buffer(target_distance)
                 intersection = circ.intersection(polygon.exterior)
@@ -324,17 +325,19 @@ with physics:
                     if m_dist_l is None or c_dist_l < m_dist_l:
                         m_dist_l = c_dist_l
                         m_l = int_p
-                intersection.remove(m_l)
+                if m_l in intersection:
+                    intersection.remove(m_l)
                 m_r, m_dist_r = None, None
                 for int_p in intersection:
                     c_dist_r = p_r_f.distance(geometry.Point(int_p))
                     if m_dist_r is None or c_dist_r < m_dist_r:
                         m_dist_r = c_dist_r
                         m_r = int_p
-                res = geometry.LineString([m_l, m_r]).centroid
-                x = res.x
-                y = res.y
-            else:
+                if m_l is not None and m_r is not None:
+                    res = geometry.LineString([m_l, m_r]).centroid
+                    x = res.x
+                    y = res.y
+            if x is None or y is None:
                 logger.debug(str(self) + ": Using target in front of object instead of polygon following computation "
                                            "since no closest point on polygon could be determined")
                 x = target_distance * math.cos(math.radians(self.has_yaw)) + g.x
