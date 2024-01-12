@@ -24,7 +24,7 @@ class Scenario(list):
     """
 
     def __init__(self, scene_number: int = None, scenes: list[scene.Scene] = None, scenery: scenery.Scenery = None,
-                 name: str = "Unnamed Scenario", folder: str = None, add_extras: bool = True,
+                 scenery_file: str = None, name: str = "Unnamed Scenario", folder: str = None, add_extras: bool = True,
                  more_extras: list[str] = None, load_cp: bool = False, seed: int = None, file: str = None,
                  hertz: int = None):
         """
@@ -33,6 +33,8 @@ class Scenario(list):
         :param scenes: Optional list of scenes that make up this scenario. scene_number is ignored if a scene list is
             given.
         :param scenery: An optional scenery (i.e., static elements) of this scenario.
+        :param scenery_file: An optional string representing a file path of the scenery OWL file, to avoid saving
+            an ABox multiple times.
         :param name: Name of this scenario (for printing), "Unnamed Scenario" if not set.
         :param folder: The folder to look for, should contain the `automotive_urban_traffic_ontology.owl`. Can be None,
             in this case, it takes the ontology located in the pyauto repository.
@@ -68,7 +70,7 @@ class Scenario(list):
                     scene_number = 0
                 for _ in range(scene_number):
                     self.new_scene(folder=folder, add_extras=add_extras, more_extras=more_extras, load_cp=load_cp,
-                                   scenery=scenery)
+                                   scenery=scenery, scenery_file=scenery_file)
             if len(self) > 0:
                 self._duration = self[-1]._timestamp - self[0]._timestamp
                 self._max_time = self[-1]._timestamp
@@ -147,7 +149,7 @@ class Scenario(list):
         return str(self._name)
 
     def new_scene(self, position: int = -1, timestamp: float | int = None, folder: str = None, add_extras: bool = True,
-                  more_extras: list[str] = None, load_cp: bool = False, scenery=None):
+                  more_extras: list[str] = None, load_cp: bool = False, scenery=None, scenery_file: str = None):
         """
         Adds a new scene to the scenario.
         :param position: Optional position at which to insert. If -1, the new scene is added at the end.
@@ -160,11 +162,14 @@ class Scenario(list):
             imports *all* Python files located in the package's (sub)folder(s).
         :param load_cp: Whether to load the criticality_phenomena.owl (and formalization) as well.
         :param scenery: The scenery of the new scene to add.
+        :param scenery_file: An optional string representing a file path of the scenery OWL file, to avoid saving
+            an ABox multiple times.
         """
         if timestamp is None:
             timestamp = position if position >= 0 else len(self)
         self.add_scene(scene.Scene(folder=folder, timestamp=timestamp, parent_scenario=self, scenery=scenery,
-                                   add_extras=add_extras, more_extras=more_extras, load_cp=load_cp), position)
+                                   scenery_file=scenery_file, add_extras=add_extras, more_extras=more_extras,
+                                   load_cp=load_cp), position)
 
     def add_scene(self, new_scene: scene.Scene, position: int = -1):
         """

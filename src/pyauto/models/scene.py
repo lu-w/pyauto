@@ -24,13 +24,17 @@ class Scene(owlready2.World):
 
     _SCENERY_COMMENT = "_auto_scenery"  # enables unique identification of scenery elements in OWL files.
 
-    def __init__(self, timestamp: float | int = 0, parent_scenario=None, scenery=None, folder: str = None,
-                 add_extras: bool = True, more_extras: list[str] = None, load_cp: bool = False, name: str = None):
+    def __init__(self, timestamp: float | int = 0, parent_scenario=None, scenery=None, scenery_file: str = None,
+                 folder: str = None, add_extras: bool = True, more_extras: list[str] = None, load_cp: bool = False,
+                 name: str = None):
         """
         Creates a new scene and loads A.U.T.O. into this scene (this may take some time).
         :param timestamp: Optional point in time of this scene.
         :param parent_scenario: If the scene belongs to a list of scenes, this points to the parent scenario of type
             pyauto.models.scenario.Scenario.
+        :param scenery: The scenery object of this scene.
+        :param scenery_file: An optional string representing a file path of the scenery OWL file, to avoid saving
+            an ABox multiple times.
         :param folder: The folder to look for, should contain the `automotive_urban_traffic_ontology.owl`. Can be None,
             in this case, it takes the ontology located in the pyauto repository.
         :param add_extras: Whether to import the extra functionality that is added the classes from owlready2.
@@ -47,9 +51,11 @@ class Scene(owlready2.World):
         self._more_extras = more_extras
         self._loaded_cp = load_cp
         self._name = name
-        self.set_scenery(scenery)
-        logger.debug("Creating scene " + str(self))
+        with tempfile.NamedTemporaryFile(suffix=".sqlite3", delete=False) as f:
+            logger.debug("Creating scene " + str(self) + " at " + f.name)
+            self.set_backend(filename=f.name)
         auto.load(folder=folder, load_into_world=self, add_extras=add_extras, more_extras=more_extras, load_cp=load_cp)
+        self._scenery_file = self.set_scenery(scenery, scenery_file)
 
     def __str__(self):
         if self._name is not None:
@@ -74,8 +80,8 @@ class Scene(owlready2.World):
         else:
             return self.get_ontology("http://anonymous#").get_namespace(iri)
 
-    def save_abox(self, file: str = None, format: str = "rdfxml", save_scenery=False, scenery_file: str = None,
-                  to_ignore: set[str] = None, iri=None, **kargs) -> str:
+    def save_abox(self, file: str = None, format: str = "rdfxml", save_scenery=False,
+                  scenery_file: str = None, to_ignore: set[str] = None, iri=None, **kargs) -> str:
         """
         Works analogously to the save() method of owlready2.World, but saves the ABox auf A.U.T.O. only.
         Note that right now, only the "rdfxml" format is supported. If some other format is given, the plain save()
@@ -219,7 +225,9 @@ class Scene(owlready2.World):
             if scenery_file is None:
                 with tempfile.NamedTemporaryFile(suffix=".owl", delete=False) as f:
                     scenery_file = f.name
+                    logger.debug("Writing scenery to file " + scenery_file)
                     self._scenery.save_abox(scenery_file)
+            logger.debug("Loading scenery from " + scenery_file)
             self.get_ontology("file://" + scenery_file).load()
             # We make individuals from the scenery identifiable later on by adding a comment.
             for i in self.get_ontology("file://" + scenery_file + "#").individuals():
@@ -232,6 +240,7 @@ class Scene(owlready2.World):
                 scenery._random = self._random
             if not hasattr(scenery, "_np_random") and hasattr(self, "_np_random"):
                 scenery._np_random = self._np_random
+            logger.debug("Finished setting scenery for scene " + str(self))
             return scenery_file
 
     def copy(self, delta_t: float | int = 0, to_keep: set = None) -> \
@@ -253,7 +262,8 @@ class Scene(owlready2.World):
         if "." in str(delta_t):
             timestamp = numpy.round(timestamp, len(str(delta_t).split(".")[1]))
         new = Scene(timestamp=timestamp, parent_scenario=self._scenario, scenery=self._scenery,
-                    add_extras=self._added_extras, more_extras=self._more_extras, load_cp=self._loaded_cp)
+                    scenery_file=self._scenery_file, add_extras=self._added_extras, more_extras=self._more_extras,
+                    load_cp=self._loaded_cp)
         mapping = {}
 
         logger.debug("Copying individuals and relations")
@@ -316,6 +326,7 @@ class Scene(owlready2.World):
         :param to_keep: The properties of individuals to copy over when creating new scenes.
         :param prioritize: A list of OWL classes or attributes of those individuals who are to prioritize in simulation.
         """
+        logger.debug("Starting scene simulation")
         ge = self.ontology(auto.Ontology.GeoSPARQL)
         ph = self.ontology(auto.Ontology.Physics)
         rdfs = self.get_ontology("http://www.w3.org/2000/01/rdf-schema")
@@ -330,13 +341,16 @@ class Scene(owlready2.World):
                     if len([x for x in a.INDIRECT_is_a if prio in str(x)]) > 0 or hasattr(a, prio):
                         return i
                 return abs(hash(a) + len(prioritize))
-            key=prio_key
+            key = prio_key
         else:
             key = hash
+
+        # Main simulation loop over individuals
         inds = sorted(mapping.keys(), key=key)
         for ind in inds:
             if hasattr(ind, "simulate"):
                 ind.simulate(mapping, delta_t)
+
         return new
 
     def augment(self):
