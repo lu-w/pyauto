@@ -86,7 +86,15 @@ with physics:
             :returns: The geometry of this object or None.
             """
             if self.has_geometry():
-                return wkt.loads(self.hasGeometry[0].asWKT[0])  # .buffer(0)
+                return wkt.loads(self.hasGeometry[0].asWKT[0])
+
+        @cache
+        def get_centroid(self) -> geometry.Point:
+            """
+            :return: The centroid of the geometry of this object or None if this object does not have a geometry.
+            """
+            if self.has_geometry():
+                return self.get_geometry().centroid
 
         def get_distance(self, other: physics.Spatial_Object):
             if other is not None and self.has_geometry() and other.has_geometry():
