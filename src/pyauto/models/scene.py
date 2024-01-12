@@ -51,6 +51,7 @@ class Scene(owlready2.World):
         self._more_extras = more_extras
         self._loaded_cp = load_cp
         self._name = name
+        # Note: We use an sqlite3-file as backend. This uses disk and not memory, but is actually a bit more efficient.
         with tempfile.NamedTemporaryFile(suffix=".sqlite3", delete=False) as f:
             logger.debug("Creating scene " + str(self) + " at " + f.name)
             self.set_backend(filename=f.name)
