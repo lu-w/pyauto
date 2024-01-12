@@ -227,7 +227,7 @@ class Scene(owlready2.World):
             self._scenery = scenery
             if scenery_file is None:
                 scenery_dir = pyauto.utils.make_temporary_subfolder("scenery_tmp")
-                with tempfile.NamedTemporaryFile(scenery_dir, suffix=".owl", delete=False) as f:
+                with tempfile.NamedTemporaryFile(dir=scenery_dir, suffix=".owl", delete=False) as f:
                     scenery_file = f.name
                     logger.debug("Writing scenery to file " + scenery_file)
                     self._scenery.save_abox(scenery_file)

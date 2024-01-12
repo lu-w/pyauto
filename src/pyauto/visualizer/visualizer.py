@@ -21,7 +21,6 @@ from http.server import SimpleHTTPRequestHandler, HTTPServer
 from .. import utils
 from ..models.scene import Scene
 from ..models.scenario import Scenario
-from ..utils import make_temporary_subfolder
 
 
 ####################
@@ -157,7 +156,7 @@ def visualize(model: Scene | Scenario, cps: list = None):
     scenario_info = "(" + str(len(model)) + " Scenes)"
 
     # Create folder to serve from, copy CSS/JS files there
-    tmp_dir = make_temporary_subfolder("visualization")
+    tmp_dir = utils.make_temporary_subfolder("visualization")
     file_location = os.path.dirname(os.path.realpath(__file__)) + "/files"
     bootstrap_css = "css/bootstrap.min.css"
     bootstrap_js = "js/bootstrap.bundle.min.js"
