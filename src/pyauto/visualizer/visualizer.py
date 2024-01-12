@@ -4,10 +4,8 @@ import shutil
 import math
 import random
 import threading
-import socketserver
 import os
 import re
-import tempfile
 import webbrowser
 
 import mpld3
@@ -23,6 +21,7 @@ from http.server import SimpleHTTPRequestHandler, HTTPServer
 from .. import utils
 from ..models.scene import Scene
 from ..models.scenario import Scenario
+from ..utils import make_temporary_subfolder
 
 
 ####################
@@ -53,9 +52,11 @@ logger = logging.getLogger(__name__)
 logging.getLogger("matplotlib").setLevel(logging.ERROR)
 logging.getLogger("PIL").setLevel(logging.WARNING)
 
+
 # Helper function for sorting CPs & individuals
 def _natural_sort_key(s, _nsre=re.compile("([0-9]+)")):
     return [int(text) if text.isdigit() else text.lower() for text in _nsre.split(str(s))]
+
 
 # Redirect logging of HTTP server for visualizing to logger (debug)
 class VisualizerHTTPHandler(SimpleHTTPRequestHandler):
@@ -156,8 +157,8 @@ def visualize(model: Scene | Scenario, cps: list = None):
     scenario_info = "(" + str(len(model)) + " Scenes)"
 
     # Create folder to serve from, copy CSS/JS files there
-    tmp_dir = tempfile.mkdtemp()
-    file_location = dir_path = os.path.dirname(os.path.realpath(__file__)) + "/files"
+    tmp_dir = make_temporary_subfolder("visualization")
+    file_location = os.path.dirname(os.path.realpath(__file__)) + "/files"
     bootstrap_css = "css/bootstrap.min.css"
     bootstrap_js = "js/bootstrap.bundle.min.js"
     jquery_js = "js/jquery-3.6.0.min.js"
@@ -388,31 +389,47 @@ def visualize(model: Scene | Scenario, cps: list = None):
                             plt.fill(*points, alpha=.25, color="red")
                         elif len([x for x in entity.INDIRECT_is_a if "Pedestrian_Crossing" in str(x)]):
                             bbox_x, bbox_y = shape.minimum_rotated_rectangle.exterior.coords.xy
-                            len_side_1 = geometry.Point(bbox_x[0], bbox_y[0]).distance(geometry.Point(bbox_x[1], bbox_y[1]))
-                            len_side_2 = geometry.Point(bbox_x[1], bbox_y[1]).distance(geometry.Point(bbox_x[2], bbox_y[2]))
+                            bbox_x = bbox_x[:-1]
+                            bbox_y = bbox_y[:-1]
+                            min_bbox_y_ind = min(range(len(bbox_y)), key=bbox_y.__getitem__)
+                            start_1 = (bbox_x[min_bbox_y_ind], bbox_y[min_bbox_y_ind])
+
+                            len_side_1 = geometry.Point(bbox_x[min_bbox_y_ind], bbox_y[min_bbox_y_ind]).distance(
+                                geometry.Point(bbox_x[(min_bbox_y_ind + 1) % len(bbox_y)],
+                                               bbox_y[(min_bbox_y_ind + 1) % len(bbox_y)]))
+                            len_side_2 = geometry.Point(bbox_x[min_bbox_y_ind], bbox_y[min_bbox_y_ind]).distance(
+                                geometry.Point(bbox_x[(min_bbox_y_ind - 1) % len(bbox_y)],
+                                               bbox_y[(min_bbox_y_ind - 1) % len(bbox_y)]))
                             if len_side_1 < len_side_2:
-                                start_1 = (bbox_x[0], bbox_y[0])
-                                start_2 = (bbox_x[1], bbox_y[1])
                                 ped_length = len_side_2
-                                m = (bbox_y[1] - bbox_y[2]) / (bbox_x[1] - bbox_x[2])
+                                next_p_index = (min_bbox_y_ind + 1) % len(bbox_y)
                             else:
-                                start_1 = (bbox_x[1], bbox_y[1])
-                                start_2 = (bbox_x[2], bbox_y[2])
                                 ped_length = len_side_1
-                                if bbox_x[2] - bbox_x[3] != 0:
-                                    m = (bbox_y[2] - bbox_y[3]) / (bbox_x[2] - bbox_x[3])
-                                else:
-                                    m = 0
-                            c = 1 / math.sqrt(1+m**2)
-                            s = m / math.sqrt(1+m**2)
-                            strip_width = 0.6
-                            strip_x_offset = strip_width * c
-                            strip_y_offset = strip_width * s
+                                next_p_index = (min_bbox_y_ind - 1) % len(bbox_y)
+                            start_2 = (bbox_x[next_p_index], bbox_y[next_p_index])
+                            if bbox_x[next_p_index] - bbox_x[min_bbox_y_ind] != 0:
+                                m = ((bbox_y[next_p_index] - bbox_y[min_bbox_y_ind]) /
+                                     (bbox_x[next_p_index] - bbox_x[min_bbox_y_ind]))
+                            else:
+                                m = 0
+                            if m != 0:
+                                c = math.copysign(1, m) / math.sqrt(1+m**2)
+                                s = -m / math.sqrt(1+m**2)
+                            else:
+                                c = 1
+                                s = 0
+                            strip_width = 0.4
+                            strip_x_offset = strip_width * s
+                            strip_y_offset = strip_width * c
                             strip_number = 0
                             for _ in range(math.floor(ped_length / strip_width)):
-                                if  strip_number % 2 == 0:
-                                    strip_xs = [start_1[0] + strip_x_offset * strip_number, start_1[0] + strip_x_offset * (strip_number + 1), start_2[0] + strip_x_offset * (strip_number + 1), start_2[0] + strip_x_offset * strip_number]
-                                    strip_ys = [start_1[1] + strip_y_offset * strip_number, start_1[1] + strip_y_offset * (strip_number + 1), start_2[1] + strip_y_offset * (strip_number + 1), start_2[1] + strip_y_offset * strip_number]
+                                if strip_number % 2 == 0:
+                                    strip_xs = [start_1[0] + strip_x_offset * strip_number, start_1[0] +
+                                                strip_x_offset * (strip_number + 1), start_2[0] + strip_x_offset *
+                                                (strip_number + 1), start_2[0] + strip_x_offset * strip_number]
+                                    strip_ys = [start_1[1] + strip_y_offset * strip_number, start_1[1] +
+                                                strip_y_offset * (strip_number + 1), start_2[1] + strip_y_offset *
+                                                (strip_number + 1), start_2[1] + strip_y_offset * strip_number]
                                     plt.fill(strip_xs, strip_ys, color="black", alpha=.4)
                                 strip_number += 1
                         elif len([x for x in entity.INDIRECT_is_a if "Dynamical_Object" in str(x)]) > 0:
