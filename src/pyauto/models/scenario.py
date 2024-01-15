@@ -87,6 +87,7 @@ class Scenario(list):
         self._name = os.path.basename(kbs_file)
         aboxes = []
         # Parses .kbs file
+        kbs_file = os.path.abspath(kbs_file)
         kbs_dir = os.path.abspath(os.path.dirname(kbs_file))
         prev_wd = os.getcwd()
         os.chdir(kbs_dir)
